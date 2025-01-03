@@ -1,16 +1,12 @@
 import Phaser from 'phaser';
 import { config } from './config/GameConfig';
-import { BootScene } from './scenes/BootScene';
-import { PreloadScene } from './scenes/PreloadScene';
-import { MainScene } from './scenes/MainScene';
+import { BubbleShooterScene } from './scenes/BubbleShooterScene';
 
 class PurpleLandGame extends Phaser.Game {
   constructor() {
     super(config);
-    this.scene.add('BootScene', BootScene);
-    this.scene.add('PreloadScene', PreloadScene);
-    this.scene.add('MainScene', MainScene);
-    this.scene.start('BootScene');
+    this.scene.add('BubbleShooterScene', BubbleShooterScene);
+    this.scene.start('BubbleShooterScene');
     this.initTelegramIntegration();
   }
 
