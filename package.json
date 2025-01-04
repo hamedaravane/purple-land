@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "A production-ready Phaser 3 game built with TypeScript.",
   "author": "Hamed Arghavan <hamedaravane@gmail.com>",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE FILE",
+  "licenseText": "Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hamedaravane/purple-land.git"
