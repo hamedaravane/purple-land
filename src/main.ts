@@ -1,35 +1,24 @@
-import Phaser from 'phaser';
-import { config } from './config/GameConfig';
-import { BubbleShooterScene } from './scenes/BubbleShooterScene';
+import { Game, Types } from 'phaser';
+import { Preloader } from './scenes/Preloader.ts';
+import { BubbleShooterScene } from './scenes/BubbleShooterScene.ts';
 
-class PurpleLandGame extends Phaser.Game {
-  constructor() {
-    super(config);
-    this.scene.add('BubbleShooterScene', BubbleShooterScene);
-    this.scene.start('BubbleShooterScene');
-    this.initTelegramIntegration();
-  }
+const config: Types.Core.GameConfig = {
+  type: Phaser.AUTO,
+  width: 600,
+  height: 800,
+  parent: 'game-container',
+  backgroundColor: 'transparent',
+  scale: {
+    mode: Phaser.Scale.EXPAND,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  scene: [Preloader, BubbleShooterScene],
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { x: 0, y: 0 },
+    },
+  },
+};
 
-  private initTelegramIntegration(): void {
-    window.Telegram.WebApp.ready();
-
-    document.body.style.backgroundColor = window.Telegram.WebApp.themeParams.bg_color || '#0f022a';
-
-    window.Telegram.WebApp.MainButton.setParams({
-      text: 'Start Game',
-      color: '#4CAF50',
-      text_color: '#FFFFFF',
-    });
-
-    window.Telegram.WebApp.MainButton.show();
-    window.Telegram.WebApp.MainButton.onClick(() => {
-      console.log('Main Button Clicked');
-      window.Telegram.WebApp.MainButton.hide();
-      this.scene.start('MainScene');
-    });
-  }
-}
-
-window.addEventListener('load', () => {
-  new PurpleLandGame();
-});
+export default new Game(config);

@@ -10,10 +10,10 @@
     "url": "git+https://github.com/hamedaravane/purple-land.git"
   },
   "scripts": {
-    "dev": "node log.js dev & vite --config vite/config.dev.mjs",
-    "build": "node log.js build & vite build --config vite/config.prod.mjs",
-    "dev-nolog": "vite --config vite/config.dev.mjs",
-    "build-nolog": "vite build --config vite/config.prod.mjs"
+    "dev": "vite --config vite/config.dev.mjs",
+    "build": "vite build --config vite/config.prod.mjs",
+    "dev-log": "node log.js dev & vite --config vite/config.dev.mjs",
+    "build-log": "node log.js build & vite build --config vite/config.prod.mjs"
   },
   "keywords": [
     "glitch",
