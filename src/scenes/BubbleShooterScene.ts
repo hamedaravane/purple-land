@@ -1,321 +1,472 @@
-import {
-  Scene,
-  Physics,
-  GameObjects,
-  Sound,
-  Input,
-  Types,
-  Math as PhaserMath,
-} from 'phaser';
+// src/scenes/BubbleShooterScene.ts
+import Phaser from 'phaser';
+import { Tile } from '../objects/Tile';
+import { Bubble, BubbleState } from '../objects/Bubble';
+import { Aimer } from '../objects/Aimer';
 
-export class BubbleShooterScene extends Scene {
-  private grid: Array<Array<Physics.Arcade.Sprite | null>> = [];
-  private numRows = 10;
-  private numCols = 12;
-  private bubbleSize = 64;
-  private bubbleColors = 5;
-  private descendInterval = 1;
+/**
+ * Represents data passed when restarting the scene (e.g., Game Over).
+ */
+interface SceneData {
+  gameOver?: boolean;
+  finalScore?: number;
+}
 
-  private score = 0;
-  private level = 1;
+/**
+ * BubbleShooterScene:
+ * Manages the main gameplay mechanics for the bubble shooter game using a hexagonal grid.
+ */
+export class BubbleShooterScene extends Phaser.Scene {
+  // -- Grid Configuration --
+  private tiles: Tile[][] = [];
+  private numRows: number = 7;
+  private numCols: number = 8;
+  private tileSize: number = 32; // Radius of hexagon
+  private hexHeight: number;
+  private hexWidth: number;
 
-  private bubbleGroup?: Physics.Arcade.StaticGroup;
-  private shooterBubble?: Physics.Arcade.Sprite;
+  // -- Game Entities --
+  private bubbleGroup!: Phaser.Physics.Arcade.StaticGroup;
+  private aimer!: Aimer;
+  private shooterBubble!: Bubble;
 
-  private scoreText?: GameObjects.Text;
-  private levelText?: GameObjects.Text;
+  // -- UI Elements --
+  private score: number = 0;
+  private level: number = 1;
+  private scoreText!: Phaser.GameObjects.Text;
+  private levelText!: Phaser.GameObjects.Text;
 
-  private popSound?: Sound.BaseSound;
-  private shootSound?: Sound.BaseSound;
+  // -- Audio --
+  private popSound!: Phaser.Sound.BaseSound;
+  private shootSound!: Phaser.Sound.BaseSound;
 
-  private initialPointerPos?: { x: number; y: number };
-  private finalPointerPos?: { x: number; y: number };
+  // -- State Tracking --
+  private isShooting: boolean = false;
 
   constructor() {
     super({ key: 'BubbleShooterScene' });
+
+    // Calculate hex dimensions
+    this.hexHeight = this.tileSize * Math.sqrt(3);
+    this.hexWidth = this.tileSize * 1.5;
   }
 
-  preload() {
-    this.load.spritesheet('bubbles', '/assets/images/bubbles.png', {
-      frameWidth: 64,
-      frameHeight: 64,
-      margin: 4,
-      spacing: 4,
+  /**
+   * Preloads all necessary assets for the scene.
+   */
+  public preload(): void {
+    // Load the bubbles spritesheet
+    this.load.spritesheet('bubbles', 'assets/images/bubbles.png', {
+      frameWidth: this.tileSize * 2,
+      frameHeight: this.hexHeight,
     });
-    this.load.audio('pop', '/assets/audio/pop.wav');
-    this.load.audio('shoot', '/assets/audio/shoot.wav');
+
+    // Load audio files
+    this.load.audio('pop', 'assets/audio/pop.wav');
+    this.load.audio('shoot', 'assets/audio/shoot.wav');
   }
 
-  create() {
+  /**
+   * Creates game objects and initializes the scene.
+   */
+  public create(): void {
     this.createAudio();
     this.createUI();
+    this.createTiles();
     this.createInitialBubbles();
     this.createShooterBubble();
+    this.createAimer();
     this.setupInput();
   }
 
-  update() {}
+  /**
+   * Update loop - currently unused but can be utilized for future enhancements.
+   */
+  public update(time: number, delta: number): void {
+    // Future per-frame logic can be added here
+  }
 
-  private createAudio() {
+  /**
+   * Initializes audio objects.
+   */
+  private createAudio(): void {
     this.popSound = this.sound.add('pop');
     this.shootSound = this.sound.add('shoot');
   }
 
-  private createUI() {
-    this.scoreText = this.add
-      .text(10, 10, `Score: ${this.score}`, {
-        fontSize: '24px',
-        color: '#ffffff',
-      })
-      .setDepth(10);
-
-    this.levelText = this.add
-      .text(10, 40, `Level: ${this.level}`, {
-        fontSize: '24px',
-        color: '#ffffff',
-      })
-      .setDepth(10);
-  }
-
-  private setupInput() {
-    this.input.on('pointerdown', (pointer: Input.Pointer) => {
-      this.initialPointerPos = { x: pointer.x, y: pointer.y };
+  /**
+   * Creates UI elements like score and level displays.
+   */
+  private createUI(): void {
+    this.scoreText = this.add.text(10, 10, `Score: ${this.score}`, {
+      fontSize: '24px',
+      color: '#ffffff',
     });
-
-    this.input.on('pointerup', (pointer: Input.Pointer) => {
-      this.finalPointerPos = { x: pointer.x, y: pointer.y };
-      this.shootBubble();
+    this.levelText = this.add.text(10, 40, `Level: ${this.level}`, {
+      fontSize: '24px',
+      color: '#ffffff',
     });
   }
 
-  private createInitialBubbles() {
+  /**
+   * Sets up the hexagonal grid of tiles.
+   */
+  private createTiles(): void {
+    // Create a static group for all bubbles
     this.bubbleGroup = this.physics.add.staticGroup();
 
-    for (let row = 0; row < this.numRows; row++) {
-      this.grid[row] = [];
-      for (let col = 0; col < this.numCols; col++) {
-        const colorIndex = PhaserMath.Between(0, this.bubbleColors - 1);
-        const x = col * this.bubbleSize + this.bubbleSize / 2;
-        const y = row * this.bubbleSize + this.bubbleSize / 2 + 50;
+    for (let r = 0; r < this.numRows; r++) {
+      this.tiles[r] = [];
+      for (let q = 0; q < this.numCols; q++) {
+        this.tiles[r][q] = new Tile(this, q, r, this.tileSize);
+      }
+    }
 
-        const bubble = this.bubbleGroup.create(x, y, 'bubbles', colorIndex);
-        bubble.setData('color', colorIndex);
-        bubble.setData('row', row);
-        bubble.setData('col', col);
-        bubble.setCircle(this.bubbleSize / 2);
+    // After all tiles are created, set their neighbors
+    this.setTileNeighbors();
+  }
 
-        this.grid[row][col] = bubble;
+  /**
+   * Establishes neighbor references for each tile based on axial directions.
+   */
+  private setTileNeighbors(): void {
+    const directions = [
+      { dq: 1, dr: 0 }, // East
+      { dq: 1, dr: -1 }, // Northeast
+      { dq: 0, dr: -1 }, // Northwest
+      { dq: -1, dr: 0 }, // West
+      { dq: -1, dr: 1 }, // Southwest
+      { dq: 0, dr: 1 }, // Southeast
+    ];
+
+    for (let r = 0; r < this.numRows; r++) {
+      for (let q = 0; q < this.numCols; q++) {
+        const tile = this.tiles[r][q];
+        const neighbors: Tile[] = [];
+
+        directions.forEach((dir) => {
+          const neighborQ = q + dir.dq;
+          const neighborR = r + dir.dr;
+
+          if (this.isValidTile(neighborQ, neighborR)) {
+            neighbors.push(this.tiles[neighborR][neighborQ]);
+          }
+        });
+
+        tile.setNeighbors(neighbors);
       }
     }
   }
 
-  private createShooterBubble() {
-    if (this.shooterBubble) {
-      this.shooterBubble.destroy();
-    }
-
-    const colorIndex = PhaserMath.Between(0, this.bubbleColors - 1);
-    const x = this.scale.width / 2;
-    const y = this.scale.height - 100;
-
-    this.shooterBubble = this.physics.add.sprite(x, y, 'bubbles', colorIndex);
-    this.shooterBubble.setData('color', colorIndex);
-    this.shooterBubble.setCircle(this.bubbleSize / 2);
-    this.shooterBubble.setDepth(5);
+  /**
+   * Checks if the given axial coordinates are within grid bounds.
+   * @param q Axial column
+   * @param r Axial row
+   */
+  private isValidTile(q: number, r: number): boolean {
+    return q >= 0 && q < this.numCols && r >= 0 && r < this.numRows;
   }
 
-  private shootBubble() {
-    if (!this.shooterBubble || !this.bubbleGroup) return;
-    if (!this.initialPointerPos || !this.finalPointerPos) return;
+  /**
+   * Creates the initial bubbles on the grid.
+   */
+  private createInitialBubbles(): void {
+    const initialRows = 2; // Number of rows to populate initially
 
-    const dx = this.finalPointerPos.x - this.initialPointerPos.x;
-    const dy = this.finalPointerPos.y - this.initialPointerPos.y;
+    for (let r = 0; r < initialRows; r++) {
+      for (let q = 0; q < this.numCols; q++) {
+        const tile = this.tiles[r][q];
+        const hasBubble = Phaser.Math.Between(0, 1); // 50% chance to have a bubble
 
-    if (dx === 0 && dy === 0) return;
+        if (hasBubble) {
+          const color = Phaser.Math.Between(0, 4); // Assuming 5 colors (0-4)
+          const bubble = new Bubble(
+            this,
+            tile.x,
+            tile.y,
+            'bubbles',
+            color,
+            color,
+          );
+          this.bubbleGroup.add(bubble);
+          tile.placeBubble(bubble);
+        }
+      }
+    }
+  }
 
-    this.shootSound?.play();
+  /**
+   * Creates the shooter bubble at the bottom center of the screen.
+   */
+  private createShooterBubble(): void {
+    const x = this.scale.width / 2;
+    const y = this.scale.height - 100; // 100px from bottom
+    const color = Phaser.Math.Between(0, 4);
+    this.shooterBubble = new Bubble(
+      this,
+      x,
+      y,
+      'bubbles',
+      color,
+      color,
+    );
+    this.shooterBubble.setDepth(1);
+    this.physics.add.existing(this.shooterBubble);
+
+    // Ensure the shooter bubble is dynamic but immovable initially
+    this.shooterBubble.setImmovable(true);
+    this.shooterBubble.setGravityY(0);
+  }
+
+  /**
+   * Creates the aimer for aiming and shooting bubbles.
+   */
+  private createAimer(): void {
+    const x = this.shooterBubble.x;
+    const y = this.shooterBubble.y;
+    this.aimer = new Aimer(this, x, y);
+  }
+
+  /**
+   * Sets up input handlers for aiming and shooting.
+   */
+  private setupInput(): void {
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      this.aimer.startAiming(pointer);
+    });
+
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      this.aimer.updateAim(pointer);
+    });
+
+    this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+      const direction = this.aimer.endAiming();
+      if (direction && !this.isShooting) {
+        this.shootBubble(direction.dx, direction.dy);
+      }
+    });
+  }
+
+  /**
+   * Shoots the current bubble in the direction determined by the aimer.
+   * @param dx Change in x.
+   * @param dy Change in y.
+   */
+  private shootBubble(dx: number, dy: number): void {
+    if (!this.shooterBubble) return;
+
+    this.isShooting = true;
+    this.shootSound.play();
 
     const speed = 800;
     const magnitude = Math.sqrt(dx * dx + dy * dy);
-    const vx = (dx / magnitude) * speed;
-    const vy = (dy / magnitude) * speed;
+    const velocityX = (dx / magnitude) * speed;
+    const velocityY = (dy / magnitude) * speed;
 
-    this.shooterBubble.setVelocity(vx, vy);
+    // Make the shooter bubble dynamic
+    this.shooterBubble.body?.setImmovable(false);
+    this.shooterBubble.body.setAllowGravity(true);
+    this.shooterBubble.body.setVelocity(velocityX, velocityY);
 
+    // Add collision with bubbles and world bounds
     this.physics.add.collider(
       this.shooterBubble,
       this.bubbleGroup,
-      () => this.handleBubbleCollision,
+      this.handleCollision,
       undefined,
       this,
     );
+
+    // Handle collision with world bounds
+    this.shooterBubble.setCollideWorldBounds(true);
+    this.shooterBubble.setBounce(1, 1);
+    this.shooterBubble.body.onWorldBounds = true;
+
+    this.physics.world.on('worldbounds', this.handleWorldBounds, this);
   }
 
-  private handleBubbleCollision = (
-    shot: Types.Physics.Arcade.GameObjectWithBody,
-    _static: Types.Physics.Arcade.GameObjectWithBody,
-  ) => {
-    const shotBubble = shot as Physics.Arcade.Sprite;
-    shotBubble.setVelocity(0, 0);
-    shotBubble.setImmovable(true);
-    shotBubble.body!.immovable = true;
+  /**
+   * Handles collision between the shooter bubble and static bubbles.
+   * @param shooter The shooter bubble.
+   * @param staticBubble The static bubble it collided with.
+   */
+  private handleCollision = (
+    shooter: Phaser.Types.Physics.Arcade.GameObjectWithBody,
+    staticBubble: Phaser.Types.Physics.Arcade.GameObjectWithBody,
+  ): void => {
+    const shooterBubble = shooter as Bubble;
+    const staticBubbleSprite = staticBubble as Bubble;
 
-    const { x, y, row, col } = this.getNearestGridPosition(
-      shotBubble.x,
-      shotBubble.y,
-    );
-    shotBubble.setPosition(x, y);
-    shotBubble.setData('row', row);
-    shotBubble.setData('col', col);
+    // Stop shooter movement
+    shooterBubble.setVelocity(0, 0);
+    shooterBubble.body.setImmovable(true);
+    shooterBubble.body.moves = false;
 
-    this.bubbleGroup?.add(shotBubble);
-    this.grid[row][col] = shotBubble;
+    // Find the nearest tile to snap the shooter bubble
+    const nearestTile = this.findNearestTile(shooterBubble.x, shooterBubble.y);
+    if (nearestTile && !nearestTile.isOccupied()) {
+      nearestTile.placeBubble(shooterBubble);
+      this.bubbleGroup.add(shooterBubble);
+      this.isShooting = false;
 
-    this.checkForMatches(shotBubble);
-    this.createShooterBubble();
-    this.descendRows();
-    this.checkGameOver();
+      // Remove existing collider and world bounds listener
+      this.physics.world.off('worldbounds', this.handleWorldBounds, this);
+
+      // Check for matches
+      this.checkForMatches(shooterBubble);
+
+      // Descend grid and check game over
+      this.descendGrid();
+      this.checkGameOver();
+
+      // Create a new shooter bubble
+      this.createShooterBubble();
+      this.createAimer(); // Recreate aimer for the new shooter
+    }
   };
 
-  private getNearestGridPosition(
-    x: number,
-    y: number,
-  ): {
-    x: number;
-    y: number;
-    row: number;
-    col: number;
-  } {
-    let col = Math.round((x - this.bubbleSize / 2) / this.bubbleSize);
-    let row = Math.round((y - this.bubbleSize / 2 - 50) / this.bubbleSize);
+  /**
+   * Handles collision of the shooter bubble with world bounds.
+   */
+  private handleWorldBounds = (body: Phaser.Physics.Arcade.Body, up: boolean, down: boolean, left: boolean, right: boolean): void => {
+    if (body.gameObject === this.shooterBubble) {
+      body.gameObject.destroy();
+      this.isShooting = false;
+      this.createShooterBubble();
+      this.createAimer();
+    }
+  };
 
-    col = PhaserMath.Clamp(col, 0, this.numCols - 1);
-    row = PhaserMath.Clamp(row, 0, this.numRows - 1);
+  /**
+   * Finds the nearest tile based on x and y coordinates.
+   * @param x X-coordinate.
+   * @param y Y-coordinate.
+   */
+  private findNearestTile(x: number, y: number): Tile | null {
+    let nearestTile: Tile | null = null;
+    let minDist = Infinity;
 
-    return {
-      x: col * this.bubbleSize + this.bubbleSize / 2,
-      y: row * this.bubbleSize + this.bubbleSize / 2 + 50,
-      row,
-      col,
-    };
+    this.tiles.forEach((row) => {
+      row.forEach((tile) => {
+        const dist = Phaser.Math.Distance.Between(x, y, tile.x, tile.y);
+        if (dist < minDist) {
+          minDist = dist;
+          nearestTile = tile;
+        }
+      });
+    });
+
+    return nearestTile;
   }
 
-  private checkForMatches(shotBubble: Physics.Arcade.Sprite) {
-    const color = shotBubble.getData('color') as number;
-    const row = shotBubble.getData('row') as number;
-    const col = shotBubble.getData('col') as number;
+  /**
+   * Checks for matching bubbles (3+ of the same color) and pops them.
+   * @param bubble The bubble to check around.
+   */
+  private checkForMatches(bubble: Bubble): void {
+    const color = bubble.color;
+    const row = bubble.r;
+    const col = bubble.q;
 
+    const matchedBubbles: Bubble[] = [];
+    const visited = new Set<string>();
     const stack: Array<{ row: number; col: number }> = [{ row, col }];
-    const visited = new Set([`${row},${col}`]);
-    const matching: Physics.Arcade.Sprite[] = [];
 
     while (stack.length > 0) {
-      const { row: r, col: c } = stack.pop()!;
-      const bubble = this.grid[r][c];
-      if (!bubble) continue;
+      const current = stack.pop()!;
+      const key = `${current.row},${current.col}`;
 
-      if ((bubble.getData('color') as number) === color) {
-        matching.push(bubble);
+      if (visited.has(key)) continue;
+      visited.add(key);
 
-        const neighbors = [
-          { r: r - 1, c },
-          { r: r + 1, c },
-          { r, c: c - 1 },
-          { r, c: c + 1 },
-        ];
+      const currentTile = this.tiles[current.row][current.col];
+      const currentBubble = currentTile.bubble;
 
-        for (const n of neighbors) {
-          const key = `${n.r},${n.c}`;
-          if (
-            n.r >= 0 &&
-            n.r < this.numRows &&
-            n.c >= 0 &&
-            n.c < this.numCols &&
-            !visited.has(key) &&
-            this.grid[n.r][n.c] != null
-          ) {
-            stack.push({ row: n.r, col: n.c });
-            visited.add(key);
+      if (currentBubble && currentBubble.color === color) {
+        matchedBubbles.push(currentBubble);
+
+        // Add all neighbors to stack
+        currentTile.neighbors.forEach((neighbor) => {
+          if (neighbor.bubble && neighbor.bubble.color === color) {
+            stack.push({ row: neighbor.r, col: neighbor.q });
+          }
+        });
+      }
+    }
+
+    if (matchedBubbles.length >= 3) {
+      // Pop matched bubbles
+      matchedBubbles.forEach((matchedBubble) => {
+        this.popSound.play();
+        matchedBubble.setState(BubbleState.Bursting);
+        this.score += 10;
+      });
+
+      // Update UI
+      this.scoreText.setText(`Score: ${this.score}`);
+    }
+  }
+
+  /**
+   * Descends the grid by a certain number of rows, increasing difficulty.
+   */
+  private descendGrid(): void {
+    const rowsToDescend = 1; // Adjust based on level or other factors
+
+    // Iterate from bottom to top to prevent overwriting
+    for (let r = this.numRows - 1; r >= 0; r--) {
+      for (let q = 0; q < this.numCols; q++) {
+        const tile = this.tiles[r][q];
+        if (tile.bubble) {
+          const newR = r + rowsToDescend;
+          if (newR < this.numRows) {
+            const targetTile = this.tiles[newR][q];
+            if (!targetTile.isOccupied()) {
+              targetTile.placeBubble(tile.bubble);
+              tile.removeBubble();
+            }
+          } else {
+            // Bubble has descended beyond the grid
+            tile.removeBubble();
           }
         }
       }
     }
-
-    if (matching.length >= 3) {
-      this.popBubbles(matching);
-    }
   }
 
-  private popBubbles(bubbles: Physics.Arcade.Sprite[]) {
-    this.popSound?.play();
-
-    bubbles.forEach((bubble) => {
-      const r = bubble.getData('row') as number;
-      const c = bubble.getData('col') as number;
-
-      this.tweens.add({
-        targets: bubble,
-        scaleX: 0,
-        scaleY: 0,
-        duration: 200,
-        onComplete: () => {
-          this.grid[r][c] = null;
-          bubble.destroy();
-        },
-      });
-    });
-
-    this.score += bubbles.length * 10;
-    this.scoreText?.setText(`Score: ${this.score}`);
-  }
-
-  private descendRows() {
-    for (let row = this.numRows - 1; row >= 0; row--) {
-      for (let col = 0; col < this.numCols; col++) {
-        const bubble = this.grid[row][col];
-        if (!bubble) continue;
-
-        const newRow = row + this.descendInterval;
-        if (newRow < this.numRows) {
-          this.grid[newRow][col] = bubble;
-          this.grid[row][col] = null;
-          bubble.setData('row', newRow);
-          bubble.setData('col', col);
-
-          this.tweens.add({
-            targets: bubble,
-            y: newRow * this.bubbleSize + this.bubbleSize / 2 + 50,
-            duration: 300,
-          });
-        } else {
-          bubble.destroy();
-          this.grid[row][col] = null;
-        }
-      }
-    }
-  }
-
-  private checkGameOver() {
-    for (let c = 0; c < this.numCols; c++) {
-      if (this.grid[this.numRows - 1][c]) {
+  /**
+   * Checks if any bubble has reached the bottom row, triggering game over.
+   */
+  private checkGameOver(): void {
+    for (let q = 0; q < this.numCols; q++) {
+      const tile = this.tiles[this.numRows - 1][q];
+      if (tile.isOccupied()) {
         this.handleGameOver();
         return;
       }
     }
 
-    if (this.isGridEmpty()) {
-      this.nextLevel();
+    // Optionally, check if all bubbles are cleared to proceed to next level
+    if (this.areAllBubblesCleared()) {
+      this.proceedToNextLevel();
     }
   }
 
-  private handleGameOver() {
+  /**
+   * Handles the game over state.
+   */
+  private handleGameOver(): void {
+    // Implement game over logic (e.g., show game over screen, restart)
     this.scene.restart({ gameOver: true, finalScore: this.score });
   }
 
-  private isGridEmpty(): boolean {
-    for (let row = 0; row < this.numRows; row++) {
-      for (let col = 0; col < this.numCols; col++) {
-        if (this.grid[row][col]) {
+  /**
+   * Checks if all bubbles on the grid are cleared.
+   */
+  private areAllBubblesCleared(): boolean {
+    for (let r = 0; r < this.numRows; r++) {
+      for (let q = 0; q < this.numCols; q++) {
+        if (this.tiles[r][q].isOccupied()) {
           return false;
         }
       }
@@ -323,26 +474,31 @@ export class BubbleShooterScene extends Scene {
     return true;
   }
 
-  private nextLevel() {
+  /**
+   * Proceeds to the next level by increasing difficulty.
+   */
+  private proceedToNextLevel(): void {
     this.level++;
-    this.levelText?.setText(`Level: ${this.level}`);
+    this.levelText.setText(`Level: ${this.level}`);
 
-    this.descendInterval = Math.min(this.descendInterval + 1, 3);
-    this.numRows = Math.min(this.numRows + 1, 12);
+    // Increase difficulty parameters
+    this.numRows = Math.min(this.numRows + 1, 12); // Maximum rows
+    // Potentially increase bubble colors, speed, etc.
 
+    // Reset grid
     this.resetGrid();
+    this.createTiles();
     this.createInitialBubbles();
   }
 
-  private resetGrid() {
-    for (let row = 0; row < this.grid.length; row++) {
-      for (let col = 0; col < this.grid[row].length; col++) {
-        const bubble = this.grid[row][col];
-        bubble?.destroy();
-        this.grid[row][col] = null;
-      }
-    }
-    this.grid = [];
-    this.bubbleGroup?.clear(true, true);
+  /**
+   * Resets the grid by removing all bubbles.
+   */
+  private resetGrid(): void {
+    this.tiles.forEach((row) => {
+      row.forEach((tile) => {
+        tile.removeBubble();
+      });
+    });
   }
 }
