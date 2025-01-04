@@ -23,6 +23,7 @@ A simple yet addictive bubble-popping game built using **Phaser 3** and **TypeSc
 
 ## Production Build:
 
+1. **Build Project**
     ```bash
     npm run build
 
@@ -31,7 +32,6 @@ The compiled files will be in the `dist/` folder.
 ## Game Configuration:
 
 - Adjust `GameConfig.ts` to change `width`, `height`, `scale` `mode`, etc.
-
 - Edit `BubbleShooterScene.ts` to tweak gameplay parameters (`bubble rows`, `difficulty`, etc.).
 
 ## Directory Structure
@@ -40,6 +40,5 @@ The compiled files will be in the `dist/` folder.
 - `config/`: Shared Phaser game config (GameConfig).
 - `scenes/`: Game scenes (Main bubble shooter).
 - `objects/`, `utils/`, `types/`: Extend as needed for shared classes, utilities, type definitions, etc.
-- `webpack.config.js`: Webpack bundling configuration.
 - `tsconfig.json`: TypeScript configuration.
 - `eslint.config.js`: ESLint configuration for code quality.
