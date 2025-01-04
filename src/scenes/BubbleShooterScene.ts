@@ -8,25 +8,6 @@ import {
   Math as PhaserMath,
 } from 'phaser';
 
-/**
- * Represents a bubble in the grid, storing its color, row, and column index.
- * You can extend this interface for more properties (e.g., power-ups).
- */
-/* interface BubbleData {
-  color: number;
-  row: number;
-  col: number;
-} */
-
-/**
- * BubbleShooterScene:
- * A single scene managing a basic bubble-shooter mechanic:
- * - Preloads bubble assets.
- * - Creates a grid of static bubbles.
- * - Allows the player to shoot a bubble from the bottom.
- * - Checks for 3+ matches and pops them.
- * - Descends the grid and checks for game over.
- */
 export class BubbleShooterScene extends Scene {
   private grid: Array<Array<Physics.Arcade.Sprite | null>> = [];
   private numRows = 10;
@@ -54,10 +35,6 @@ export class BubbleShooterScene extends Scene {
     super({ key: 'BubbleShooterScene' });
   }
 
-  /**
-   * Preload your bubble spritesheet and audio here.
-   * Adjust file paths to match your asset locations.
-   */
   public preload() {
     this.load.spritesheet('bubbles', '/assets/images/bubbles.png', {
       frameWidth: 64,
@@ -69,14 +46,6 @@ export class BubbleShooterScene extends Scene {
     this.load.audio('shoot', '/assets/audio/shoot.wav');
   }
 
-  /**
-   * Create is called once when the scene starts. Here, we set up:
-   * - Audio
-   * - UI text (score, level)
-   * - The initial grid of static bubbles
-   * - The shooter bubble at the bottom
-   * - Input handlers (for swiping/shooting)
-   */
   public create() {
     this.createAudio();
     this.createUI();
@@ -85,22 +54,13 @@ export class BubbleShooterScene extends Scene {
     this.setupInput();
   }
 
-  /**
-   * The main update loop. Keep the logic minimal here for clarity.
-   */
   public update() {}
 
-  /**
-   * Initializes audio objects.
-   */
   private createAudio() {
     this.popSound = this.sound.add('pop');
     this.shootSound = this.sound.add('shoot');
   }
 
-  /**
-   * Creates text objects for score and level displays.
-   */
   private createUI() {
     this.scoreText = this.add
       .text(10, 10, `Score: ${this.score}`, {
@@ -117,11 +77,6 @@ export class BubbleShooterScene extends Scene {
       .setDepth(10);
   }
 
-  /**
-   * Sets up pointer input (touch/mouse) for the bubble shooter.
-   * We capture the initial pointer position on pointerdown,
-   * and the final on pointerup to compute the shot direction.
-   */
   private setupInput() {
     this.input.on('pointerdown', (pointer: Input.Pointer) => {
       this.initialPointerPos = { x: pointer.x, y: pointer.y };
@@ -133,9 +88,6 @@ export class BubbleShooterScene extends Scene {
     });
   }
 
-  /**
-   * Creates an initial grid of static bubbles at the top of the screen.
-   */
   private createInitialBubbles() {
     this.bubbleGroup = this.physics.add.staticGroup();
 
@@ -157,9 +109,6 @@ export class BubbleShooterScene extends Scene {
     }
   }
 
-  /**
-   * Creates the shooter bubble at the bottom of the screen.
-   */
   private createShooterBubble() {
     if (this.shooterBubble) {
       this.shooterBubble.destroy();
@@ -175,9 +124,6 @@ export class BubbleShooterScene extends Scene {
     this.shooterBubble.setDepth(5);
   }
 
-  /**
-   * Shoots the current bubble from the bottom to the top, based on swipe direction.
-   */
   private shootBubble() {
     if (!this.shooterBubble || !this.bubbleGroup) return;
     if (!this.initialPointerPos || !this.finalPointerPos) return;
@@ -205,13 +151,6 @@ export class BubbleShooterScene extends Scene {
     );
   }
 
-  /**
-   * Collision handler when the shot bubble collides with a static bubble.
-   * - Stops the shot bubble.
-   * - Snaps it to the nearest grid position.
-   * - Checks for matches.
-   * - Descends rows, checks for Game Over.
-   */
   private handleBubbleCollision = (
     shot: Types.Physics.Arcade.GameObjectWithBody,
     _static: Types.Physics.Arcade.GameObjectWithBody,
@@ -233,18 +172,11 @@ export class BubbleShooterScene extends Scene {
     this.grid[row][col] = shotBubble;
 
     this.checkForMatches(shotBubble);
-
     this.createShooterBubble();
-
     this.descendRows();
-
     this.checkGameOver();
   };
 
-  /**
-   * Gets the nearest row & column in the grid for a given x,y,
-   * and returns the center coordinates for that cell.
-   */
   private getNearestGridPosition(
     x: number,
     y: number,
@@ -268,10 +200,6 @@ export class BubbleShooterScene extends Scene {
     };
   }
 
-  /**
-   * Checks if the given bubble, when placed, forms a cluster of >= 3 matching bubbles.
-   * If so, pops them, updates score, and removes them from the grid.
-   */
   private checkForMatches(shotBubble: Physics.Arcade.Sprite) {
     const color = shotBubble.getData('color') as number;
     const row = shotBubble.getData('row') as number;
@@ -318,9 +246,6 @@ export class BubbleShooterScene extends Scene {
     }
   }
 
-  /**
-   * Plays pop animation, destroys bubbles, updates score, and removes them from the grid.
-   */
   private popBubbles(bubbles: Physics.Arcade.Sprite[]) {
     this.popSound?.play();
 
@@ -344,10 +269,6 @@ export class BubbleShooterScene extends Scene {
     this.scoreText?.setText(`Score: ${this.score}`);
   }
 
-  /**
-   * After every shot, the entire grid descends by `descendInterval` rows.
-   * Bubbles moving beyond the last row are removed.
-   */
   private descendRows() {
     for (let row = this.numRows - 1; row >= 0; row--) {
       for (let col = 0; col < this.numCols; col++) {
@@ -374,10 +295,6 @@ export class BubbleShooterScene extends Scene {
     }
   }
 
-  /**
-   * Checks if any bubble occupies the bottom row -> triggers Game Over.
-   * Alternatively, if the grid is clear, we can progress to the next level.
-   */
   private checkGameOver() {
     for (let c = 0; c < this.numCols; c++) {
       if (this.grid[this.numRows - 1][c]) {
@@ -391,17 +308,10 @@ export class BubbleShooterScene extends Scene {
     }
   }
 
-  /**
-   * A simple game-over handler. Here, we restart the scene.
-   * In a real game, you might show a "Game Over" screen or menu.
-   */
   private handleGameOver() {
     this.scene.restart({ gameOver: true, finalScore: this.score });
   }
 
-  /**
-   * Checks if the entire grid is empty.
-   */
   private isGridEmpty(): boolean {
     for (let row = 0; row < this.numRows; row++) {
       for (let col = 0; col < this.numCols; col++) {
@@ -413,9 +323,6 @@ export class BubbleShooterScene extends Scene {
     return true;
   }
 
-  /**
-   * Increases difficulty and moves the game to the next level.
-   */
   private nextLevel() {
     this.level++;
     this.levelText?.setText(`Level: ${this.level}`);
@@ -427,9 +334,6 @@ export class BubbleShooterScene extends Scene {
     this.createInitialBubbles();
   }
 
-  /**
-   * Clears the grid and destroys any existing bubbles.
-   */
   private resetGrid() {
     for (let row = 0; row < this.grid.length; row++) {
       for (let col = 0; col < this.grid[row].length; col++) {
