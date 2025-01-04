@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import Phaser from 'phaser';
 
 /**
  * Represents a bubble in the grid, storing its color, row, and column index.
@@ -49,7 +49,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   private finalPointerPos?: { x: number; y: number };
 
   constructor() {
-    super({ key: "BubbleShooterScene" });
+    super({ key: 'BubbleShooterScene' });
   }
 
   /**
@@ -57,12 +57,14 @@ export class BubbleShooterScene extends Phaser.Scene {
    * Adjust file paths to match your asset locations.
    */
   public preload(): void {
-    this.load.spritesheet("bubbles", "assets/images/bubbles.png", {
+    this.load.spritesheet('bubbles', '/public/assets/images/bubbles.png', {
       frameWidth: 64,
-      frameHeight: 64
+      frameHeight: 64,
+      margin: 4,
+      spacing: 4,
     });
-    this.load.audio("pop", "assets/audio/pop.wav");
-    this.load.audio("shoot", "assets/audio/shoot.wav");
+    this.load.audio('pop', '/public/assets/audio/pop.wav');
+    this.load.audio('shoot', '/public/assets/audio/shoot.wav');
   }
 
   /**
@@ -92,8 +94,8 @@ export class BubbleShooterScene extends Phaser.Scene {
    * Initializes audio objects.
    */
   private createAudio(): void {
-    this.popSound = this.sound.add("pop");
-    this.shootSound = this.sound.add("shoot");
+    this.popSound = this.sound.add('pop');
+    this.shootSound = this.sound.add('shoot');
   }
 
   /**
@@ -102,15 +104,15 @@ export class BubbleShooterScene extends Phaser.Scene {
   private createUI(): void {
     this.scoreText = this.add
       .text(10, 10, `Score: ${this.score}`, {
-        fontSize: "24px",
-        color: "#ffffff"
+        fontSize: '24px',
+        color: '#ffffff',
       })
       .setDepth(10);
 
     this.levelText = this.add
       .text(10, 40, `Level: ${this.level}`, {
-        fontSize: "24px",
-        color: "#ffffff"
+        fontSize: '24px',
+        color: '#ffffff',
       })
       .setDepth(10);
   }
@@ -121,11 +123,11 @@ export class BubbleShooterScene extends Phaser.Scene {
    * and the final on pointerup to compute the shot direction.
    */
   private setupInput(): void {
-    this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       this.initialPointerPos = { x: pointer.x, y: pointer.y };
     });
 
-    this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+    this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
       this.finalPointerPos = { x: pointer.x, y: pointer.y };
       this.shootBubble();
     });
@@ -144,11 +146,11 @@ export class BubbleShooterScene extends Phaser.Scene {
         const x = col * this.bubbleSize + this.bubbleSize / 2;
         const y = row * this.bubbleSize + this.bubbleSize / 2 + 50;
 
-        const bubble = this.bubbleGroup.create(x, y, "bubbles", colorIndex);
+        const bubble = this.bubbleGroup.create(x, y, 'bubbles', colorIndex);
         // Store bubble metadata for easier reference
-        bubble.setData("color", colorIndex);
-        bubble.setData("row", row);
-        bubble.setData("col", col);
+        bubble.setData('color', colorIndex);
+        bubble.setData('row', row);
+        bubble.setData('col', col);
         bubble.setCircle(this.bubbleSize / 2);
 
         this.grid[row][col] = bubble;
@@ -169,8 +171,8 @@ export class BubbleShooterScene extends Phaser.Scene {
     const x = this.scale.width / 2;
     const y = this.scale.height - 100;
 
-    this.shooterBubble = this.physics.add.sprite(x, y, "bubbles", colorIndex);
-    this.shooterBubble.setData("color", colorIndex);
+    this.shooterBubble = this.physics.add.sprite(x, y, 'bubbles', colorIndex);
+    this.shooterBubble.setData('color', colorIndex);
     this.shooterBubble.setCircle(this.bubbleSize / 2);
     this.shooterBubble.setDepth(5);
   }
@@ -204,7 +206,7 @@ export class BubbleShooterScene extends Phaser.Scene {
       this.bubbleGroup,
       () => this.handleBubbleCollision,
       undefined,
-      this
+      this,
     );
   }
 
@@ -217,7 +219,7 @@ export class BubbleShooterScene extends Phaser.Scene {
    */
   private handleBubbleCollision = (
     shot: Phaser.Types.Physics.Arcade.GameObjectWithBody,
-    _static: Phaser.Types.Physics.Arcade.GameObjectWithBody
+    _static: Phaser.Types.Physics.Arcade.GameObjectWithBody,
   ): void => {
     const shotBubble = shot as Phaser.Physics.Arcade.Sprite;
     shotBubble.setVelocity(0, 0);
@@ -225,10 +227,13 @@ export class BubbleShooterScene extends Phaser.Scene {
     shotBubble.body!.immovable = true;
 
     // Snap to grid
-    const { x, y, row, col } = this.getNearestGridPosition(shotBubble.x, shotBubble.y);
+    const { x, y, row, col } = this.getNearestGridPosition(
+      shotBubble.x,
+      shotBubble.y,
+    );
     shotBubble.setPosition(x, y);
-    shotBubble.setData("row", row);
-    shotBubble.setData("col", col);
+    shotBubble.setData('row', row);
+    shotBubble.setData('col', col);
 
     this.bubbleGroup?.add(shotBubble);
     this.grid[row][col] = shotBubble;
@@ -250,7 +255,10 @@ export class BubbleShooterScene extends Phaser.Scene {
    * Gets the nearest row & column in the grid for a given x,y,
    * and returns the center coordinates for that cell.
    */
-  private getNearestGridPosition(x: number, y: number): {
+  private getNearestGridPosition(
+    x: number,
+    y: number,
+  ): {
     x: number;
     y: number;
     row: number;
@@ -266,7 +274,7 @@ export class BubbleShooterScene extends Phaser.Scene {
       x: col * this.bubbleSize + this.bubbleSize / 2,
       y: row * this.bubbleSize + this.bubbleSize / 2 + 50,
       row,
-      col
+      col,
     };
   }
 
@@ -275,9 +283,9 @@ export class BubbleShooterScene extends Phaser.Scene {
    * If so, pops them, updates score, and removes them from the grid.
    */
   private checkForMatches(shotBubble: Phaser.Physics.Arcade.Sprite): void {
-    const color = shotBubble.getData("color") as number;
-    const row = shotBubble.getData("row") as number;
-    const col = shotBubble.getData("col") as number;
+    const color = shotBubble.getData('color') as number;
+    const row = shotBubble.getData('row') as number;
+    const col = shotBubble.getData('col') as number;
 
     const stack: Array<{ row: number; col: number }> = [{ row, col }];
     const visited = new Set([`${row},${col}`]);
@@ -289,7 +297,7 @@ export class BubbleShooterScene extends Phaser.Scene {
       if (!bubble) continue;
 
       // Compare colors
-      if ((bubble.getData("color") as number) === color) {
+      if ((bubble.getData('color') as number) === color) {
         matching.push(bubble);
 
         // Check 4-directional neighbors
@@ -297,7 +305,7 @@ export class BubbleShooterScene extends Phaser.Scene {
           { r: r - 1, c },
           { r: r + 1, c },
           { r, c: c - 1 },
-          { r, c: c + 1 }
+          { r, c: c + 1 },
         ];
 
         for (const n of neighbors) {
@@ -330,8 +338,8 @@ export class BubbleShooterScene extends Phaser.Scene {
     this.popSound?.play();
 
     bubbles.forEach((bubble) => {
-      const r = bubble.getData("row") as number;
-      const c = bubble.getData("col") as number;
+      const r = bubble.getData('row') as number;
+      const c = bubble.getData('col') as number;
 
       // Tween for "pop" effect
       this.tweens.add({
@@ -342,7 +350,7 @@ export class BubbleShooterScene extends Phaser.Scene {
         onComplete: () => {
           this.grid[r][c] = null;
           bubble.destroy();
-        }
+        },
       });
     });
 
@@ -365,13 +373,13 @@ export class BubbleShooterScene extends Phaser.Scene {
         if (newRow < this.numRows) {
           this.grid[newRow][col] = bubble;
           this.grid[row][col] = null;
-          bubble.setData("row", newRow);
-          bubble.setData("col", col);
+          bubble.setData('row', newRow);
+          bubble.setData('col', col);
 
           this.tweens.add({
             targets: bubble,
             y: newRow * this.bubbleSize + this.bubbleSize / 2 + 50,
-            duration: 300
+            duration: 300,
           });
         } else {
           // Bubble falls off the bottom
