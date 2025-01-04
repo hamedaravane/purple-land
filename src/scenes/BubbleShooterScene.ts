@@ -35,7 +35,7 @@ export class BubbleShooterScene extends Scene {
     super({ key: 'BubbleShooterScene' });
   }
 
-  public preload() {
+  preload() {
     this.load.spritesheet('bubbles', '/assets/images/bubbles.png', {
       frameWidth: 64,
       frameHeight: 64,
@@ -46,7 +46,7 @@ export class BubbleShooterScene extends Scene {
     this.load.audio('shoot', '/assets/audio/shoot.wav');
   }
 
-  public create() {
+  create() {
     this.createAudio();
     this.createUI();
     this.createInitialBubbles();
@@ -54,7 +54,7 @@ export class BubbleShooterScene extends Scene {
     this.setupInput();
   }
 
-  public update() {}
+  update() {}
 
   private createAudio() {
     this.popSound = this.sound.add('pop');
