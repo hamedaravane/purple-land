@@ -1,6 +1,5 @@
-// src/objects/Tile.ts
-import { GameObjects, Scene } from "phaser";
-import { Bubble } from "./Bubble";
+import { GameObjects, Scene } from 'phaser';
+import { Bubble } from '@objects/Bubble.ts';
 
 /**
  * Represents a single hexagonal tile in the grid.
@@ -13,7 +12,7 @@ export class Tile extends GameObjects.Container {
 
   constructor(scene: Scene, q: number, r: number, size: number) {
     // Calculate pixel position based on axial coordinates
-    const x = size * (3 / 2 * q);
+    const x = size * ((3 / 2) * q);
     const y = size * (Math.sqrt(3) * (r + q / 2));
 
     super(scene, x, y);

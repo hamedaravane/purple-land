@@ -1,8 +1,15 @@
-// src/scenes/BubbleShooterScene.ts
-import Phaser from 'phaser';
-import { Tile } from '../objects/Tile';
-import { Bubble, BubbleState } from '../objects/Bubble';
-import { Aimer } from '../objects/Aimer';
+import {
+  GameObjects,
+  Physics,
+  Scene,
+  Types,
+  Sound,
+  Input,
+  Math as PhaserMath,
+} from 'phaser';
+import { Tile } from '@objects/Tile.ts';
+import { Aimer } from '@objects/Aimer.ts';
+import { Bubble, BubbleState } from '@objects/Bubble.ts';
 
 /**
  * Represents data passed when restarting the scene (e.g., Game Over).
@@ -16,29 +23,29 @@ interface SceneData {
  * BubbleShooterScene:
  * Manages the main gameplay mechanics for the bubble shooter game using a hexagonal grid.
  */
-export class BubbleShooterScene extends Phaser.Scene {
+export class BubbleShooterScene extends Scene {
   // -- Grid Configuration --
   private tiles: Tile[][] = [];
   private numRows: number = 7;
   private numCols: number = 8;
   private tileSize: number = 32; // Radius of hexagon
-  private hexHeight: number;
+  private readonly hexHeight: number;
   private hexWidth: number;
 
   // -- Game Entities --
-  private bubbleGroup!: Phaser.Physics.Arcade.StaticGroup;
+  private bubbleGroup!: Physics.Arcade.StaticGroup;
   private aimer!: Aimer;
   private shooterBubble!: Bubble;
 
   // -- UI Elements --
   private score: number = 0;
   private level: number = 1;
-  private scoreText!: Phaser.GameObjects.Text;
-  private levelText!: Phaser.GameObjects.Text;
+  private scoreText!: GameObjects.Text;
+  private levelText!: GameObjects.Text;
 
   // -- Audio --
-  private popSound!: Phaser.Sound.BaseSound;
-  private shootSound!: Phaser.Sound.BaseSound;
+  private popSound!: Sound.BaseSound;
+  private shootSound!: Sound.BaseSound;
 
   // -- State Tracking --
   private isShooting: boolean = false;
@@ -54,7 +61,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Preloads all necessary assets for the scene.
    */
-  public preload(): void {
+  public preload() {
     // Load the bubbles spritesheet
     this.load.spritesheet('bubbles', 'assets/images/bubbles.png', {
       frameWidth: this.tileSize * 2,
@@ -69,7 +76,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Creates game objects and initializes the scene.
    */
-  public create(): void {
+  public create() {
     this.createAudio();
     this.createUI();
     this.createTiles();
@@ -82,14 +89,14 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Update loop - currently unused but can be utilized for future enhancements.
    */
-  public update(time: number, delta: number): void {
+  /*public update(time: number, delta: number) {
     // Future per-frame logic can be added here
-  }
+  }*/
 
   /**
    * Initializes audio objects.
    */
-  private createAudio(): void {
+  private createAudio() {
     this.popSound = this.sound.add('pop');
     this.shootSound = this.sound.add('shoot');
   }
@@ -97,7 +104,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Creates UI elements like score and level displays.
    */
-  private createUI(): void {
+  private createUI() {
     this.scoreText = this.add.text(10, 10, `Score: ${this.score}`, {
       fontSize: '24px',
       color: '#ffffff',
@@ -111,7 +118,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Sets up the hexagonal grid of tiles.
    */
-  private createTiles(): void {
+  private createTiles() {
     // Create a static group for all bubbles
     this.bubbleGroup = this.physics.add.staticGroup();
 
@@ -129,7 +136,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Establishes neighbor references for each tile based on axial directions.
    */
-  private setTileNeighbors(): void {
+  private setTileNeighbors() {
     const directions = [
       { dq: 1, dr: 0 }, // East
       { dq: 1, dr: -1 }, // Northeast
@@ -170,16 +177,16 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Creates the initial bubbles on the grid.
    */
-  private createInitialBubbles(): void {
+  private createInitialBubbles() {
     const initialRows = 2; // Number of rows to populate initially
 
     for (let r = 0; r < initialRows; r++) {
       for (let q = 0; q < this.numCols; q++) {
         const tile = this.tiles[r][q];
-        const hasBubble = Phaser.Math.Between(0, 1); // 50% chance to have a bubble
+        const hasBubble = PhaserMath.Between(0, 1); // 50% chance to have a bubble
 
         if (hasBubble) {
-          const color = Phaser.Math.Between(0, 4); // Assuming 5 colors (0-4)
+          const color = PhaserMath.Between(0, 4); // Assuming 5 colors (0-4)
           const bubble = new Bubble(
             this,
             tile.x,
@@ -198,18 +205,11 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Creates the shooter bubble at the bottom center of the screen.
    */
-  private createShooterBubble(): void {
+  private createShooterBubble() {
     const x = this.scale.width / 2;
     const y = this.scale.height - 100; // 100px from bottom
-    const color = Phaser.Math.Between(0, 4);
-    this.shooterBubble = new Bubble(
-      this,
-      x,
-      y,
-      'bubbles',
-      color,
-      color,
-    );
+    const color = PhaserMath.Between(0, 4);
+    this.shooterBubble = new Bubble(this, x, y, 'bubbles', color, color);
     this.shooterBubble.setDepth(1);
     this.physics.add.existing(this.shooterBubble);
 
@@ -221,7 +221,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Creates the aimer for aiming and shooting bubbles.
    */
-  private createAimer(): void {
+  private createAimer() {
     const x = this.shooterBubble.x;
     const y = this.shooterBubble.y;
     this.aimer = new Aimer(this, x, y);
@@ -230,16 +230,22 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Sets up input handlers for aiming and shooting.
    */
-  private setupInput(): void {
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+  private setupInput() {
+    this.input.on('pointerdown', (pointer: Input.Pointer) => {
+      // Begin aiming with the pointer's starting position
       this.aimer.startAiming(pointer);
     });
 
-    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+    this.input.on('pointermove', (pointer: Input.Pointer) => {
+      // Dynamically update the aim with the pointer's current position
       this.aimer.updateAim(pointer);
     });
 
-    this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+    this.input.on('pointerup', (pointer: Input.Pointer) => {
+      // Log the pointer's release position for debugging
+      console.log(`Pointer released at: (${pointer.x}, ${pointer.y})`);
+
+      // End aiming and shoot if direction is valid
       const direction = this.aimer.endAiming();
       if (direction && !this.isShooting) {
         this.shootBubble(direction.dx, direction.dy);
@@ -252,7 +258,7 @@ export class BubbleShooterScene extends Phaser.Scene {
    * @param dx Change in x.
    * @param dy Change in y.
    */
-  private shootBubble(dx: number, dy: number): void {
+  private shootBubble(dx: number, dy: number) {
     if (!this.shooterBubble) return;
 
     this.isShooting = true;
@@ -264,11 +270,10 @@ export class BubbleShooterScene extends Phaser.Scene {
     const velocityY = (dy / magnitude) * speed;
 
     // Make the shooter bubble dynamic
-    this.shooterBubble.body?.setImmovable(false);
-    this.shooterBubble.body.setAllowGravity(true);
-    this.shooterBubble.body.setVelocity(velocityX, velocityY);
+    this.shooterBubble.setImmovable(false);
+    this.shooterBubble.setVelocity(velocityX, velocityY);
 
-    // Add collision with bubbles and world bounds
+    // Add collision with bubbles
     this.physics.add.collider(
       this.shooterBubble,
       this.bubbleGroup,
@@ -280,9 +285,17 @@ export class BubbleShooterScene extends Phaser.Scene {
     // Handle collision with world bounds
     this.shooterBubble.setCollideWorldBounds(true);
     this.shooterBubble.setBounce(1, 1);
-    this.shooterBubble.body.onWorldBounds = true;
+    this.shooterBubble.setOnWorldBounds(true); // Enable world bounds collision events
 
-    this.physics.world.on('worldbounds', this.handleWorldBounds, this);
+    // Listen for the world bounds collision event
+    this.physics.world.on(
+      Physics.Arcade.Events.WORLD_BOUNDS,
+      (body: Physics.Arcade.Body) => {
+        if (body.gameObject === this.shooterBubble) {
+          this.handleWorldBounds(body);
+        }
+      },
+    );
   }
 
   /**
@@ -290,17 +303,16 @@ export class BubbleShooterScene extends Phaser.Scene {
    * @param shooter The shooter bubble.
    * @param staticBubble The static bubble it collided with.
    */
-  private handleCollision = (
-    shooter: Phaser.Types.Physics.Arcade.GameObjectWithBody,
-    staticBubble: Phaser.Types.Physics.Arcade.GameObjectWithBody,
-  ): void => {
+  private handleCollision: Types.Physics.Arcade.ArcadePhysicsCallback = (
+    shooter,
+    staticBubble,
+  ) => {
     const shooterBubble = shooter as Bubble;
     const staticBubbleSprite = staticBubble as Bubble;
 
     // Stop shooter movement
     shooterBubble.setVelocity(0, 0);
-    shooterBubble.body.setImmovable(true);
-    shooterBubble.body.moves = false;
+    shooterBubble.setImmovable(true);
 
     // Find the nearest tile to snap the shooter bubble
     const nearestTile = this.findNearestTile(shooterBubble.x, shooterBubble.y);
@@ -328,12 +340,30 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Handles collision of the shooter bubble with world bounds.
    */
-  private handleWorldBounds = (body: Phaser.Physics.Arcade.Body, up: boolean, down: boolean, left: boolean, right: boolean): void => {
+  private handleWorldBounds = (
+    body: Physics.Arcade.Body,
+    up: boolean,
+    down: boolean,
+    left: boolean,
+    right: boolean,
+  ): void => {
     if (body.gameObject === this.shooterBubble) {
-      body.gameObject.destroy();
-      this.isShooting = false;
-      this.createShooterBubble();
-      this.createAimer();
+      if (up || down || left || right) {
+        console.log(
+          `Collision at: ${up ? 'up' : ''}${down ? 'down' : ''}${left ? 'left' : ''}${right ? 'right' : ''}`,
+        );
+      }
+
+      // Destroy the bubble if it collides with specific bounds (e.g., top or bottom)
+      if (up || down) {
+        body.gameObject.destroy();
+        this.isShooting = false;
+        this.createShooterBubble();
+        this.createAimer();
+      } else {
+        // Handle bounce or other actions for side collisions
+        body.setVelocity(body.velocity.x * -1, body.velocity.y);
+      }
     }
   };
 
@@ -348,7 +378,7 @@ export class BubbleShooterScene extends Phaser.Scene {
 
     this.tiles.forEach((row) => {
       row.forEach((tile) => {
-        const dist = Phaser.Math.Distance.Between(x, y, tile.x, tile.y);
+        const dist = PhaserMath.Distance.Between(x, y, tile.x, tile.y);
         if (dist < minDist) {
           minDist = dist;
           nearestTile = tile;
@@ -363,10 +393,10 @@ export class BubbleShooterScene extends Phaser.Scene {
    * Checks for matching bubbles (3+ of the same color) and pops them.
    * @param bubble The bubble to check around.
    */
-  private checkForMatches(bubble: Bubble): void {
+  private checkForMatches(bubble: Bubble) {
     const color = bubble.color;
-    const row = bubble.r;
-    const col = bubble.q;
+    const row = bubble.tile?.r!;
+    const col = bubble.tile?.q!;
 
     const matchedBubbles: Bubble[] = [];
     const visited = new Set<string>();
@@ -410,7 +440,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Descends the grid by a certain number of rows, increasing difficulty.
    */
-  private descendGrid(): void {
+  private descendGrid() {
     const rowsToDescend = 1; // Adjust based on level or other factors
 
     // Iterate from bottom to top to prevent overwriting
@@ -437,7 +467,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Checks if any bubble has reached the bottom row, triggering game over.
    */
-  private checkGameOver(): void {
+  private checkGameOver() {
     for (let q = 0; q < this.numCols; q++) {
       const tile = this.tiles[this.numRows - 1][q];
       if (tile.isOccupied()) {
@@ -455,7 +485,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Handles the game over state.
    */
-  private handleGameOver(): void {
+  private handleGameOver() {
     // Implement game over logic (e.g., show game over screen, restart)
     this.scene.restart({ gameOver: true, finalScore: this.score });
   }
@@ -463,7 +493,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Checks if all bubbles on the grid are cleared.
    */
-  private areAllBubblesCleared(): boolean {
+  private areAllBubblesCleared() {
     for (let r = 0; r < this.numRows; r++) {
       for (let q = 0; q < this.numCols; q++) {
         if (this.tiles[r][q].isOccupied()) {
@@ -477,7 +507,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Proceeds to the next level by increasing difficulty.
    */
-  private proceedToNextLevel(): void {
+  private proceedToNextLevel() {
     this.level++;
     this.levelText.setText(`Level: ${this.level}`);
 
@@ -494,7 +524,7 @@ export class BubbleShooterScene extends Phaser.Scene {
   /**
    * Resets the grid by removing all bubbles.
    */
-  private resetGrid(): void {
+  private resetGrid() {
     this.tiles.forEach((row) => {
       row.forEach((tile) => {
         tile.removeBubble();

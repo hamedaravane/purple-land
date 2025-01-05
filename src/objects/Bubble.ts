@@ -1,5 +1,5 @@
 import { Physics } from 'phaser';
-import { Tile } from './Tile';
+import { Tile } from '@objects/Tile.ts';
 
 /**
  * Enum representing possible bubble states.

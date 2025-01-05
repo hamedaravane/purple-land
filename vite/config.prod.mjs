@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import path from 'node:path';
 
 const phasermsg = () => {
   return {
@@ -36,6 +37,13 @@ export default defineConfig({
   },
   server: {
     port: 8080,
+  },
+  resolve: {
+    alias: {
+      '@objects': path.resolve(__dirname, '../src/objects'),
+      '@scenes': path.resolve(__dirname, '../src/scenes'),
+      '@utils': path.resolve(__dirname, '../src/utils'),
+    },
   },
   plugins: [phasermsg()],
 });

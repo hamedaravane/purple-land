@@ -1,4 +1,4 @@
-import { GameObjects, Input, Scene } from 'phaser';
+import { GameObjects, Scene, Input } from 'phaser';
 
 export class Aimer extends GameObjects.Graphics {
   private readonly startX: number;
