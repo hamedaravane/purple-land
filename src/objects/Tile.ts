@@ -1,25 +1,31 @@
 import { GameObjects, Scene } from 'phaser';
-import { Bubble } from '@objects/Bubble.ts';
+import { Bubble } from './Bubble';
 
 /**
  * Represents a single hexagonal tile in the grid.
  */
 export class Tile extends GameObjects.Container {
-  public q: number; // Axial column
-  public r: number; // Axial row
+  /**
+   * The q-axis coordinate in the axial coordinate system.
+   */
+  public q: number;
+
+  /**
+   * The r-axis coordinate in the axial coordinate system.
+   */
+  public r: number;
   public bubble: Bubble | null = null;
   public neighbors: Tile[] = [];
 
   constructor(scene: Scene, q: number, r: number, size: number) {
     // Calculate pixel position based on axial coordinates
-    const x = size * ((3 / 2) * q);
+    const x = size * (3 / 2) * q;
     const y = size * (Math.sqrt(3) * (r + q / 2));
 
     super(scene, x, y);
-
     this.q = q;
     this.r = r;
-    this.scene.add.existing(this);
+    // Add tile graphics or sprite here if needed
   }
 
   /**

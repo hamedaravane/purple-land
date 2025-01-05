@@ -1,5 +1,5 @@
 import { Physics } from 'phaser';
-import { Tile } from '@objects/Tile.ts';
+import { Tile } from './Tile';
 
 /**
  * Enum representing possible bubble states.
@@ -30,6 +30,7 @@ export class Bubble extends Physics.Arcade.Sprite {
   private readonly _type: BubbleType;
   private _tile: Tile | null = null;
   private _state: BubbleState = BubbleState.Idle;
+  public specialProperties: string[] = [];
 
   constructor(
     scene: Phaser.Scene,
@@ -97,7 +98,31 @@ export class Bubble extends Physics.Arcade.Sprite {
    * @param tile The tile to assign to.
    */
   public setTile(tile: Tile): void {
+    if (this._tile) {
+      this._tile.removeBubble();
+    }
     this._tile = tile;
+    this._tile.placeBubble(this);
+    this.setPosition(tile.x, tile.y);
+  }
+
+  /**
+   * Moves the bubble to a new tile.
+   * @param targetTile The tile to move to.
+   */
+  public moveToTile(targetTile: Tile): void {
+    this.setBubbleState(BubbleState.Moving);
+    this.scene.tweens.add({
+      targets: this,
+      x: targetTile.x,
+      y: targetTile.y,
+      duration: 500,
+      ease: 'Power2',
+      onComplete: () => {
+        this.setTile(targetTile);
+        this.setBubbleState(BubbleState.Idle);
+      },
+    });
   }
 
   /**
@@ -111,11 +136,40 @@ export class Bubble extends Physics.Arcade.Sprite {
       duration: 200,
       onComplete: () => {
         this.destroy();
+        if (this._tile) {
+          this._tile.removeBubble();
+        }
       },
     });
   }
 
   /**
-   * Additional methods for special properties can be added here.
+   * Applies a special property to the bubble.
+   * @param property The special property to apply.
    */
+  public applySpecialProperty(property: string): void {
+    this.specialProperties.push(property);
+    switch (property) {
+      case 'bomb':
+        // Implement bomb effect
+        break;
+      case 'freeze':
+        // Implement freeze effect
+        break;
+      // Add more cases as needed
+      default:
+        console.log(`Unknown special property: ${property}`);
+    }
+  }
+
+  /**
+   * Checks if the bubble can be matched with others based on color or type.
+   * @param otherBubble The other bubble to check against.
+   * @returns True if it can be matched, false otherwise.
+   */
+  public canMatch(otherBubble: Bubble): boolean {
+    return (
+      this.color === otherBubble.color || this.bubbleType !== BubbleType.Normal
+    );
+  }
 }
