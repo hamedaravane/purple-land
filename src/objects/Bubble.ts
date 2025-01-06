@@ -1,5 +1,5 @@
 import { Physics } from 'phaser';
-import { Tile } from './Tile';
+import { Hexagon } from './Hexagon.ts';
 
 /**
  * Enum representing possible bubble states.
@@ -28,7 +28,7 @@ export enum BubbleType {
 export class Bubble extends Physics.Arcade.Sprite {
   private readonly _color: number;
   private readonly _type: BubbleType;
-  private _tile: Tile | null = null;
+  private _tile: Hexagon | null = null;
   private _state: BubbleState = BubbleState.Idle;
   public specialProperties: string[] = [];
 
@@ -67,7 +67,7 @@ export class Bubble extends Physics.Arcade.Sprite {
     return this._type;
   }
 
-  public get tile(): Tile | null {
+  public get tile(): Hexagon | null {
     return this._tile;
   }
 
@@ -97,7 +97,7 @@ export class Bubble extends Physics.Arcade.Sprite {
    * Assigns the bubble to a tile.
    * @param tile The tile to assign to.
    */
-  public setTile(tile: Tile): void {
+  public setTile(tile: Hexagon): void {
     if (this._tile) {
       this._tile.removeBubble();
     }
@@ -110,7 +110,7 @@ export class Bubble extends Physics.Arcade.Sprite {
    * Moves the bubble to a new tile.
    * @param targetTile The tile to move to.
    */
-  public moveToTile(targetTile: Tile): void {
+  public moveToTile(targetTile: Hexagon): void {
     this.setBubbleState(BubbleState.Moving);
     this.scene.tweens.add({
       targets: this,

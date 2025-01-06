@@ -1,5 +1,5 @@
 import { GameObjects, Input, Scene } from 'phaser';
-import { Tile } from './Tile.ts';
+import { Hexagon } from './Hexagon.ts';
 import { Bubble } from './Bubble.ts';
 
 export class Aimer extends GameObjects.Graphics {
@@ -9,7 +9,7 @@ export class Aimer extends GameObjects.Graphics {
   private endY: number;
   private isAiming: boolean = false;
   private readonly bubble: Bubble;
-  private readonly tiles: Tile[][];
+  private readonly tiles: Hexagon[][];
   private readonly size: number;
 
   constructor(
@@ -17,7 +17,7 @@ export class Aimer extends GameObjects.Graphics {
     startX: number,
     startY: number,
     bubble: Bubble,
-    tiles: Tile[][],
+    tiles: Hexagon[][],
     size: number,
   ) {
     super(scene, { x: startX, y: startY });
@@ -88,7 +88,7 @@ export class Aimer extends GameObjects.Graphics {
     });
   }
 
-  private findTargetTile(x: number, y: number): Tile | null {
+  private findTargetTile(x: number, y: number): Hexagon | null {
     const sqrt3 = Math.sqrt(3);
     const q = Math.round((2 * x) / (3 * this.size));
     const r = Math.round(y / (sqrt3 * this.size) - x / (3 * this.size));
@@ -99,9 +99,9 @@ export class Aimer extends GameObjects.Graphics {
     return null;
   }
 
-  private checkForMatches(tile: Tile): void {
+  private checkForMatches(tile: Hexagon): void {
     const visited: Set<string> = new Set();
-    const sameColorTiles: Tile[] = [];
+    const sameColorTiles: Hexagon[] = [];
     const color = tile.bubble?.color || 0;
 
     this.floodFill(tile, color, sameColorTiles, visited);
@@ -113,9 +113,9 @@ export class Aimer extends GameObjects.Graphics {
   }
 
   private floodFill(
-    tile: Tile,
+    tile: Hexagon,
     color: number,
-    sameColorTiles: Tile[],
+    sameColorTiles: Hexagon[],
     visited: Set<string>,
   ): void {
     const key = `${tile.q},${tile.r}`;
