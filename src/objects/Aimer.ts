@@ -1,137 +1,122 @@
-import { GameObjects, Input, Scene } from 'phaser';
-import { Hexagon } from './Hexagon.ts';
-import { Bubble } from './Bubble.ts';
+import Phaser from 'phaser';
 
-export class Aimer extends GameObjects.Graphics {
-  private readonly startX: number;
-  private readonly startY: number;
-  private endX: number;
-  private endY: number;
-  private isAiming: boolean = false;
-  private readonly bubble: Bubble;
-  private readonly tiles: Hexagon[][];
-  private readonly size: number;
+export class Aimer {
+  private scene: Phaser.Scene;
+  private shooterX: number;
+  private shooterY: number;
+  private aimerGraphics: Phaser.GameObjects.Graphics;
+  private readonly lineLength: number;
+  private angle: number; // In radians
+  private isCharging: boolean = false;
+  private chargeStartTime: number = 0;
+  private maxChargeTime: number = 2000; // 2 seconds
+  private chargeMultiplier: number = 2;
+  private readonly bubblePreview: Phaser.GameObjects.Sprite;
 
   constructor(
-    scene: Scene,
-    startX: number,
-    startY: number,
-    bubble: Bubble,
-    tiles: Hexagon[][],
-    size: number,
+    scene: Phaser.Scene,
+    shooterX: number,
+    shooterY: number,
+    lineLength: number = 100,
   ) {
-    super(scene, { x: startX, y: startY });
-    this.startX = startX;
-    this.startY = startY;
-    this.endX = startX;
-    this.endY = startY;
-    this.bubble = bubble;
-    this.tiles = tiles;
-    this.size = size;
-    scene.add.existing(this);
-    this.setupInput();
+    this.scene = scene;
+    this.shooterX = shooterX;
+    this.shooterY = shooterY;
+    this.lineLength = lineLength;
+    this.angle = -Math.PI / 2; // Default to upward
+
+    // Initialize graphics
+    this.aimerGraphics = this.scene.add.graphics();
+    this.aimerGraphics.setPosition(this.shooterX, this.shooterY);
+    this.drawAimer();
+
+    // Initialize bubble preview
+    this.bubblePreview = this.scene.add.sprite(0, 0, 'bubble_preview');
+    this.bubblePreview.setAlpha(0.5);
+    this.bubblePreview.setScale(0.5);
+    this.aimerGraphics.setBelow(this.bubblePreview);
+
+    // Set up input handling
+    this.scene.input.on('pointermove', this.updateAngle, this);
+    this.scene.input.on('pointerdown', this.startCharging, this);
+    this.scene.input.on('pointerup', this.releaseCharge, this);
   }
 
-  private setupInput() {
-    this.scene.input.on('pointerdown', this.startAiming);
-    this.scene.input.on('pointermove', this.updateAim);
-    this.scene.input.on('pointerup', () => this.endAiming());
+  // Draw the aiming line and bubble preview
+  private drawAimer(): void {
+    this.aimerGraphics.clear();
+    this.aimerGraphics.lineStyle(2, 0xff0000, 1); // Red line
+    this.aimerGraphics.beginPath();
+    const endX = this.lineLength * Math.cos(this.angle);
+    const endY = this.lineLength * Math.sin(this.angle);
+    this.aimerGraphics.moveTo(0, 0);
+    this.aimerGraphics.lineTo(endX, endY);
+    this.aimerGraphics.strokePath();
+
+    // Update bubble preview position
+    this.bubblePreview.setPosition(endX, endY);
   }
 
-  public startAiming(pointer: Input.Pointer): void {
-    this.isAiming = true;
-    this.endX = pointer.x;
-    this.endY = pointer.y;
-    this.drawAim();
+  // Update the aiming angle based on pointer position
+  private updateAngle(pointer: Phaser.Input.Pointer): void {
+    if (this.isCharging) return; // Don't update angle while charging
+
+    const dx = pointer.x - this.shooterX;
+    const dy = pointer.y - this.shooterY;
+    let angle = Math.atan2(dy, dx);
+
+    // Apply angle constraints (e.g., between -75 degrees and 75 degrees)
+    const minAngle = Phaser.Math.DegToRad(-75);
+    const maxAngle = Phaser.Math.DegToRad(75);
+
+    if (angle < minAngle) angle = minAngle;
+    if (angle > maxAngle) angle = maxAngle;
+
+    this.angle = angle;
+    this.drawAimer();
   }
 
-  public updateAim(pointer: Input.Pointer): void {
-    if (!this.isAiming) return;
-    this.endX = pointer.x;
-    this.endY = pointer.y;
-    this.drawAim();
+  // Start charging the shot
+  private startCharging(pointer: Phaser.Input.Pointer): void {
+    this.isCharging = true;
+    this.chargeStartTime = this.scene.time.now;
   }
 
-  public endAiming(): void {
-    if (!this.isAiming) return;
-    this.isAiming = false;
-    this.clear();
-    const dx = this.endX - this.startX;
-    const dy = this.endY - this.startY;
-    this.shootBubble(dx, dy);
-  }
+  // Release charge and shoot bubble
+  private releaseCharge(pointer: Phaser.Input.Pointer): void {
+    if (this.isCharging) {
+      this.isCharging = false;
+      const chargeDuration = this.scene.time.now - this.chargeStartTime;
+      const chargeFactor =
+        Phaser.Math.Clamp(chargeDuration / this.maxChargeTime, 0, 1) *
+        this.chargeMultiplier;
 
-  private drawAim(): void {
-    this.clear();
-    this.lineStyle(4, 0xffffff, 1);
-    this.beginPath();
-    this.moveTo(this.startX, this.startY);
-    this.lineTo(this.endX, this.endY);
-    this.strokePath();
-  }
-
-  private shootBubble(dx: number, dy: number): void {
-    const speed = 500;
-
-    this.scene.tweens.add({
-      targets: this.bubble,
-      x: this.bubble.x + dx,
-      y: this.bubble.y + dy,
-      duration: speed,
-      onComplete: () => {
-        const targetTile = this.findTargetTile(this.bubble.x, this.bubble.y);
-        if (targetTile) {
-          this.bubble.setTile(targetTile);
-          this.checkForMatches(targetTile);
-        }
-      },
-    });
-  }
-
-  private findTargetTile(x: number, y: number): Hexagon | null {
-    const sqrt3 = Math.sqrt(3);
-    const q = Math.round((2 * x) / (3 * this.size));
-    const r = Math.round(y / (sqrt3 * this.size) - x / (3 * this.size));
-
-    if (q >= 0 && q < this.tiles.length && r >= 0 && r < this.tiles[0].length) {
-      return this.tiles[q][r];
-    }
-    return null;
-  }
-
-  private checkForMatches(tile: Hexagon): void {
-    const visited: Set<string> = new Set();
-    const sameColorTiles: Hexagon[] = [];
-    const color = tile.bubble?.color || 0;
-
-    this.floodFill(tile, color, sameColorTiles, visited);
-
-    if (sameColorTiles.length >= 3) {
-      sameColorTiles.forEach((t) => t.removeBubble());
-      // this.handleFallingBubbles();
+      // Emit shootBubble event with direction and charge
+      this.scene.events.emit('shootBubble', {
+        direction: this.getDirection(),
+        charge: chargeFactor,
+      });
     }
   }
 
-  private floodFill(
-    tile: Hexagon,
-    color: number,
-    sameColorTiles: Hexagon[],
-    visited: Set<string>,
-  ): void {
-    const key = `${tile.q},${tile.r}`;
-    if (!tile || visited.has(key) || tile.bubble?.color !== color) {
-      return;
-    }
-
-    visited.add(key);
-    sameColorTiles.push(tile);
-
-    tile.neighbors.forEach((neighbor) =>
-      this.floodFill(neighbor, color, sameColorTiles, visited),
-    );
+  // Method to retrieve the shooting direction vector
+  public getDirection(): Phaser.Math.Vector2 {
+    return new Phaser.Math.Vector2(Math.cos(this.angle), Math.sin(this.angle));
   }
 
-  /*private handleFallingBubbles(): void {
-    // Implement logic to make remaining bubbles fall and fill gaps
-  }*/
+  // Optionally, update the aimer if the shooter moves
+  public updateShooterPosition(x: number, y: number): void {
+    this.shooterX = x;
+    this.shooterY = y;
+    this.aimerGraphics.setPosition(this.shooterX, this.shooterY);
+    this.drawAimer();
+  }
+
+  // Clean up
+  public destroy(): void {
+    this.aimerGraphics.destroy();
+    this.scene.input.off('pointermove', this.updateAngle, this);
+    this.scene.input.off('pointerdown', this.startCharging, this);
+    this.scene.input.off('pointerup', this.releaseCharge, this);
+  }
 }

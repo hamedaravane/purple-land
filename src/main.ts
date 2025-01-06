@@ -1,5 +1,4 @@
 import { Game, Types } from 'phaser';
-import { Preloader } from './scenes/Preloader.ts';
 import { BubbleShooterScene } from './scenes/BubbleShooterScene.ts';
 
 const config: Types.Core.GameConfig = {
@@ -12,7 +11,7 @@ const config: Types.Core.GameConfig = {
     mode: Phaser.Scale.EXPAND,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [Preloader, BubbleShooterScene],
+  scene: [BubbleShooterScene],
   physics: {
     default: 'arcade',
     arcade: {

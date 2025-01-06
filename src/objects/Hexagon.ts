@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Bubble } from './Bubble';
 import { HexGrid } from './HexagonalGrid.ts';
 
-export class Hexagon {
+export class Hexagon extends Phaser.GameObjects.Container {
   public q: number;
   public r: number;
   public x: number;
@@ -11,7 +11,15 @@ export class Hexagon {
   private tileGraphics: Phaser.GameObjects.Graphics;
   private readonly size: number;
 
-  constructor(scene: Phaser.Scene, q: number, r: number, x: number, y: number, size: number) {
+  constructor(
+    scene: Phaser.Scene,
+    q: number,
+    r: number,
+    x: number,
+    y: number,
+    size: number,
+  ) {
+    super(scene, r, q);
     this.q = q;
     this.r = r;
     this.x = x;
@@ -50,7 +58,12 @@ export class Hexagon {
     for (let i = 0; i < 6; i++) {
       const angle_deg = 60 * i - 30; // Pointy-topped
       const angle_rad = Phaser.Math.DegToRad(angle_deg);
-      points.push(new Phaser.Geom.Point(size * Math.cos(angle_rad), size * Math.sin(angle_rad)));
+      points.push(
+        new Phaser.Geom.Point(
+          size * Math.cos(angle_rad),
+          size * Math.sin(angle_rad),
+        ),
+      );
     }
     return points;
   }
@@ -73,7 +86,7 @@ export class Hexagon {
   }
 
   // Check if the tile is empty
-  public isEmpty(): boolean {
+  public isEmpty() {
     return this.bubble === null;
   }
 
@@ -88,15 +101,16 @@ export class Hexagon {
       { dq: 0, dr: 1 },
     ];
 
-    return directions.map(dir => grid.getTile(this.r + dir.dr, this.q + dir.dq))
-      .filter(tile => tile !== undefined) as Hexagon[];
+    return directions
+      .map((dir) => grid.getTile(this.r + dir.dr, this.q + dir.dq))
+      .filter((tile) => tile !== undefined) as Hexagon[];
   }
 
   // Setup interactivity
   private setupInteractivity(scene: Phaser.Scene) {
     this.tileGraphics.setInteractive(
-      Hexagon.getHexPoints(this.size).map(p => ({ x: p.x, y: p.y })),
-      Phaser.Geom.Polygon.Contains
+      Hexagon.getHexPoints(this.size).map((p) => ({ x: p.x, y: p.y })),
+      Phaser.Geom.Polygon.Contains,
     );
 
     this.tileGraphics.on('pointerdown', () => {
