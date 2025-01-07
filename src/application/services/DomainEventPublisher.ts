@@ -1,20 +1,25 @@
-type Event = { type: string; payload: any };
-type Listener = (event: Event) => void;
+type DomainEvent = {
+  type: string;
+  payload: any;
+};
+
+type EventListener = (event: DomainEvent) => void;
 
 export class DomainEventPublisher {
-  private listeners: { [eventType: string]: Listener[] } = {};
+  private listeners: { [eventType: string]: EventListener[] } = {};
 
-  subscribe(eventType: string, listener: Listener): void {
+  subscribe(eventType: string, listener: EventListener): void {
     if (!this.listeners[eventType]) {
       this.listeners[eventType] = [];
     }
     this.listeners[eventType].push(listener);
   }
 
-  publish(event: Event): void {
-    const eventListeners = this.listeners[event.type];
-    if (eventListeners) {
-      eventListeners.forEach((listener) => listener(event));
+  publish(event: DomainEvent): void {
+    const { type, payload } = event;
+    const eventListeners = this.listeners[type] || [];
+    for (const listener of eventListeners) {
+      listener({ type, payload });
     }
   }
 }
