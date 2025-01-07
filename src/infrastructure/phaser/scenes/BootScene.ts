@@ -5,8 +5,7 @@ export class BootScene extends Phaser.Scene {
     super({ key: 'BootScene' });
   }
 
-  preload(): void {
-  }
+  preload(): void {}
 
   create(): void {
     // Move to the main scene after loading
