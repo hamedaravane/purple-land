@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'node:path';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 const phasermsg = () => {
   return {
@@ -45,5 +46,5 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, '../src/utils'),
     },
   },
-  plugins: [phasermsg()],
+  plugins: [phasermsg(), tsconfigPaths()],
 });

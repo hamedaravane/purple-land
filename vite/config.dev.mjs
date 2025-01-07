@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import * as path from 'node:path';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   base: './',
@@ -22,4 +23,5 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, '../src/utils'),
     },
   },
+  plugins: [tsconfigPaths()],
 });

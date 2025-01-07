@@ -37,7 +37,8 @@
     "ts-jest": "^29.2.5",
     "ts-loader": "^9.5.1",
     "typescript": "^5.7.2",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "engines": {
     "node": ">=14.0.0",
