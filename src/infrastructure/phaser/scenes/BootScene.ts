@@ -6,8 +6,6 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    // Preload assets here. e.g., bubble images, backgrounds
-    this.load.image('bubble', 'assets/bubble.png');
   }
 
   create(): void {
