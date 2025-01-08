@@ -1,70 +1,68 @@
-import { BubbleCluster } from '@domain/bubbles/aggregates/BubbleCluster.ts';
+import { ShootingService } from '@domain/shooting/services/ShootingService.ts';
 import { BubbleCollisionService } from '@domain/bubbles/services/BubbleCollisionService.ts';
 import { ClusterPopService } from '@domain/bubbles/services/ClusterPopService.ts';
+import { BubbleCluster } from '@domain/bubbles/aggregates/BubbleCluster.ts';
 import { ScoringRulesService } from '@domain/scoring/services/ScoringRulesService.ts';
-import { ShootingService } from '@domain/shooting/services/ShootingService.ts';
+import { ClusterConnectivityService } from '@domain/bubbles/services/ClusterConnectivityService.ts';
 import { TrajectoryCalculator } from '@domain/shooting/services/TrajectoryCalculator.ts';
-import { Bubble } from '@domain/bubbles/entities/Bubble.ts';
-import { adjacencyCheck } from '@shared/utils/AdjacencyCheck.ts';
 
-/**
- * Use Case: Tap to shoot a "shooting bubble" from its current position
- * toward the tapped position. Visual line drawing is handled in Infrastructure.
- */
 export class TapShootBubbleUseCase {
   constructor(
     private shootingService: ShootingService,
     private collisionService: BubbleCollisionService,
     private clusterPopService: ClusterPopService,
+    private connectivityService: ClusterConnectivityService,
     private bubbleCluster: BubbleCluster,
     private scoringService: ScoringRulesService,
     private trajectoryCalculator: TrajectoryCalculator,
-    private shootingBubble: Bubble, // or something that references the "current bubble"
+    private bubbleRadius: number,
+    private shotRadius: number,
   ) {}
 
   execute(
+    shooterPosition: { x: number; y: number },
     tapPosition: { x: number; y: number },
-    shotRadius: number,
-    bubbleRadius: number,
   ): void {
-    // 1) Calculate direction from shooting bubble to tap
     const direction = this.trajectoryCalculator.calculateDirection(
-      this.shootingBubble.position,
+      shooterPosition,
       tapPosition,
     );
-    const speed = 400; // For example
+    const speed = this.trajectoryCalculator.calculateSpeed(
+      shooterPosition,
+      tapPosition,
+    );
 
-    // 2) Fire a shot from the bubble's position, with that direction+speed
-    const shot = this.shootingService.fireShot(this.shootingBubble.position, {
-      x: this.shootingBubble.position.x + direction.x * 10,
-      y: this.shootingBubble.position.y + direction.y * 10,
+    // Fire a shot
+    const shot = this.shootingService.fireShot(shooterPosition, {
+      x: shooterPosition.x + direction.x * 10,
+      y: shooterPosition.y + direction.y * 10,
     });
-    // Override the shot's direction & speed if needed:
     shot.direction = direction;
     shot.speed = speed;
 
-    // 3) Check collision
-    // TODO: in a real game loop, you'd do this over time, but for simplicity, let's do an immediate check
+    // We'll do an immediate collision check (for demonstration).
     const collided = this.collisionService.detectCollision(
       this.bubbleCluster,
       shot.position,
-      shotRadius,
-      bubbleRadius,
+      this.shotRadius,
+      this.bubbleRadius,
     );
     if (collided) {
+      // pop connected
       const popped = this.clusterPopService.popConnectedBubbles(
         this.bubbleCluster,
         collided,
-        () => adjacencyCheck(shot.position, { x: 500, y: 0 }), // TODO: I should write another utility function for this
+        this.bubbleRadius,
       );
       if (popped.length > 0) {
         this.scoringService.applyBubblePoppedScoring(popped.length);
+        // remove disconnected
+        this.connectivityService.handleDisconnected(
+          this.bubbleCluster,
+          this.bubbleRadius,
+        );
       }
       this.shootingService.deactivateShot(shot.id);
     }
-
-    // 4) Optionally remove or reset the shootingBubble from the domain
-    this.shootingBubble.isPopped = true;
-    // Or mark it as used, or generate a new bubble, etc.
   }
 }

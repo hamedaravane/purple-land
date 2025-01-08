@@ -2,14 +2,6 @@ import { Bubble } from '../entities/Bubble';
 import { BubbleCluster } from '../aggregates/BubbleCluster';
 
 export class BubbleCollisionService {
-  /**
-   * Detects if a shot has collided with any bubble in the cluster.
-   * @param cluster - The BubbleCluster to check against.
-   * @param shotPosition - The current position of the shot.
-   * @param shotRadius - The radius of the shot.
-   * @param bubbleRadius - The radius of each bubble.
-   * @returns The Bubble instance that was hit, or null if no collision occurred.
-   */
   detectCollision(
     cluster: BubbleCluster,
     shotPosition: { x: number; y: number },
@@ -21,7 +13,6 @@ export class BubbleCollisionService {
 
       const distance = this.calculateDistance(shotPosition, bubble.position);
       if (distance <= shotRadius + bubbleRadius) {
-        console.log(`Collision detected with Bubble ${bubble.id}.`);
         return bubble;
       }
     }

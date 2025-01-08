@@ -25,3 +25,9 @@ export function hexAdjacent(
   const threshold = bubbleRadius * 2 * 1.2;
   return distSq <= threshold * threshold;
 }
+
+export function isHexAdjacent(dist: number, bubbleRadius: number): boolean {
+  // For a neat hex arrangement, let's say adjacency if dist <= ~1.2 * diameter
+  const threshold = bubbleRadius * 2 * 1.2;
+  return dist <= threshold;
+}

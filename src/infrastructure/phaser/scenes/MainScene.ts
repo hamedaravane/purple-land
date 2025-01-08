@@ -1,109 +1,185 @@
 import Phaser from 'phaser';
-import { TapInputSystem } from '@infrastructure/phaser/systems/TapInputSystem.ts';
+import { TapInputSystem } from '../systems/TapInputSystem';
 import { BubbleCluster } from '@domain/bubbles/aggregates/BubbleCluster.ts';
 import { BubbleCollisionService } from '@domain/bubbles/services/BubbleCollisionService.ts';
 import { ClusterPopService } from '@domain/bubbles/services/ClusterPopService.ts';
+import { ClusterConnectivityService } from '@domain/bubbles/services/ClusterConnectivityService.ts';
+import { HexBubbleArrangementService } from '@domain/bubbles/services/HexBubbleArrangementService.ts';
+import { ShootingService } from '@domain/shooting/services/ShootingService.ts';
+import { TrajectoryCalculator } from '@domain/shooting/services/TrajectoryCalculator.ts';
 import { Score } from '@domain/scoring/aggregates/Score.ts';
 import { ScoringRulesService } from '@domain/scoring/services/ScoringRulesService.ts';
-import { TrajectoryCalculator } from '@domain/shooting/services/TrajectoryCalculator.ts';
-import { ShootingService } from '@domain/shooting/services/ShootingService.ts';
-import { Bubble } from '@domain/bubbles/entities/Bubble.ts';
 import { TapShootBubbleUseCase } from '@application/usecases/TapShootBubbleUseCase.ts';
-import { HexBubbleArrangementService } from '@domain/bubbles/services/HexBubbleArrangementService.ts';
+import { Bubble } from '@domain/bubbles/entities/Bubble.ts';
 
 export class MainScene extends Phaser.Scene {
-  private tapInputSystem: TapInputSystem;
-  private bubbleGraphics: Phaser.GameObjects.Graphics[] = [];
   private bubbleCluster: BubbleCluster;
   private score: Score;
+  private tapShootUseCase: TapShootBubbleUseCase;
+  private inputSystem: TapInputSystem;
+  private shooterBubble: Bubble;
+  private shooterGraphics: Phaser.GameObjects.Graphics;
+  private dashedLine: Phaser.GameObjects.Graphics;
 
   constructor() {
     super({ key: 'MainScene' });
   }
 
   create(): void {
+    // 1) domain + arrangement
     this.bubbleCluster = new BubbleCluster();
-    this.score = new Score();
-    const collisionService = new BubbleCollisionService();
-    const popService = new ClusterPopService();
-    const scoreService = new ScoringRulesService(this.score);
-    const trajectoryCalc = new TrajectoryCalculator();
-    const shootingService = new ShootingService(trajectoryCalc);
-
-    const hexService = new HexBubbleArrangementService();
-    hexService.arrange(this.bubbleCluster, {
+    const arrangement = new HexBubbleArrangementService();
+    arrangement.arrange(this.bubbleCluster, {
       rows: 5,
       cols: 8,
       bubbleRadius: 20,
-      colors: [0xff0000, 0x0000ff, 0x00ff00, 0xffff00, 0xff00ff],
-    });
-    this.drawHexBubbles();
-
-    // 2) "Shooting bubble" at bottom
-    const shootingBubble = new Bubble('shooter', 0xff0000, {
-      x: this.scale.width / 2,
-      y: 550,
+      colors: ['red', 'blue', 'green', 'yellow', 'purple'],
     });
 
-    // 3) The new use case
-    const tapShootUseCase = new TapShootBubbleUseCase(
-      shootingService,
-      collisionService,
-      popService,
+    // 2) place the shooter bubble at bottom
+    this.shooterBubble = new Bubble('shooter', 'red', { x: 400, y: 550 });
+    // no need to add to bubbleCluster, it's separate until it collides
+
+    // 3) set up domain services
+    const collision = new BubbleCollisionService();
+    const pop = new ClusterPopService();
+    const connectivity = new ClusterConnectivityService();
+    const shooting = new ShootingService();
+    this.score = new Score();
+    const scoring = new ScoringRulesService(this.score);
+    const trajectory = new TrajectoryCalculator();
+
+    // 4) create the use case
+    this.tapShootUseCase = new TapShootBubbleUseCase(
+      shooting,
+      collision,
+      pop,
+      connectivity,
       this.bubbleCluster,
-      scoreService,
-      trajectoryCalc,
-      shootingBubble,
-    );
-
-    // 4) Set up the input system
-    this.tapInputSystem = new TapInputSystem(
-      this,
-      shootingBubble,
-      tapShootUseCase,
-      15,
+      scoring,
+      trajectory,
+      20,
       10,
     );
-    this.tapInputSystem.setup();
 
-    // 5) Draw the "shooter" bubble as a circle
-    const shooterCircle = this.add.graphics();
-    shooterCircle.fillStyle(0xff0000, 1.0);
-    shooterCircle.fillCircle(
-      shootingBubble.position.x,
-      shootingBubble.position.y,
-      15,
+    // 5) setup input
+    this.dashedLine = this.add.graphics();
+    this.inputSystem = new TapInputSystem(
+      this,
+      (endPos) => {
+        // onTapRelease -> shoot
+        this.dashedLine.clear();
+        this.tapShootUseCase.execute(this.shooterBubble.position, endPos);
+      },
+      (start, end) => {
+        // onLineDraw -> draw dashed line
+        this.drawDashedLine(start, end);
+      },
     );
+    this.inputSystem.setup();
 
-    // Simple text UI for score
-    const scoreText = this.add.text(10, 10, `Score: ${this.score.value}`, {
+    // 6) draw the bubbleCluster
+    this.drawCluster();
+
+    // 7) draw the shooter
+    this.shooterGraphics = this.add.graphics();
+    this.drawShooter();
+
+    // 8) show score
+    const txt = this.add.text(10, 10, `Score: ${this.score.value}`, {
+      color: '#fff',
       fontSize: '16px',
     });
     this.time.addEvent({
-      delay: 500,
+      delay: 300,
       loop: true,
       callback: () => {
-        scoreText.setText(`Score: ${this.score.value}`);
+        txt.setText(`Score: ${this.score.value}`);
       },
     });
-
-    // 6) (Optional) place some "bubbles" up top
-    // ...
   }
 
-  private drawHexBubbles(): void {
-    // Clear old
-    this.bubbleGraphics.forEach((g) => g.destroy());
-    this.bubbleGraphics = [];
+  update() {}
 
-    // Re-draw
-    for (const bubble of this.bubbleCluster.getBubbles()) {
+  private drawCluster() {
+    const bubbles = this.bubbleCluster.getBubbles();
+    for (const b of bubbles) {
       const gfx = this.add.graphics();
-      gfx.lineStyle(2, bubble.color, 1.0);
-      gfx.fillStyle(bubble.color, 0.7);
-      gfx.fillCircle(bubble.position.x, bubble.position.y, 20);
+      gfx.lineStyle(2, this.colorToHex(b.color), 1.0);
+      gfx.strokeCircle(b.position.x, b.position.y, 20);
+      gfx.fillStyle(this.colorToHex(b.color), 0.3);
+      gfx.fillCircle(b.position.x, b.position.y, 20);
+    }
+  }
 
-      this.bubbleGraphics.push(gfx);
+  private drawShooter() {
+    this.shooterGraphics.clear();
+    this.shooterGraphics.fillStyle(
+      this.colorToHex(this.shooterBubble.color),
+      1.0,
+    );
+    this.shooterGraphics.fillCircle(
+      this.shooterBubble.position.x,
+      this.shooterBubble.position.y,
+      20,
+    );
+  }
+
+  private drawDashedLine(
+    start: { x: number; y: number },
+    end: { x: number; y: number },
+  ) {
+    this.dashedLine.clear();
+    this.dashedLine.lineStyle(
+      2,
+      this.colorToHex(this.shooterBubble.color),
+      1.0,
+    );
+
+    const dashLen = 8;
+    const gapLen = 5;
+
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    const angle = Math.atan2(dy, dx);
+
+    let currentX = start.x;
+    let currentY = start.y;
+    let remaining = dist;
+
+    this.dashedLine.beginPath();
+    while (remaining > 0) {
+      const seg = Math.min(dashLen, remaining);
+      const nextX = currentX + Math.cos(angle) * seg;
+      const nextY = currentY + Math.sin(angle) * seg;
+
+      this.dashedLine.moveTo(currentX, currentY);
+      this.dashedLine.lineTo(nextX, nextY);
+      this.dashedLine.strokePath();
+
+      currentX = nextX + Math.cos(angle) * gapLen;
+      currentY = nextY + Math.sin(angle) * gapLen;
+      remaining -= dashLen + gapLen;
+    }
+    this.dashedLine.closePath();
+  }
+
+  private colorToHex(c: string): number {
+    switch (c) {
+      case 'red':
+        return 0xff0000;
+      case 'blue':
+        return 0x0000ff;
+      case 'green':
+        return 0x00ff00;
+      case 'yellow':
+        return 0xffff00;
+      case 'purple':
+        return 0xff00ff;
+      default:
+        return 0xffffff;
     }
   }
 }

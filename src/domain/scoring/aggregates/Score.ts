@@ -1,19 +1,11 @@
 export class Score {
   constructor(public value: number = 0) {}
 
-  increment(points: number): void {
-    if (points > 0) {
-      this.value += points;
-    }
+  increment(points: number) {
+    this.value += points;
   }
 
-  decrement(points: number): void {
-    if (points > 0) {
-      this.value = Math.max(0, this.value - points);
-    }
-  }
-
-  reset(): void {
+  reset() {
     this.value = 0;
   }
 }
