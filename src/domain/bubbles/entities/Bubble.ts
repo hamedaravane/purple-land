@@ -16,7 +16,7 @@ export class Bubble {
    */
   constructor(
     public readonly id: string,
-    public readonly color: string,
+    public readonly color: number,
     public position: Position,
     public isPopped: boolean = false,
   ) {}
