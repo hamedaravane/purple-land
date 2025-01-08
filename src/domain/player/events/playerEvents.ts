@@ -19,7 +19,7 @@ export class NextBubbleGeneratedEvent {
 }
 
 /**
- * Emitted when a power-up is activated (e.g., multi-color shot).
+ * Emitted when a power-up is activated (e.g., multicolor shot).
  */
 export class PowerUpActivatedEvent {
   constructor(
