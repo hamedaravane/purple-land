@@ -1,9 +1,10 @@
 import { Bubble } from '../entities/Bubble';
 import { BubbleCluster } from '../aggregates/BubbleCluster';
+import { PositionOrDirection } from '@shared/types';
 
 export class BubbleCollisionService {
   detectCollision(
-    shotPosition: { x: number; y: number },
+    shotPosition: PositionOrDirection,
     shotRadius: number,
     cluster: BubbleCluster,
   ): Bubble | null {
@@ -21,8 +22,8 @@ export class BubbleCollisionService {
    * Calculates the Euclidean distance between two positions.
    */
   private calculateDistance(
-    a: { x: number; y: number },
-    b: { x: number; y: number },
+    a: PositionOrDirection,
+    b: PositionOrDirection,
   ): number {
     const dx = a.x - b.x;
     const dy = a.y - b.y;

@@ -4,6 +4,7 @@ import { ClusterPopService } from '@domain/bubbles/services/ClusterPopService.ts
 import { BubbleCluster } from '@domain/bubbles/aggregates/BubbleCluster.ts';
 import { TrajectoryService } from '@domain/shooting/services/TrajectoryService.ts';
 import { Bubble } from '@domain/bubbles/entities/Bubble.ts';
+import { PositionOrDirection } from '@shared/types';
 
 export class TapShootBubbleUseCase {
   constructor(
@@ -17,7 +18,7 @@ export class TapShootBubbleUseCase {
     private shotRadius: number,
   ) {}
 
-  execute(touchPos: { x: number; y: number }): void {
+  execute(touchPos: PositionOrDirection): void {
     // 1) Calculate direction
     const direction = this.trajectoryService.calculateDirection(
       this.shooterBubble.position,

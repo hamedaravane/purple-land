@@ -26,7 +26,7 @@ export class DomainEventPublisher {
   public static subscribe<T extends IDomainEvent>(
     eventClass: DomainEventConstructor<T>,
     listener: (event: T) => void,
-  ): void {
+  ) {
     const eventName = eventClass.name;
     if (!this.listeners.has(eventName)) {
       this.listeners.set(eventName, []);
@@ -38,7 +38,7 @@ export class DomainEventPublisher {
    * Publish an event instance. All listeners for that event class
    * will be invoked with the event data.
    */
-  public static publish<T extends IDomainEvent>(event: T): void {
+  public static publish<T extends IDomainEvent>(event: T) {
     const eventName = event.constructor.name;
     const eventListeners = this.listeners.get(eventName) || [];
     for (const listener of eventListeners) {

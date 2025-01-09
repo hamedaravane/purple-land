@@ -1,8 +1,9 @@
 import { Bubble } from '@domain/bubbles/entities/Bubble.ts';
+import { PositionOrDirection } from '@shared/types';
 
 export function adjacencyCheck(
-  a: { x: number; y: number },
-  b: { x: number; y: number },
+  a: PositionOrDirection,
+  b: PositionOrDirection,
 ): boolean {
   const dx = a.x - b.x;
   const dy = a.y - b.y;

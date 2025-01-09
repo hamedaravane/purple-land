@@ -1,8 +1,10 @@
+import { PositionOrDirection } from '@shared/types';
+
 export class Shot {
   constructor(
     public readonly id: string,
-    public position: { x: number; y: number },
-    public direction: { x: number; y: number },
+    public position: PositionOrDirection,
+    public direction: PositionOrDirection,
     public speed: number,
     public radius: number,
     public isActive: boolean = true,

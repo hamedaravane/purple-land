@@ -1,11 +1,13 @@
+import { PositionOrDirection } from '@shared/types';
+
 export class TrajectoryService {
   /**
    * Calculate direction from bottom bubble center to tapped point.
    */
   calculateDirection(
-    shooterPos: { x: number; y: number },
-    touchPos: { x: number; y: number },
-  ): { x: number; y: number } {
+    shooterPos: PositionOrDirection,
+    touchPos: PositionOrDirection,
+  ): PositionOrDirection {
     const dx = touchPos.x - shooterPos.x;
     const dy = touchPos.y - shooterPos.y;
     const mag = Math.sqrt(dx * dx + dy * dy);
@@ -18,8 +20,8 @@ export class TrajectoryService {
    * angle in radians between this ray and x-axis
    */
   calculateAngle(
-    shooterPos: { x: number; y: number },
-    touchPos: { x: number; y: number },
+    shooterPos: PositionOrDirection,
+    touchPos: PositionOrDirection,
   ): number {
     const dx = touchPos.x - shooterPos.x;
     const dy = touchPos.y - shooterPos.y;

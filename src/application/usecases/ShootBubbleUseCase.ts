@@ -3,6 +3,7 @@ import { BubbleCluster } from '@domain/bubbles/aggregates/BubbleCluster.ts';
 import { BubbleCollisionService } from '@domain/bubbles/services/BubbleCollisionService.ts';
 import { ClusterPopService } from '@domain/bubbles/services/ClusterPopService.ts';
 import { ScoringRulesService } from '@domain/scoring/services/ScoringRulesService.ts';
+import { PositionOrDirection } from '@shared/types';
 
 export class ShootBubbleUseCase {
   constructor(
@@ -14,8 +15,8 @@ export class ShootBubbleUseCase {
   ) {}
 
   execute(
-    swipeStart: { x: number; y: number },
-    swipeEnd: { x: number; y: number },
+    swipeStart: PositionOrDirection,
+    swipeEnd: PositionOrDirection,
     shotRadius: number,
     bubbleRadius: number,
     adjacencyCheck: (a: any, b: any) => boolean,

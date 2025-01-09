@@ -1,12 +1,13 @@
 import { Shot } from '../entities/Shot';
+import { PositionOrDirection } from '@shared/types';
 
 export class ShootingService {
   private shots: Shot[] = [];
   private shotIdCounter = 0;
 
   fireShot(
-    start: { x: number; y: number },
-    direction: { x: number; y: number },
+    start: PositionOrDirection,
+    direction: PositionOrDirection,
     speed: number,
     radius: number,
   ): Shot {
