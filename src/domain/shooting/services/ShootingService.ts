@@ -6,33 +6,32 @@ export class ShootingService {
 
   fireShot(
     start: { x: number; y: number },
-    end: { x: number; y: number },
+    direction: { x: number; y: number },
+    speed: number,
+    radius: number,
   ): Shot {
     const shot = new Shot(
       `shot-${this.shotIdCounter++}`,
       { x: start.x, y: start.y },
-      { x: end.x - start.x, y: end.y - start.y },
-      500,
+      direction,
+      speed,
+      radius,
     );
     this.shots.push(shot);
     return shot;
   }
 
-  updateShots(deltaTime: number): void {
-    for (const shot of this.shots) {
-      if (shot.isActive) {
-        shot.updatePosition(deltaTime);
-      }
-    }
-    this.shots = this.shots.filter((shot) => shot.isActive);
+  updateShots(dt: number): void {
+    this.shots.forEach((s) => s.updatePosition(dt));
+    this.shots = this.shots.filter((s) => s.isActive);
   }
 
-  deactivateShot(shotId: string): void {
-    const shot = this.shots.find((s) => s.id === shotId);
-    if (shot) shot.deactivate();
+  deactivateShot(id: string): void {
+    const s = this.shots.find((x) => x.id === id);
+    if (s) s.deactivate();
   }
 
   getActiveShots(): Shot[] {
-    return this.shots.filter((shot) => shot.isActive);
+    return this.shots.filter((s) => s.isActive);
   }
 }

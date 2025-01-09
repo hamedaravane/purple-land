@@ -2,12 +2,12 @@ import Phaser from 'phaser';
 
 export class TapInputSystem {
   private isPointerDown = false;
-  private startPos: { x: number; y: number } | null = null;
+  private start: { x: number; y: number } | null = null;
 
   constructor(
     private scene: Phaser.Scene,
-    private onTapRelease: (endPos: { x: number; y: number }) => void,
-    private onLineDraw?: (
+    private onTap: (pointerUpPos: { x: number; y: number }) => void,
+    private onDrawLine?: (
       start: { x: number; y: number },
       end: { x: number; y: number },
     ) => void,
@@ -16,20 +16,20 @@ export class TapInputSystem {
   setup(): void {
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       this.isPointerDown = true;
-      this.startPos = { x: pointer.x, y: pointer.y };
+      this.start = { x: pointer.x, y: pointer.y };
     });
 
     this.scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      if (this.isPointerDown && this.startPos && this.onLineDraw) {
-        this.onLineDraw(this.startPos, { x: pointer.x, y: pointer.y });
+      if (this.isPointerDown && this.start && this.onDrawLine) {
+        this.onDrawLine(this.start, { x: pointer.x, y: pointer.y });
       }
     });
 
     this.scene.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
       this.isPointerDown = false;
-      if (this.startPos) {
-        this.onTapRelease({ x: pointer.x, y: pointer.y });
-        this.startPos = null;
+      if (this.start) {
+        this.onTap({ x: pointer.x, y: pointer.y });
+        this.start = null;
       }
     });
   }

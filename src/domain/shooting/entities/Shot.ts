@@ -1,12 +1,10 @@
-export type ShotPosition = { x: number; y: number };
-export type ShotDirection = { x: number; y: number };
-
 export class Shot {
   constructor(
     public readonly id: string,
-    public position: ShotPosition,
-    public direction: ShotDirection,
+    public position: { x: number; y: number },
+    public direction: { x: number; y: number },
     public speed: number,
+    public radius: number,
     public isActive: boolean = true,
   ) {}
 
