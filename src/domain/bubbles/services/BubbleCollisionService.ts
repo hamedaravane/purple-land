@@ -3,16 +3,14 @@ import { BubbleCluster } from '../aggregates/BubbleCluster';
 
 export class BubbleCollisionService {
   detectCollision(
-    cluster: BubbleCluster,
     shotPosition: { x: number; y: number },
     shotRadius: number,
-    bubbleRadius: number,
+    cluster: BubbleCluster,
   ): Bubble | null {
     for (const bubble of cluster.getBubbles()) {
       if (bubble.isPopped) continue;
-
-      const distance = this.calculateDistance(shotPosition, bubble.position);
-      if (distance <= shotRadius + bubbleRadius) {
+      const distance = this.calculateDistance(bubble.position, shotPosition);
+      if (distance <= bubble.radius + shotRadius) {
         return bubble;
       }
     }

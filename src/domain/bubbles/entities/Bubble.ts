@@ -3,8 +3,9 @@ export type Position = { x: number; y: number };
 export class Bubble {
   constructor(
     public readonly id: string,
-    public readonly color: string,
+    public color: string,
     public position: Position,
+    public radius: number,
     public isPopped: boolean = false,
     public rowIndex: number = 0,
     public colIndex: number = 0,

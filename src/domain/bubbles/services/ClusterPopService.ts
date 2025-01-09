@@ -1,49 +1,36 @@
-/////////////////////////////////////////////////
-// domain/bubbles/services/ClusterPopService.ts
-/////////////////////////////////////////////////
 import { Bubble } from '../entities/Bubble';
 import { BubbleCluster } from '../aggregates/BubbleCluster';
-import { isHexAdjacent } from '@shared/utils/AdjacencyCheck.ts';
 
 export class ClusterPopService {
-  popConnectedBubbles(
-    cluster: BubbleCluster,
-    originBubble: Bubble,
-    bubbleRadius: number,
-  ): Bubble[] {
-    if (originBubble.isPopped) return [];
+  popMatchingColor(cluster: BubbleCluster, collided: Bubble): Bubble[] {
+    if (collided.isPopped) return [];
 
-    const stack: Bubble[] = [originBubble];
-    const visited = new Set<Bubble>();
-    const sameColor = originBubble.color;
+    const sameColor = collided.color;
+    const toPop = new Set<Bubble>();
+    const stack: Bubble[] = [collided];
 
     while (stack.length > 0) {
       const current = stack.pop()!;
-      if (!visited.has(current)) {
-        visited.add(current);
-        const neighbors = cluster
-          .getBubbles()
-          .filter((b) => !b.isPopped && b.color === sameColor);
-        for (const n of neighbors) {
-          if (!visited.has(n)) {
-            const dx = current.position.x - n.position.x;
-            const dy = current.position.y - n.position.y;
+      if (!toPop.has(current)) {
+        toPop.add(current);
+        // find neighbors of same color
+        for (const neighbor of cluster.getBubbles()) {
+          if (!neighbor.isPopped && neighbor.color === sameColor) {
+            // a simple distance check
+            const dx = current.position.x - neighbor.position.x;
+            const dy = current.position.y - neighbor.position.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            // If they're adjacent in a hex sense
-            if (isHexAdjacent(dist, bubbleRadius)) {
-              stack.push(n);
+            if (dist <= (current.radius + neighbor.radius) * 1.2) {
+              stack.push(neighbor);
             }
           }
         }
       }
     }
-
-    // Pop all found bubbles
-    for (const bubble of visited) {
-      bubble.pop();
+    // pop them
+    for (const b of toPop) {
+      b.pop();
     }
-
-    // Return the list of popped bubbles
-    return Array.from(visited);
+    return Array.from(toPop);
   }
 }

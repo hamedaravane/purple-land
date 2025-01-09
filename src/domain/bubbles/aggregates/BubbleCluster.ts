@@ -11,14 +11,7 @@ export class BubbleCluster {
     return this.bubbles;
   }
 
-  removeBubble(bubbleId: string): void {
-    const idx = this.bubbles.findIndex((b) => b.id === bubbleId);
-    if (idx !== -1) {
-      this.bubbles.splice(idx, 1);
-    }
-  }
-
-  clearPoppedBubbles(): void {
+  removePoppedBubbles(): void {
     this.bubbles = this.bubbles.filter((b) => !b.isPopped);
   }
 }
