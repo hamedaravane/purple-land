@@ -6,6 +6,9 @@ export class Aimer extends Phaser.GameObjects.Graphics {
   private readonly fromX: number;
   private readonly fromY: number;
   private readonly color: number;
+  private readonly bubble: Bubble;
+  private targetX: number = 0;
+  private targetY: number = 0;
 
   constructor(scene: Phaser.Scene, bubble: Bubble) {
     super(scene);
@@ -14,6 +17,7 @@ export class Aimer extends Phaser.GameObjects.Graphics {
     this.fromX = bubble.x;
     this.fromY = bubble.y;
     this.color = bubble.color;
+    this.bubble = bubble;
     scene.add.existing(this);
 
     // Register input event listeners
@@ -34,6 +38,7 @@ export class Aimer extends Phaser.GameObjects.Graphics {
 
       const dashLength = 10;
       const gapLength = 5;
+
       this.drawDashedLine(
         this.fromX,
         this.fromY,
@@ -42,6 +47,10 @@ export class Aimer extends Phaser.GameObjects.Graphics {
         dashLength,
         gapLength,
       );
+
+      // Store the last known pointer position for the shot
+      this.targetX = pointer.x;
+      this.targetY = pointer.y;
 
       // Extend the dashed line to the outside of the viewport
       const angle = Phaser.Math.Angle.Between(
@@ -70,6 +79,9 @@ export class Aimer extends Phaser.GameObjects.Graphics {
 
   onPointerUp() {
     this.clear();
+    if (this.targetX !== 0 && this.targetY !== 0) {
+      this.bubble.shot({ x: this.targetX, y: this.targetY });
+    }
   }
 
   drawDashedLine(
