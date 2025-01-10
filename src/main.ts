@@ -1,16 +1,16 @@
 import Phaser from 'phaser';
-import { MainScene } from '@infrastructure/phaser/scenes/MainScene.ts';
-import { BootScene } from '@infrastructure/phaser/scenes/BootScene.ts';
+import BootScene from '@scenes/BootScene.ts';
+import GameScene from '@scenes/GameScene.ts';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: 600,
   height: 800,
-  scene: [BootScene, MainScene],
+  scene: [BootScene, GameScene],
   parent: 'game-container',
   physics: {
     default: 'arcade',
-    arcade: { gravity: { y: 0, x: 1 } },
+    arcade: { gravity: { x: NaN, y: 0 } },
   },
 };
 

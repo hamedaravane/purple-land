@@ -8,8 +8,6 @@
       "DOM",
       "DOM.Iterable"
     ],
-    "typeRoots": ["./node_modules/phaser/types"],
-    "types": ["Phaser"],
     "skipLibCheck": true,
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -23,9 +21,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "paths": {
-      "@*": ["./*"]
+      "@*": ["./src/*"]
     }
   },
   "include": [

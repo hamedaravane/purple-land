@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import * as path from 'node:path';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import Checker from 'vite-plugin-checker';
 
 export default defineConfig({
   base: './',
@@ -23,5 +24,10 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, '../src/utils'),
     },
   },
-  plugins: [tsconfigPaths()],
+  plugins: [
+    tsconfigPaths(),
+    Checker({
+      typescript: true, // Enable TypeScript type checking
+    }),
+  ],
 });
