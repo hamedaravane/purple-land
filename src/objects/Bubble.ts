@@ -1,4 +1,4 @@
-export class Bubble extends Phaser.GameObjects.Sprite {
+export class Bubble extends Phaser.GameObjects.Ellipse {
   private readonly bubbleType: 'static' | 'shooting';
   private readonly _color: number;
 
@@ -6,14 +6,12 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     scene: Phaser.Scene,
     x: number,
     y: number,
-    texture: string | Phaser.Textures.Texture,
     bubbleType: 'static' | 'shooting' = 'static',
-    color: number = 0xffffff,
-    frame?: string | number,
+    fillColor: number = 0xffffff,
   ) {
-    super(scene, x, y, texture, frame);
+    super(scene, x, y, 25, 25, fillColor, 1);
     this.bubbleType = bubbleType;
-    this._color = color;
+    this._color = fillColor;
     scene.add.existing(this);
 
     if (bubbleType === 'shooting') {

@@ -74,7 +74,7 @@ export class Aimer extends Phaser.GameObjects.Graphics {
    * Draws the aim line from the bubble's position to the pointer's position.
    */
   private drawAimLine(pointer: Phaser.Input.Pointer) {
-    this.lineStyle(2, this.color);
+    this.lineStyle(1, this.color);
     this.drawDashedLine(this.fromX, this.fromY, pointer.x, pointer.y);
 
     const angle = Phaser.Math.Angle.Between(
