@@ -1,6 +1,7 @@
 export class Bubble extends Phaser.GameObjects.Ellipse {
   private readonly bubbleType: 'static' | 'shooting';
   private readonly _color: number;
+  public neighbors: Bubble[] = [];
 
   constructor(
     scene: Phaser.Scene,
@@ -57,6 +58,19 @@ export class Bubble extends Phaser.GameObjects.Ellipse {
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
       this.body.setVelocity(0, 0);
       this.body.enable = false;
+    }
+  }
+
+  addNeighbor(bubble: Bubble) {
+    if (!this.neighbors.includes(bubble)) {
+      this.neighbors.push(bubble);
+    }
+  }
+
+  removeNeighbor(bubble: Bubble) {
+    const index = this.neighbors.indexOf(bubble);
+    if (index !== -1) {
+      this.neighbors.splice(index, 1);
     }
   }
 }
