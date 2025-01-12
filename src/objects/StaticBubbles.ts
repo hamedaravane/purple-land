@@ -22,6 +22,7 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
           this.scene,
           position.x,
           position.y,
+          radius * 2,
           'static',
           color,
         );

@@ -6,10 +6,11 @@ export class Bubble extends Phaser.GameObjects.Ellipse {
     scene: Phaser.Scene,
     x: number,
     y: number,
+    radius: number,
     bubbleType: 'static' | 'shooting' = 'static',
     fillColor: number = 0xffffff,
   ) {
-    super(scene, x, y, 25, 25, fillColor, 1);
+    super(scene, x, y, radius, radius, fillColor, 1);
     this.bubbleType = bubbleType;
     this._color = fillColor;
     scene.add.existing(this);
