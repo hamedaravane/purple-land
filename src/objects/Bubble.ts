@@ -13,13 +13,10 @@ export class Bubble extends Phaser.GameObjects.Ellipse {
     this.bubbleType = bubbleType;
     this._color = fillColor;
     scene.add.existing(this);
-
-    if (bubbleType === 'shooting') {
-      this.enablePhysics();
-    }
+    this.enablePhysics();
   }
 
-  public get color(): number {
+  public get color() {
     return this._color;
   }
 
@@ -27,7 +24,7 @@ export class Bubble extends Phaser.GameObjects.Ellipse {
     this.destroy();
   }
 
-  shot(direction: { x: number; y: number }, speed: number = 600): void {
+  shot(direction: { x: number; y: number }, speed: number = 600) {
     if (this.bubbleType === 'shooting') {
       const directionX = direction.x - this.x;
       const directionY = direction.y - this.y;
@@ -45,24 +42,16 @@ export class Bubble extends Phaser.GameObjects.Ellipse {
     }
   }
 
-  /**
-   * Enable physics for the bubble.
-   */
   enablePhysics() {
-    if (!this.scene.physics.world) {
-      console.error('Physics system not initialized in the scene.');
-      return;
-    }
-
     this.scene.physics.add.existing(this);
-    const body = this.body as Phaser.Physics.Arcade.Body;
-    body.setCollideWorldBounds(true);
-    body.setVelocity(0, 0);
+
+    if (this.body instanceof Phaser.Physics.Arcade.Body) {
+      this.body.setCollideWorldBounds(true);
+      this.body.setCircle(this.width / 2);
+      this.body.setVelocity(0, 0);
+    }
   }
 
-  /**
-   * Disable physics for the bubble.
-   */
   disablePhysics() {
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
       this.body.setVelocity(0, 0);

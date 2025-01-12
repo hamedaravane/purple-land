@@ -1,9 +1,10 @@
 import { getRandomBubbleColor } from '@utils/ColorUtils.ts';
 import { Bubble } from '@objects/Bubble.ts';
 
-export class StaticBubbles {
+export class StaticBubbles extends Phaser.GameObjects.Group {
   public readonly scene: Phaser.Scene;
   constructor(scene: Phaser.Scene, radius: number, row: number, col: number) {
+    super(scene);
     this.scene = scene;
     this.createHexGrid(radius, row, col);
   }
@@ -14,7 +15,7 @@ export class StaticBubbles {
       for (let j = 0; isOffset ? j < col : j < col - 1; j++) {
         let position = {
           x: isOffset ? radius + j * radius * 2 : radius * 2 + j * radius * 2,
-          y: i * radius * 1.8,
+          y: i * radius * Math.sqrt(3),
         };
         let color = getRandomBubbleColor();
         const bubble = new Bubble(
@@ -25,10 +26,8 @@ export class StaticBubbles {
           color,
         );
         this.scene.physics.add.existing(bubble);
-        const body = bubble.body as Phaser.Physics.Arcade.Body;
-        body.setCollideWorldBounds(true);
-        body.setVelocity(0, 0);
-        this.scene.add.existing(bubble);
+        this.scene.add.existing<Bubble>(bubble);
+        this.add(bubble);
       }
     }
   }
