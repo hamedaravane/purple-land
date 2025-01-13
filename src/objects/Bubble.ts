@@ -39,17 +39,15 @@ export class Bubble extends Phaser.GameObjects.Ellipse {
 
   shot(direction: { x: number; y: number }, speed: number = 600) {
     if (this.bubbleType !== 'shooting') return;
-
     const dx = direction.x - this.x;
     const dy = direction.y - this.y;
     const magnitude = Math.sqrt(dx * dx + dy * dy);
-
     if (magnitude > 0) {
-      const normalizedX = dx / magnitude;
-      const normalizedY = dy / magnitude;
+      const nx = dx / magnitude;
+      const ny = dy / magnitude;
       (this.body as Phaser.Physics.Arcade.Body).setVelocity(
-        normalizedX * speed,
-        normalizedY * speed,
+        nx * speed,
+        ny * speed,
       );
     }
   }
