@@ -7,50 +7,50 @@ export class Bubble extends Phaser.GameObjects.Ellipse {
     scene: Phaser.Scene,
     x: number,
     y: number,
-    radius: number,
+    diameter: number,
     bubbleType: 'static' | 'shooting' = 'static',
     fillColor: number = 0xffffff,
   ) {
-    super(scene, x, y, radius, radius, fillColor, 1);
+    super(scene, x, y, diameter, diameter, fillColor, 1);
     this.bubbleType = bubbleType;
     this._color = fillColor;
-    scene.add.existing(this);
-    this.enablePhysics();
+    this.scene.add.existing(this);
+    this.initPhysics();
   }
 
-  public get color() {
+  get color() {
     return this._color;
+  }
+
+  setStatic() {
+    (this as any).bubbleType = 'static';
   }
 
   pop() {
     this.destroy();
   }
 
-  shot(direction: { x: number; y: number }, speed: number = 600) {
-    if (this.bubbleType === 'shooting') {
-      const directionX = direction.x - this.x;
-      const directionY = direction.y - this.y;
-      const magnitude = Math.sqrt(directionX ** 2 + directionY ** 2);
-
-      if (magnitude > 0) {
-        const normalizedX = directionX / magnitude;
-        const normalizedY = directionY / magnitude;
-
-        (this.body as Phaser.Physics.Arcade.Body).setVelocity(
-          normalizedX * speed,
-          normalizedY * speed,
-        );
-      }
+  fall() {
+    if (this.body instanceof Phaser.Physics.Arcade.Body) {
+      this.body.enable = true;
+      this.body.setVelocityY(200);
     }
   }
 
-  enablePhysics() {
-    this.scene.physics.add.existing(this);
+  shot(direction: { x: number; y: number }, speed: number = 600) {
+    if (this.bubbleType !== 'shooting') return;
 
-    if (this.body instanceof Phaser.Physics.Arcade.Body) {
-      this.body.setCollideWorldBounds(true);
-      this.body.setCircle(this.width / 2);
-      this.body.setVelocity(0, 0);
+    const dx = direction.x - this.x;
+    const dy = direction.y - this.y;
+    const magnitude = Math.sqrt(dx * dx + dy * dy);
+
+    if (magnitude > 0) {
+      const normalizedX = dx / magnitude;
+      const normalizedY = dy / magnitude;
+      (this.body as Phaser.Physics.Arcade.Body).setVelocity(
+        normalizedX * speed,
+        normalizedY * speed,
+      );
     }
   }
 
@@ -71,6 +71,15 @@ export class Bubble extends Phaser.GameObjects.Ellipse {
     const index = this.neighbors.indexOf(bubble);
     if (index !== -1) {
       this.neighbors.splice(index, 1);
+    }
+  }
+
+  private initPhysics() {
+    this.scene.physics.add.existing(this);
+    if (this.body instanceof Phaser.Physics.Arcade.Body) {
+      this.body.setCollideWorldBounds(true);
+      this.body.setCircle(this.width / 2);
+      this.body.setVelocity(0, 0);
     }
   }
 }
