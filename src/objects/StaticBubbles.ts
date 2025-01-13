@@ -63,28 +63,67 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
   }
 
   private attachShootingBubble(bubble: Bubble) {
-    const { rowIndex, colIndex } = this.findNearestGridPosition(
+    let { rowIndex, colIndex } = this.findNearestGridPosition(
       bubble.x,
       bubble.y,
     );
+    const { r, c } = this.findClosestEmptySlot(rowIndex, colIndex);
+    const { x, y } = this.computeBubblePosition(r, c);
+    bubble.setPosition(x, y);
     bubble.setStatic();
     this.add(bubble);
-    if (!this.grid[rowIndex]) {
-      this.grid[rowIndex] = [];
+    if (!this.grid[r]) {
+      this.grid[r] = [];
     }
-    this.grid[rowIndex][colIndex] = bubble;
-    this.linkNeighbors(bubble, rowIndex, colIndex);
+    this.grid[r][c] = bubble;
+    this.linkNeighbors(bubble, r, c);
   }
 
-  private findNearestGridPosition(
-    x: number,
-    y: number,
-  ): { rowIndex: number; colIndex: number } {
+  private findNearestGridPosition(x: number, y: number) {
     const rowIndex = Math.round(y / (this.radius * Math.sqrt(3)));
     const isOffset = rowIndex % 2 === 1;
     const offsetX = isOffset ? this.radius : this.radius * 2;
     const colIndex = Math.round((x - offsetX) / (2 * this.radius));
     return { rowIndex, colIndex };
+  }
+
+  private findClosestEmptySlot(row: number, col: number) {
+    const visited = new Set<string>();
+    const queue = [{ r: row, c: col }];
+    while (queue.length) {
+      const { r, c } = queue.shift()!;
+      if (!this.grid[r] || !this.grid[r][c]) {
+        return { r, c };
+      }
+      visited.add(`${r},${c}`);
+      this.getGridNeighbors(r, c).forEach((n) => {
+        const key = `${n.r},${n.c}`;
+        if (!visited.has(key)) {
+          queue.push(n);
+        }
+      });
+    }
+    return { r: row, c: col };
+  }
+
+  private getGridNeighbors(row: number, col: number) {
+    return [
+      { r: row, c: col - 1 },
+      { r: row, c: col + 1 },
+      { r: row - 1, c: col },
+      { r: row - 1, c: col + 1 },
+      { r: row + 1, c: col },
+      { r: row + 1, c: col - 1 },
+    ];
+  }
+
+  private computeBubblePosition(rowIndex: number, colIndex: number) {
+    const isOffset = rowIndex % 2 === 1;
+    const x = isOffset
+      ? this.radius + colIndex * this.radius * 2
+      : this.radius * 2 + colIndex * this.radius * 2;
+    const y = rowIndex * this.radius * Math.sqrt(3);
+    return { x, y };
   }
 
   private linkNeighbors(bubble: Bubble, rowIndex: number, colIndex: number) {
@@ -98,9 +137,9 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
     ];
     const isOffset = rowIndex % 2 === 1;
     directions.forEach(({ row, col }) => {
-      const neighborRow = rowIndex + row;
-      const neighborCol = colIndex + col + (isOffset && row !== 0 ? 1 : 0);
-      const neighbor = this.grid[neighborRow]?.[neighborCol];
+      const nr = rowIndex + row;
+      const nc = colIndex + col + (isOffset && row !== 0 ? 1 : 0);
+      const neighbor = this.grid[nr]?.[nc];
       if (neighbor && neighbor instanceof Bubble) {
         bubble.addNeighbor(neighbor);
         neighbor.addNeighbor(bubble);
@@ -111,7 +150,7 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
   private chainPop(startBubble: Bubble, color: number) {
     const stack: Bubble[] = [startBubble];
     const visited = new Set<Bubble>();
-    while (stack.length > 0) {
+    while (stack.length) {
       const current = stack.pop()!;
       if (visited.has(current)) continue;
       visited.add(current);
@@ -138,10 +177,13 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
 
   private dropFloatingBubbles() {
     const visited = new Set<Bubble>();
-    for (let colIndex = 0; colIndex < (this.grid[1]?.length || 0); colIndex++) {
-      const topBubble = this.grid[1][colIndex];
-      if (topBubble) {
-        this.bfsMarkConnected(topBubble, visited);
+    const anchorRow = 1;
+    if (this.grid[anchorRow]) {
+      for (let col = 0; col < this.grid[anchorRow].length; col++) {
+        const topBubble = this.grid[anchorRow][col];
+        if (topBubble) {
+          this.bfsMarkConnected(topBubble, visited);
+        }
       }
     }
     for (let r = 0; r < this.grid.length; r++) {
@@ -157,13 +199,15 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
 
   private bfsMarkConnected(start: Bubble, visited: Set<Bubble>) {
     const queue: Bubble[] = [start];
-    while (queue.length > 0) {
+    while (queue.length) {
       const current = queue.shift()!;
       if (visited.has(current)) continue;
       visited.add(current);
-      current.neighbors
-        .filter((n) => !visited.has(n))
-        .forEach((n) => queue.push(n));
+      current.neighbors.forEach((neighbor) => {
+        if (!visited.has(neighbor)) {
+          queue.push(neighbor);
+        }
+      });
     }
   }
 }

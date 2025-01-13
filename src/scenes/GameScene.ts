@@ -6,6 +6,7 @@ import { getRandomBubbleColor } from '@utils/ColorUtils';
 export default class GameScene extends Phaser.Scene {
   private shootingBubble: Bubble;
   private staticBubbles: StaticBubbles;
+  private aimer: Aimer;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -20,24 +21,15 @@ export default class GameScene extends Phaser.Scene {
     this.staticBubbles = new StaticBubbles(this, r, rows, cols);
     this.add.existing(this.staticBubbles);
     this.spawnShootingBubble();
-    this.physics.add.collider(
-      this.shootingBubble,
-      this.staticBubbles,
-      this
-        .onBubbleCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
-      undefined,
-      this,
-    );
   }
 
   private spawnShootingBubble() {
+    if (this.shootingBubble) this.shootingBubble.destroy();
+    if (this.aimer) this.aimer.destroy();
     const w = this.cameras.main.width;
     const h = this.cameras.main.height;
     const cols = 14;
     const r = w / cols / 2;
-    if (this.shootingBubble) {
-      this.shootingBubble.destroy();
-    }
     this.shootingBubble = new Bubble(
       this,
       w / 2,
@@ -46,25 +38,18 @@ export default class GameScene extends Phaser.Scene {
       'shooting',
       getRandomBubbleColor(),
     );
-    new Aimer(this, this.shootingBubble);
     this.physics.add.existing(this.shootingBubble);
-  }
-
-  private onBubbleCollision(
-    shootingObj: Phaser.Types.Physics.Arcade.GameObjectWithBody,
-    staticObj: Phaser.Types.Physics.Arcade.GameObjectWithBody,
-  ) {
-    const shootingBubble = shootingObj as Bubble;
-    const staticBubble = staticObj as Bubble;
-    this.staticBubbles.handleCollision(shootingBubble, staticBubble);
-    this.spawnShootingBubble();
+    this.aimer = new Aimer(this, this.shootingBubble);
     this.physics.add.collider(
       this.shootingBubble,
       this.staticBubbles,
-      this
-        .onBubbleCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
-      undefined,
-      this,
+      (shootingObj, staticObj) =>
+        this.onBubbleCollision(shootingObj as Bubble, staticObj as Bubble),
     );
+  }
+
+  private onBubbleCollision(shootingBubble: Bubble, staticBubble: Bubble) {
+    this.staticBubbles.handleCollision(shootingBubble, staticBubble);
+    this.spawnShootingBubble();
   }
 }

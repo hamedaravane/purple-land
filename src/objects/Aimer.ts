@@ -89,4 +89,13 @@ export class Aimer extends Phaser.GameObjects.Graphics {
     }
     this.strokePath();
   }
+
+  public destroy(...args: any[]) {
+    if (this.scene && this.scene.input) {
+      this.scene.input.off('pointerdown', this.onPointerDown, this);
+      this.scene.input.off('pointermove', this.onPointerMove, this);
+      this.scene.input.off('pointerup', this.onPointerUp, this);
+    }
+    super.destroy(...args);
+  }
 }
