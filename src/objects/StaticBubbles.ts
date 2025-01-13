@@ -1,48 +1,66 @@
-import { getRandomBubbleColor } from '@utils/ColorUtils.ts';
-import { Bubble } from '@objects/Bubble.ts';
+import { getRandomBubbleColor } from '@utils/ColorUtils';
+import { Bubble } from '@objects/Bubble';
 
 export class StaticBubbles extends Phaser.GameObjects.Group {
-  public readonly scene: Phaser.Scene;
-  constructor(scene: Phaser.Scene, radius: number, row: number, col: number) {
+  constructor(
+    scene: Phaser.Scene,
+    private radius: number,
+    private row: number,
+    private col: number,
+  ) {
     super(scene);
-    this.scene = scene;
-    this.createHexGrid(radius, row, col);
+    this.generateGrid();
   }
 
-  createHexGrid(radius: number, row: number, col: number) {
+  private generateGrid(): void {
     const grid: Bubble[][] = [];
 
-    for (let i = 1; i < row; i++) {
+    for (let i = 1; i < this.row; i++) {
       grid[i] = [];
       const isOffset = i % 2 === 1;
 
-      for (let j = 0; isOffset ? j < col : j < col - 1; j++) {
-        const position = {
-          x: isOffset ? radius + j * radius * 2 : radius * 2 + j * radius * 2,
-          y: i * radius * Math.sqrt(3),
-        };
-
-        const color = getRandomBubbleColor();
-        const bubble = new Bubble(
-          this.scene,
-          position.x,
-          position.y,
-          radius * 2,
-          'static',
-          color,
-        );
-
-        this.scene.physics.add.existing(bubble);
-        this.scene.add.existing<Bubble>(bubble);
-        this.add(bubble);
+      for (let j = 0; isOffset ? j < this.col : j < this.col - 1; j++) {
+        const bubble = this.createBubble(i, j, isOffset);
         grid[i][j] = bubble;
-
-        this.assignNeighbors(bubble, i, j, grid);
+        this.linkNeighbors(bubble, i, j, grid);
       }
     }
   }
 
-  assignNeighbors(bubble: Bubble, row: number, col: number, grid: Bubble[][]) {
+  private createBubble(
+    rowIndex: number,
+    colIndex: number,
+    isOffset: boolean,
+  ): Bubble {
+    const x = isOffset
+      ? this.radius + colIndex * this.radius * 2
+      : this.radius * 2 + colIndex * this.radius * 2;
+
+    const y = rowIndex * this.radius * Math.sqrt(3);
+
+    const color = getRandomBubbleColor();
+    const bubble = new Bubble(
+      this.scene,
+      x,
+      y,
+      this.radius * 2,
+      'static',
+      color,
+    );
+
+    this.scene.physics.add.existing(bubble);
+    this.scene.add.existing(bubble);
+    this.add(bubble);
+
+    return bubble;
+  }
+
+  private linkNeighbors(
+    bubble: Bubble,
+    rowIndex: number,
+    colIndex: number,
+    grid: Bubble[][],
+  ): void {
     const directions = [
       { row: 0, col: -1 },
       { row: 0, col: 1 },
@@ -52,21 +70,17 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
       { row: 1, col: -1 },
     ];
 
-    const isOffset = row % 2 === 1;
+    const isOffset = rowIndex % 2 === 1;
 
-    for (const { row: dRow, col: dCol } of directions) {
-      const neighborRow = row + dRow;
-      const neighborCol = col + dCol + (isOffset && dRow !== 0 ? 1 : 0);
+    directions.forEach(({ row, col }) => {
+      const neighborRow = rowIndex + row;
+      const neighborCol = colIndex + col + (isOffset && row !== 0 ? 1 : 0);
 
-      if (
-        grid[neighborRow] &&
-        grid[neighborRow][neighborCol] &&
-        grid[neighborRow][neighborCol] instanceof Bubble
-      ) {
+      if (grid[neighborRow]?.[neighborCol] instanceof Bubble) {
         const neighbor = grid[neighborRow][neighborCol];
         bubble.addNeighbor(neighbor);
         neighbor.addNeighbor(bubble);
       }
-    }
+    });
   }
 }
