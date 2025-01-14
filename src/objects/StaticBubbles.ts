@@ -1,4 +1,4 @@
-import { getRandomBubbleColor } from '@utils/ColorUtils';
+import { getRandomBubbleColorString } from '@utils/ColorUtils';
 import { Bubble } from '@objects/Bubble';
 
 export class StaticBubbles extends Phaser.GameObjects.Group {
@@ -49,7 +49,7 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
       ? this.radius + colIndex * this.radius * 2
       : this.radius * 2 + colIndex * this.radius * 2;
     const y = rowIndex * this.radius * Math.sqrt(3);
-    const color = getRandomBubbleColor();
+    const color = getRandomBubbleColorString();
     const bubble = new Bubble(
       this.scene,
       x,
@@ -147,7 +147,7 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
     });
   }
 
-  private chainPop(startBubble: Bubble, color: number) {
+  private chainPop(startBubble: Bubble, color: string) {
     const stack: Bubble[] = [startBubble];
     const visited = new Set<Bubble>();
     while (stack.length) {

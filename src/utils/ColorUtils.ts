@@ -7,3 +7,13 @@ export function getRandomBubbleColor() {
   const randomIndex = Math.floor(Math.random() * colors.length);
   return colors[randomIndex];
 }
+
+export function getRandomBubbleColorString(): keyof typeof BubbleColors {
+  const colors = Object.keys(BubbleColors) as (keyof typeof BubbleColors)[];
+  const randomIndex = Math.floor(Math.random() * colors.length);
+  return colors[randomIndex];
+}
+
+export function getColorCode(colorName: keyof typeof BubbleColors): number {
+  return BubbleColors[colorName];
+}

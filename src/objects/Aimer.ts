@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { Bubble } from '@objects/Bubble';
+import { getColorCode } from '@utils/ColorUtils.ts';
+import BubbleColors from '@constants/BubbleColors.ts';
 
 export class Aimer extends Phaser.GameObjects.Graphics {
   private readonly fromX: number;
@@ -15,7 +17,7 @@ export class Aimer extends Phaser.GameObjects.Graphics {
     super(scene);
     this.fromX = bubble.x;
     this.fromY = bubble.y;
-    this.color = bubble.color;
+    this.color = getColorCode(bubble.color as keyof typeof BubbleColors);
     this.bubble = bubble;
     scene.add.existing(this);
     this.registerInputListeners();
