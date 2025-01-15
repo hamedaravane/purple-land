@@ -6,9 +6,9 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
 
   constructor(
     scene: Phaser.Scene,
-    private radius: number,
-    private rows: number,
-    private cols: number,
+    private bubbleWidth: number,
+    private readonly rows: number,
+    private readonly cols: number,
   ) {
     super(scene);
     this.generateGrid();
@@ -30,36 +30,22 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
       const isOffset = rowIndex % 2 === 1;
       for (
         let colIndex = 0;
-        isOffset ? colIndex < this.cols : colIndex < this.cols - 1;
+        isOffset ? colIndex < this.cols : colIndex < this.cols;
         colIndex++
       ) {
-        const bubble = this.createSingleBubble(rowIndex, colIndex, isOffset);
+        const bubble = new Bubble(
+          this.scene,
+          rowIndex * this.bubbleWidth,
+          colIndex * this.bubbleWidth,
+          this.bubbleWidth,
+          'static',
+          getBubbleColor(),
+        );
+        this.add(bubble);
         this.grid[rowIndex][colIndex] = bubble;
         this.linkNeighbors(bubble, rowIndex, colIndex);
       }
     }
-  }
-
-  private createSingleBubble(
-    rowIndex: number,
-    colIndex: number,
-    isOffset: boolean,
-  ): Bubble {
-    const x = isOffset
-      ? colIndex * this.radius * 2
-      : this.radius + colIndex * this.radius * 2;
-    const y = rowIndex * this.radius * Math.sqrt(3);
-    const color = getBubbleColor();
-    const bubble = new Bubble(
-      this.scene,
-      x,
-      y,
-      this.radius * 2,
-      'static',
-      color,
-    );
-    this.add(bubble);
-    return bubble;
   }
 
   private attachShootingBubble(bubble: Bubble) {
@@ -80,10 +66,10 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
   }
 
   private findNearestGridPosition(x: number, y: number) {
-    const rowIndex = Math.round(y / (this.radius * Math.sqrt(3)));
+    const rowIndex = Math.round(y / (this.bubbleWidth * Math.sqrt(3)));
     const isOffset = rowIndex % 2 === 1;
-    const offsetX = isOffset ? this.radius : this.radius * 2;
-    const colIndex = Math.round((x - offsetX) / (2 * this.radius));
+    const offsetX = isOffset ? this.bubbleWidth : this.bubbleWidth * 2;
+    const colIndex = Math.round((x - offsetX) / (2 * this.bubbleWidth));
     return { rowIndex, colIndex };
   }
 
@@ -121,9 +107,9 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
   private computeBubblePosition(rowIndex: number, colIndex: number) {
     const isOffset = rowIndex % 2 === 1;
     const x = isOffset
-      ? this.radius + colIndex * this.radius * 2
-      : this.radius * 2 + colIndex * this.radius * 2;
-    const y = rowIndex * this.radius * Math.sqrt(3);
+      ? this.bubbleWidth + colIndex * this.bubbleWidth * 2
+      : this.bubbleWidth * 2 + colIndex * this.bubbleWidth * 2;
+    const y = rowIndex * this.bubbleWidth * Math.sqrt(3);
     return { x, y };
   }
 

@@ -11,7 +11,7 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [BootScene, GameScene],
   parent: 'game-container',
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   physics: {

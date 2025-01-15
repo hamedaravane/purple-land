@@ -7,18 +7,33 @@ export default class GameScene extends Phaser.Scene {
   private shootingBubble: Bubble;
   private staticBubbles: StaticBubbles;
   private aimer: Aimer;
+  private cols: number;
+  private rows: number;
+  private bubbleWidth: number;
 
   constructor() {
     super({ key: 'GameScene' });
   }
 
   create() {
-    const cols = 14;
-    const rows = 9;
-    const r = this.cameras.main.width / cols / 2;
+    this.cols = 12;
+    this.rows = 12;
+    this.bubbleWidth = this.scale.width / this.cols;
+    console.log('Creating Game Scene');
+    console.log(
+      'screen width',
+      this.scale.width,
+      'bubble width',
+      this.bubbleWidth,
+    );
     const background = new Phaser.GameObjects.Sprite(this, 0, 0, 'background');
     this.add.existing(background);
-    this.staticBubbles = new StaticBubbles(this, r, rows, cols);
+    this.staticBubbles = new StaticBubbles(
+      this,
+      this.bubbleWidth,
+      this.rows,
+      this.cols,
+    );
     this.add.existing(this.staticBubbles);
     this.spawnShootingBubble();
   }
@@ -26,15 +41,11 @@ export default class GameScene extends Phaser.Scene {
   private spawnShootingBubble() {
     if (this.shootingBubble) this.shootingBubble.destroy();
     if (this.aimer) this.aimer.destroy();
-    const w = this.cameras.main.width;
-    const h = this.cameras.main.height;
-    const cols = 14;
-    const r = w / cols / 2;
     this.shootingBubble = new Bubble(
       this,
-      w / 2,
-      h - 100,
-      r * 2,
+      this.scale.width / 2,
+      this.scale.height - 100,
+      this.bubbleWidth,
       'shooting',
       getBubbleColor(),
     );
