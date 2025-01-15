@@ -1,5 +1,5 @@
-import { getRandomBubbleColorString } from '@utils/ColorUtils';
 import { Bubble } from '@objects/Bubble';
+import { getBubbleColor } from '@utils/ColorUtils.ts';
 
 export class StaticBubbles extends Phaser.GameObjects.Group {
   private grid: Array<Array<Bubble | undefined>> = [];
@@ -15,8 +15,8 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
   }
 
   public handleCollision(shootingBubble: Bubble, targetBubble: Bubble) {
-    if (shootingBubble.color === targetBubble.color) {
-      this.chainPop(targetBubble, shootingBubble.color);
+    if (shootingBubble.color.label === targetBubble.color.label) {
+      this.chainPop(targetBubble, shootingBubble.color.label);
       shootingBubble.pop();
       this.dropFloatingBubbles();
     } else {
@@ -25,7 +25,7 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
   }
 
   private generateGrid() {
-    for (let rowIndex = 1; rowIndex < this.rows; rowIndex++) {
+    for (let rowIndex = 0; rowIndex < this.rows; rowIndex++) {
       this.grid[rowIndex] = [];
       const isOffset = rowIndex % 2 === 1;
       for (
@@ -46,10 +46,10 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
     isOffset: boolean,
   ): Bubble {
     const x = isOffset
-      ? this.radius + colIndex * this.radius * 2
-      : this.radius * 2 + colIndex * this.radius * 2;
+      ? colIndex * this.radius * 2
+      : this.radius + colIndex * this.radius * 2;
     const y = rowIndex * this.radius * Math.sqrt(3);
-    const color = getRandomBubbleColorString();
+    const color = getBubbleColor();
     const bubble = new Bubble(
       this.scene,
       x,
@@ -155,11 +155,11 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
       const current = stack.pop()!;
       if (visited.has(current)) continue;
       visited.add(current);
-      if (current.color === color) {
+      if (current.color.label === color) {
         current.pop();
         this.removeFromGrid(current);
         current.neighbors
-          .filter((n) => n.color === color && !visited.has(n))
+          .filter((n) => n.color.label === color && !visited.has(n))
           .forEach((n) => stack.push(n));
       }
     }

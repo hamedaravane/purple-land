@@ -1,8 +1,6 @@
-import BubbleColors from '@constants/BubbleColors.ts';
-
 export class Bubble extends Phaser.GameObjects.Sprite {
-  private readonly bubbleType: 'static' | 'shooting';
-  private readonly _color: string;
+  private bubbleType: 'static' | 'shooting';
+  private readonly _color: { label: string; color: number };
   public neighbors: Bubble[] = [];
   private readonly _diameter: number;
 
@@ -12,13 +10,14 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     y: number,
     diameter: number,
     bubbleType: 'static' | 'shooting' = 'static',
-    fillColor: keyof typeof BubbleColors = 'Red',
+    fillColor: { label: string; color: number },
   ) {
-    super(scene, x, y, `${fillColor}`);
+    super(scene, x, y, 'bubbles', fillColor.label);
     this.bubbleType = bubbleType;
     this._color = fillColor;
     this._diameter = diameter;
     this.scene.add.existing(this);
+    this.setOrigin(0.5, 0.5);
     this.setBubbleSize();
     this.initPhysics();
   }
@@ -28,7 +27,7 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   }
 
   setStatic() {
-    (this as any).bubbleType = 'static';
+    this.bubbleType = 'static';
   }
 
   pop() {

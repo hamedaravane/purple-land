@@ -1,7 +1,7 @@
 import { Bubble } from '@objects/Bubble';
 import { Aimer } from '@objects/Aimer';
 import { StaticBubbles } from '@objects/StaticBubbles';
-import { getRandomBubbleColorString } from '@utils/ColorUtils';
+import { getBubbleColor } from '@utils/ColorUtils.ts';
 
 export default class GameScene extends Phaser.Scene {
   private shootingBubble: Bubble;
@@ -12,26 +12,12 @@ export default class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
   }
 
-  preload() {
-    this.load.image('Red', 'assets/images/Red.png');
-    this.load.image('Orange', 'assets/images/Orange.png');
-    this.load.image('Yellow', 'assets/images/Yellow.png');
-    this.load.image('LightGreen', 'assets/images/LightGreen.png');
-    this.load.image('Green', 'assets/images/Green.png');
-    this.load.image('Cyan', 'assets/images/Cyan.png');
-    this.load.image('LightBlue', 'assets/images/LightBlue.png');
-    this.load.image('Purple', 'assets/images/Purple.png');
-    this.load.image('Magenta', 'assets/images/Magenta.png');
-    this.load.image('Pink', 'assets/images/Pink.png');
-    this.load.image('Brown', 'assets/images/Brown.png');
-  }
-
   create() {
-    const w = this.cameras.main.width;
-    // const h = this.cameras.main.height
     const cols = 14;
     const rows = 9;
-    const r = w / cols / 2;
+    const r = this.cameras.main.width / cols / 2;
+    const background = new Phaser.GameObjects.Sprite(this, 0, 0, 'background');
+    this.add.existing(background);
     this.staticBubbles = new StaticBubbles(this, r, rows, cols);
     this.add.existing(this.staticBubbles);
     this.spawnShootingBubble();
@@ -50,7 +36,7 @@ export default class GameScene extends Phaser.Scene {
       h - 100,
       r * 2,
       'shooting',
-      getRandomBubbleColorString(),
+      getBubbleColor(),
     );
     this.physics.add.existing(this.shootingBubble);
     this.aimer = new Aimer(this, this.shootingBubble);
