@@ -63,7 +63,7 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
   }
 
   private attachShootingBubble(bubble: Bubble) {
-    let { rowIndex, colIndex } = this.findNearestGridPosition(
+    const { rowIndex, colIndex } = this.findNearestGridPosition(
       bubble.x,
       bubble.y,
     );
@@ -107,13 +107,14 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
   }
 
   private getGridNeighbors(row: number, col: number) {
+    const isOffset = row % 2 === 1;
     return [
       { r: row, c: col - 1 },
       { r: row, c: col + 1 },
-      { r: row - 1, c: col },
-      { r: row - 1, c: col + 1 },
-      { r: row + 1, c: col },
-      { r: row + 1, c: col - 1 },
+      { r: row - 1, c: col + (isOffset ? 0 : -1) },
+      { r: row - 1, c: col + (isOffset ? 1 : 0) },
+      { r: row + 1, c: col + (isOffset ? 0 : -1) },
+      { r: row + 1, c: col + (isOffset ? 1 : 0) },
     ];
   }
 

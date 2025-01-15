@@ -4,13 +4,13 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   private readonly bubbleType: 'static' | 'shooting';
   private readonly _color: string;
   public neighbors: Bubble[] = [];
-  private readonly _diameter: number; // Store the target diameter
+  private readonly _diameter: number;
 
   constructor(
     scene: Phaser.Scene,
     x: number,
     y: number,
-    diameter: number, // Desired diameter of the bubble
+    diameter: number,
     bubbleType: 'static' | 'shooting' = 'static',
     fillColor: keyof typeof BubbleColors = 'Red',
   ) {
@@ -18,13 +18,8 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     this.bubbleType = bubbleType;
     this._color = fillColor;
     this._diameter = diameter;
-
     this.scene.add.existing(this);
-
-    // Adjust sprite scale to match the desired diameter
     this.setBubbleSize();
-
-    // Initialize physics
     this.initPhysics();
   }
 
@@ -83,15 +78,12 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   }
 
   private setBubbleSize() {
-    const originalWidth = this.width; // Original width of the sprite
-    const originalHeight = this.height; // Original height of the sprite
-
-    // Ensure the texture has been loaded and the size is correct
+    const originalWidth = this.width;
+    const originalHeight = this.height;
     if (originalWidth > 0 && originalHeight > 0) {
-      const scaleFactor = this._diameter / originalWidth; // Calculate the scale factor
-      this.setScale(scaleFactor); // Scale the sprite to match the desired diameter
+      const scaleFactor = this._diameter / originalWidth;
+      this.setScale(scaleFactor);
     } else {
-      // Fallback if texture hasn't been loaded yet
       this.once(Phaser.Loader.Events.COMPLETE, () => {
         const scaleFactor = this._diameter / this.width;
         this.setScale(scaleFactor);
@@ -102,9 +94,9 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   private initPhysics() {
     this.scene.physics.add.existing(this);
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
-      const radius = this._diameter / 2; // Use target diameter for the physics body
+      const radius = this._diameter / 2;
       this.body.setCollideWorldBounds(true);
-      this.body.setCircle(radius, -radius, -radius); // Adjust circle to match scaled bubble
+      this.body.setCircle(radius, -radius, -radius);
       this.body.setVelocity(0, 0);
     }
   }
