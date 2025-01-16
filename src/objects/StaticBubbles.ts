@@ -39,6 +39,7 @@ export class StaticBubbles extends Phaser.GameObjects.Group {
           colIndex * this.bubbleWidth,
           this.bubbleWidth,
           'static',
+          'bubbles',
           getBubbleColor(),
         );
         this.add(bubble);

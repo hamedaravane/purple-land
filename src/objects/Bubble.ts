@@ -10,14 +10,14 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     y: number,
     diameter: number,
     bubbleType: 'static' | 'shooting' = 'static',
+    texture: string = 'bubbles',
     fillColor: { label: string; color: number },
   ) {
-    super(scene, x, y, 'bubbles', fillColor.label);
+    super(scene, x, y, texture, fillColor.label);
     this.bubbleType = bubbleType;
     this._color = fillColor;
     this._diameter = diameter;
     this.scene.add.existing(this);
-    this.setOrigin(0.5, 0.5);
     this.setBubbleSize();
     this.initPhysics();
   }
