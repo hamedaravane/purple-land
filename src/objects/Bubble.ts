@@ -93,9 +93,7 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   private initPhysics() {
     this.scene.physics.add.existing(this);
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
-      const radius = this._diameter / 2;
       this.body.setCollideWorldBounds(true);
-      this.body.setCircle(radius, 0, 0);
       this.body.setVelocity(0, 0);
     }
   }

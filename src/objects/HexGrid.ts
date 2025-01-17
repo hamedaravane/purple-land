@@ -11,7 +11,7 @@ export class HexGrid {
     rows: number,
     spriteKey: string,
   ) {
-    this.hexSize = scene.scale.width / cols / 2;
+    this.hexSize = scene.scale.width / cols / Math.sqrt(3);
     this.createGrid(scene, cols, rows, spriteKey);
   }
 
@@ -27,9 +27,10 @@ export class HexGrid {
         const isOddRow = row % 2 === 0;
         if (isOddRow && col === 0) continue;
         const x = isOddRow
-          ? col * this.hexSize * 2 - this.hexSize
-          : col * this.hexSize * 2;
-        const y = row * this.hexSize * Math.sqrt(3);
+          ? col * this.hexSize * Math.sqrt(3) -
+            (this.hexSize * Math.sqrt(3)) / 2
+          : col * this.hexSize * Math.sqrt(3);
+        const y = row * this.hexSize * Math.sqrt(2.2);
         const bubbleColor = getBubbleColor();
         const tile = new HexTile(
           scene,

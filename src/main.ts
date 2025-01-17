@@ -4,8 +4,8 @@ import GameScene from '@scenes/GameScene.ts';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 400,
-  height: 900,
+  width: 390,
+  height: 844,
   pixelArt: false,
   title: 'Purple Land',
   scene: [BootScene, GameScene],
