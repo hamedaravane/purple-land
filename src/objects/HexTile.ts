@@ -18,18 +18,18 @@ export class HexTile extends Phaser.GameObjects.Container {
     this.width = width;
     this.height = height;
 
-    const vertices = [
+    /*const vertices = [
       { y: 0, x: width / 2 },
       { y: height / 4, x: 0 },
       { y: (3 * height) / 4, x: 0 },
       { y: height, x: width / 2 },
       { y: (3 * height) / 4, x: width },
       { y: height / 4, x: width },
-    ];
+    ];*/
 
-    const hexagon = new Phaser.Geom.Polygon(vertices);
+    // const hexagon = new Phaser.Geom.Polygon(vertices);
 
-    this.debugHexagon(scene, hexagon);
+    // this.debugHexagon(scene, hexagon);
 
     const bubble = new Bubble(
       scene,
