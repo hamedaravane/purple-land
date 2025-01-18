@@ -1,7 +1,9 @@
-import BubbleColors from '@constants/BubbleColors.ts';
+import BubbleColors from '@constants/BubbleColors';
 
 export function getBubbleColor(): { label: string; color: number } {
-  const keys = Array.from(BubbleColors.keys());
-  const randomKey = keys[Math.floor(Math.random() * keys.length)];
-  return { label: randomKey, color: BubbleColors.get(randomKey) as number };
+  const randomKey = Math.floor(Math.random() * BubbleColors.length);
+  return {
+    label: BubbleColors[randomKey].label,
+    color: BubbleColors[randomKey].color,
+  };
 }
