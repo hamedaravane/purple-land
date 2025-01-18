@@ -4,7 +4,7 @@ import { getBubbleColor } from '@utils/ColorUtils.ts';
 import { HexTile } from '@objects/HexTile.ts';
 
 export default class GameScene extends Phaser.Scene {
-  private shootingBubble: HexTile;
+  private shootingHexTile: HexTile;
   private aimer: Aimer;
   private cols: number;
   private rows: number;
@@ -19,7 +19,7 @@ export default class GameScene extends Phaser.Scene {
     this.rows = 6;
     // this.bubbleWidth = this.scale.width / this.cols;
     const background = new Phaser.GameObjects.Sprite(this, 0, 0, 'background');
-    this.shootingBubble = new HexTile(
+    this.shootingHexTile = new HexTile(
       this,
       this.scale.width / 2,
       this.scale.height - 100,
@@ -27,7 +27,7 @@ export default class GameScene extends Phaser.Scene {
       'bubbles',
       getBubbleColor(),
     );
-    /*this.shootingBubble = new Bubble(
+    /*this.shootingHexTile = new Bubble(
       this,
       this.scale.width / 2,
       this.scale.height - 100,
@@ -41,10 +41,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private spawnShootingBubble() {
-    if (this.shootingBubble) this.shootingBubble.destroy();
+    if (this.shootingHexTile) this.shootingHexTile.destroy();
     if (this.aimer) this.aimer.destroy();
     new HexGrid(this, this.cols, this.rows, 'bubbles');
-    this.physics.add.existing(this.shootingBubble);
-    // this.aimer = new Aimer(this, this.shootingBubble);
+    this.physics.add.existing(this.shootingHexTile);
+    // this.aimer = new Aimer(this, this.shootingHexTile);
   }
 }

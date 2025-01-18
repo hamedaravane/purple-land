@@ -1,4 +1,5 @@
 import { Bubble } from '@objects/Bubble.ts';
+import { ColorObj } from '@constants/BubbleColors.ts';
 
 export class HexTile extends Phaser.GameObjects.Container {
   constructor(
@@ -7,7 +8,7 @@ export class HexTile extends Phaser.GameObjects.Container {
     y: number,
     size: number,
     spriteKey: string,
-    bubbleColor: { label: string; color: number },
+    bubbleColor: ColorObj,
   ) {
     const height = size * 2;
     const width = size * Math.sqrt(3);
@@ -18,18 +19,18 @@ export class HexTile extends Phaser.GameObjects.Container {
     this.width = width;
     this.height = height;
 
-    /*const vertices = [
+    const vertices = [
       { y: 0, x: width / 2 },
       { y: height / 4, x: 0 },
       { y: (3 * height) / 4, x: 0 },
       { y: height, x: width / 2 },
       { y: (3 * height) / 4, x: width },
       { y: height / 4, x: width },
-    ];*/
+    ];
 
-    // const hexagon = new Phaser.Geom.Polygon(vertices);
+    const hexagon = new Phaser.Geom.Polygon(vertices);
 
-    // this.debugHexagon(scene, hexagon);
+    this.debugHexagon(scene, hexagon);
 
     const bubble = new Bubble(
       scene,
@@ -51,7 +52,7 @@ export class HexTile extends Phaser.GameObjects.Container {
 
   debugHexagon(scene: Phaser.Scene, hexagon: Phaser.Geom.Polygon) {
     const graphics = scene.add.graphics({
-      lineStyle: { width: 2, color: 0xffff00, alpha: 0.4 },
+      lineStyle: { width: 1, color: 0xffffff, alpha: 0.5 },
     });
     graphics.strokePoints(hexagon.points, true);
     this.add(graphics);

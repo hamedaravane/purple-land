@@ -1,6 +1,6 @@
-import BubbleColors from '@constants/BubbleColors';
+import BubbleColors, { ColorObj } from '@constants/BubbleColors';
 
-export function getBubbleColor(): { label: string; color: number } {
+export function getBubbleColor(): ColorObj {
   const randomKey = Math.floor(Math.random() * BubbleColors.length);
   return {
     label: BubbleColors[randomKey].label,

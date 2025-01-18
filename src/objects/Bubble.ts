@@ -1,3 +1,5 @@
+import { ColorObj } from '@constants/BubbleColors.ts';
+
 export class Bubble extends Phaser.GameObjects.Sprite {
   private bubbleType: 'static' | 'shooting';
   private readonly _color: { label: string; color: number };
@@ -11,7 +13,7 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     diameter: number,
     bubbleType: 'static' | 'shooting' = 'static',
     texture: string = 'bubbles',
-    fillColor: { label: string; color: number },
+    fillColor: ColorObj,
   ) {
     super(scene, x, y, texture, fillColor.label);
     this.bubbleType = bubbleType;
