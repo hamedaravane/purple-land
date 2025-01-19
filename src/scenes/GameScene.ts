@@ -9,7 +9,7 @@ export default class GameScene extends Phaser.Scene {
   private cols: number;
   private rows: number;
 
-  public bubbleCluster: BubbleCluster;
+  private bubbleCluster: BubbleCluster;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -18,7 +18,12 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.cols = 15;
     this.rows = 10;
-    const background = new Phaser.GameObjects.Sprite(this, 0, 0, 'background');
+    const background = new Phaser.GameObjects.Sprite(
+      this,
+      this.scale.width / 2,
+      this.scale.height / 2,
+      'background',
+    );
     this.add.existing(background);
 
     this.bubbleCluster = new BubbleCluster(

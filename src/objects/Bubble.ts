@@ -1,8 +1,9 @@
 import { ColorObj } from '@constants/BubbleColors';
 import { BubbleCluster } from '@objects/BubbleCluster';
+import Phaser from 'phaser';
 
 export class Bubble extends Phaser.GameObjects.Sprite {
-  private bubbleType: 'static' | 'shooting';
+  private _bubbleType: 'static' | 'shooting';
   private readonly _color: ColorObj;
   private readonly _diameter: number;
   public neighbors: Set<Bubble>;
@@ -18,7 +19,7 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   ) {
     super(scene, x, y, texture, fillColor.label);
 
-    this.bubbleType = bubbleType;
+    this._bubbleType = bubbleType;
     this._color = fillColor;
     this._diameter = diameter;
     this.neighbors = new Set();
@@ -33,9 +34,12 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     return this._color;
   }
 
-  /** Change the bubble to static type */
-  setStatic() {
-    this.bubbleType = 'static';
+  get bubbleType(): 'static' | 'shooting' {
+    return this._bubbleType;
+  }
+
+  set bubbleType(value: 'static' | 'shooting') {
+    this._bubbleType = value;
   }
 
   /** Pop the bubble and clean up references */
@@ -51,22 +55,18 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
-  // Bubble class update for shot and collision detection
   shot(direction: { x: number; y: number }, speed: number = 600) {
-    if (this.bubbleType !== 'shooting') return;
-
-    const dx = direction.x - this.x;
-    const dy = direction.y - this.y;
-    const magnitude = Math.sqrt(dx * dx + dy * dy);
+    const deltaX = direction.x - this.x;
+    const deltaY = direction.y - this.y;
+    const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     if (magnitude > 0) {
-      const nx = dx / magnitude;
-      const ny = dy / magnitude;
+      const normalizeX = deltaX / magnitude;
+      const normalizeY = deltaY / magnitude;
 
-      // Set initial velocity towards target
       (this.body as Phaser.Physics.Arcade.Body).setVelocity(
-        nx * speed,
-        ny * speed,
+        normalizeX * speed,
+        normalizeY * speed,
       );
     }
   }

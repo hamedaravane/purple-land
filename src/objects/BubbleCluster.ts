@@ -15,7 +15,7 @@ export class BubbleCluster {
     bubbleWidth: number,
   ) {
     this.bubbleWidth = bubbleWidth;
-    this.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+    this.grid = Array.from({ length: rows }, () => Array(cols).fill(undefined));
     this.createGrid(scene, cols, rows, spriteKey);
   }
 
@@ -60,9 +60,21 @@ export class BubbleCluster {
     spriteKey: string,
   ) {
     const { row, col } = this.findClosestGridPosition(bubble.x, bubble.y);
-    if (!this.isPositionOccupied(row, col)) {
+    if (
+      row < 0 ||
+      row >= this.grid.length ||
+      col < 0 ||
+      col >= this.grid[0].length
+    ) {
+      bubble.pop();
+      return;
+    }
+
+    const targetBubble = this.grid[row][col];
+    if (targetBubble && targetBubble.color === bubble.color) {
+      bubble.pop();
+    } else {
       this.addBubble(scene, bubble.x, bubble.y, spriteKey, bubble.color);
-      bubble.pop(); // Remove the shooting bubble after collision
     }
   }
 
@@ -107,8 +119,16 @@ export class BubbleCluster {
   }
 
   /** Check if a position in the grid is occupied */
-  private isPositionOccupied(row: number, col: number) {
-    return this.grid[row]?.[col] !== null;
+  private isPositionOccupied(row: number, col: number): boolean {
+    if (
+      row < 0 ||
+      row >= this.grid.length ||
+      col < 0 ||
+      col >= this.grid[0].length
+    ) {
+      return true;
+    }
+    return this.grid[row][col] !== undefined;
   }
 
   /** Calculate the X position for a bubble in the grid */
