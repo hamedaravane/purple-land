@@ -2,7 +2,7 @@ import { ColorObj } from '@constants/BubbleColors.ts';
 
 export class Bubble extends Phaser.GameObjects.Sprite {
   private bubbleType: 'static' | 'shooting';
-  private readonly _color: { label: string; color: number };
+  private readonly _color: ColorObj;
   public neighbors: Bubble[] = [];
   private readonly _diameter: number;
 
