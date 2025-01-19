@@ -51,18 +51,23 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
-  /** Fire the bubble in a specified direction */
+  // Bubble class update for shot and collision detection
   shot(direction: { x: number; y: number }, speed: number = 600) {
     if (this.bubbleType !== 'shooting') return;
 
-    const velocity = new Phaser.Math.Vector2(
-      direction.x - this.x,
-      direction.y - this.y,
-    )
-      .normalize()
-      .scale(speed);
-    if (this.body instanceof Phaser.Physics.Arcade.Body) {
-      this.body.setVelocity(velocity.x, velocity.y);
+    const dx = direction.x - this.x;
+    const dy = direction.y - this.y;
+    const magnitude = Math.sqrt(dx * dx + dy * dy);
+
+    if (magnitude > 0) {
+      const nx = dx / magnitude;
+      const ny = dy / magnitude;
+
+      // Set initial velocity towards target
+      (this.body as Phaser.Physics.Arcade.Body).setVelocity(
+        nx * speed,
+        ny * speed,
+      );
     }
   }
 

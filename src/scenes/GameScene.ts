@@ -1,27 +1,26 @@
-import { Aimer } from '@objects/Aimer';
-import { BubbleCluster } from '@objects/BubbleCluster';
-import { getBubbleColor } from '@utils/ColorUtils';
-import { Bubble } from '@objects/Bubble';
+import { getBubbleColor } from '@utils/ColorUtils.ts';
+import { Bubble } from '@objects/Bubble.ts';
+import { Aimer } from '@objects/Aimer.ts';
+import { BubbleCluster } from '@objects/BubbleCluster.ts';
 
 export default class GameScene extends Phaser.Scene {
-  private shootingBubble: Bubble | null = null;
-  private aimer: Aimer | null = null;
-  private bubbleCluster: BubbleCluster;
-  private readonly cols: number;
-  private readonly rows: number;
+  private shootingBubble: Bubble;
+  private aimer: Aimer;
+  private cols: number;
+  private rows: number;
+
+  public bubbleCluster: BubbleCluster;
 
   constructor() {
     super({ key: 'GameScene' });
-    this.cols = 15;
-    this.rows = 10;
   }
 
-  /** Initialize scene elements */
   create() {
+    this.cols = 15;
+    this.rows = 10;
     const background = new Phaser.GameObjects.Sprite(this, 0, 0, 'background');
     this.add.existing(background);
 
-    // Initialize the Bubble Cluster
     this.bubbleCluster = new BubbleCluster(
       this,
       this.cols,
@@ -30,21 +29,13 @@ export default class GameScene extends Phaser.Scene {
       this.scale.width / this.cols,
     );
 
-    // Spawn the first shooting bubble
     this.spawnShootingBubble();
   }
 
-  /** Spawn or reset the shooting bubble */
   private spawnShootingBubble() {
-    // Clean up the previous shooting bubble and aimer
-    if (this.shootingBubble) {
-      this.shootingBubble.destroy();
-    }
-    if (this.aimer) {
-      this.aimer.destroy();
-    }
+    if (this.shootingBubble) this.shootingBubble.destroy();
+    if (this.aimer) this.aimer.destroy();
 
-    // Create a new shooting bubble at the bottom of the screen
     this.shootingBubble = new Bubble(
       this,
       this.scale.width / 2,
@@ -55,47 +46,26 @@ export default class GameScene extends Phaser.Scene {
       getBubbleColor(),
     );
 
-    // Create the aimer for the new shooting bubble
-    this.aimer = new Aimer(this, this.shootingBubble);
-
-    // Make the shooting bubble interactive for further collision
-    this.physics.world.enable(this.shootingBubble);
+    new Aimer(this, this.shootingBubble);
   }
 
-  /** Handle bubble shot and check for cluster collisions */
-  public shootBubble(direction: { x: number; y: number }) {
+  /** Handle the collision of the shooting bubble with the cluster */
+  checkBubbleCollision() {
     if (this.shootingBubble) {
-      this.shootingBubble.shot(direction);
-
-      // Check for collisions after the bubble is shot
-      const collidedBubble = this.shootingBubble.checkCollision(
-        this.bubbleCluster,
-      );
-      if (collidedBubble) {
-        // Handle collision with existing bubbles in the cluster
+      const collision = this.shootingBubble.checkCollision(this.bubbleCluster);
+      if (collision) {
         this.bubbleCluster.handleBubbleCollision(
           this,
           this.shootingBubble,
           'bubbles',
         );
-        this.spawnShootingBubble(); // Spawn a new shooting bubble after collision
-      } else {
-        // Handle no collision (bubble continues moving)
+        this.spawnShootingBubble();
       }
     }
   }
 
-  /** Update method for continuous operations */
+  /** Update method, runs continuously to check for collisions */
   update() {
-    if (this.shootingBubble && this.shootingBubble.body) {
-      // If the bubble is in motion, check if it goes out of bounds or has reached its destination
-      if (
-        this.shootingBubble.y < 0 ||
-        this.shootingBubble.x < 0 ||
-        this.shootingBubble.x > this.scale.width
-      ) {
-        this.spawnShootingBubble(); // Spawn a new bubble if the current one goes out of bounds
-      }
-    }
+    this.checkBubbleCollision();
   }
 }
