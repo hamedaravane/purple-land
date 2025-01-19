@@ -2,100 +2,155 @@ import Phaser from 'phaser';
 import { Bubble } from '@objects/Bubble';
 
 export class Aimer extends Phaser.GameObjects.Graphics {
-  private readonly fromX: number;
-  private readonly fromY: number;
-  private readonly color: number;
+  private readonly origin: Phaser.Math.Vector2;
   private readonly bubble: Bubble;
-  private targetX = 0;
-  private targetY = 0;
   private readonly dashLength = 10;
   private readonly gapLength = 5;
+  private readonly aimColor: number;
+  private target: Phaser.Math.Vector2;
 
   constructor(scene: Phaser.Scene, bubble: Bubble) {
     super(scene);
-    this.fromX = bubble.x;
-    this.fromY = bubble.y;
-    this.color = bubble.color.color;
+
     this.bubble = bubble;
+    this.origin = new Phaser.Math.Vector2(bubble.x, bubble.y);
+    this.target = new Phaser.Math.Vector2(0, 0);
+    this.aimColor = bubble.color.color;
+
     scene.add.existing(this);
     this.registerInputListeners();
   }
 
+  /**
+   * Register input listeners for pointer events.
+   */
   private registerInputListeners() {
-    this.scene.input.on('pointerdown', this.onPointerDown, this);
-    this.scene.input.on('pointermove', this.onPointerMove, this);
-    this.scene.input.on('pointerup', this.onPointerUp, this);
+    const input = this.scene.input;
+
+    input.on('pointerdown', this.onPointerDown, this);
+    input.on('pointermove', this.onPointerMove, this);
+    input.on('pointerup', this.onPointerUp, this);
   }
 
+  /**
+   * Handle pointer down events (start aiming).
+   */
   private onPointerDown(pointer: Phaser.Input.Pointer) {
-    this.clear();
-    this.updateTargetPosition(pointer);
-    this.drawAimLine(pointer);
+    this.updateTarget(pointer);
+    this.redrawAimingLine(pointer);
   }
 
+  /**
+   * Handle pointer move events (update aiming line).
+   */
   private onPointerMove(pointer: Phaser.Input.Pointer) {
     if (pointer.isDown) {
-      this.clear();
-      this.updateTargetPosition(pointer);
-      this.drawAimLine(pointer);
+      this.updateTarget(pointer);
+      this.redrawAimingLine(pointer);
     }
   }
 
+  /**
+   * Handle pointer up events (fire bubble).
+   */
   private onPointerUp() {
     this.clear();
-    if (this.targetX && this.targetY) {
-      this.bubble.shot({ x: this.targetX, y: this.targetY });
+
+    if (!this.target.equals(this.origin)) {
+      this.bubble.shot({ x: this.target.x, y: this.target.y });
     }
   }
 
-  private updateTargetPosition(pointer: Phaser.Input.Pointer) {
-    this.targetX = pointer.x;
-    this.targetY = pointer.y;
+  /**
+   * Update the target position based on pointer input.
+   */
+  private updateTarget(pointer: Phaser.Input.Pointer) {
+    this.target.set(pointer.x, pointer.y);
   }
 
-  private drawAimLine(pointer: Phaser.Input.Pointer) {
-    this.lineStyle(1, this.color);
-    this.drawDashedLine(this.fromX, this.fromY, pointer.x, pointer.y);
+  /**
+   * Redraw the aiming line.
+   */
+  private redrawAimingLine(pointer: Phaser.Input.Pointer) {
+    this.clear();
+    this.lineStyle(1, this.aimColor);
+
     const angle = Phaser.Math.Angle.Between(
-      this.fromX,
-      this.fromY,
+      this.origin.x,
+      this.origin.y,
       pointer.x,
       pointer.y,
     );
-    const diag = Math.sqrt(
-      this.scene.scale.width ** 2 + this.scene.scale.height ** 2,
+
+    const lineLength = Math.sqrt(
+      Math.pow(this.scene.scale.width, 2) +
+        Math.pow(this.scene.scale.height, 2),
     );
-    const extX = pointer.x + Math.cos(angle) * diag;
-    const extY = pointer.y + Math.sin(angle) * diag;
-    this.drawDashedLine(pointer.x, pointer.y, extX, extY);
+
+    const extendedTarget = new Phaser.Math.Vector2(
+      pointer.x + Math.cos(angle) * lineLength,
+      pointer.y + Math.sin(angle) * lineLength,
+    );
+
+    // Draw the dashed lines
+    this.drawDashedLine(
+      this.origin,
+      new Phaser.Math.Vector2(pointer.x, pointer.y),
+    );
+    this.drawDashedLine(
+      new Phaser.Math.Vector2(pointer.x, pointer.y),
+      extendedTarget,
+    );
   }
 
-  private drawDashedLine(x1: number, y1: number, x2: number, y2: number) {
-    const length = Phaser.Math.Distance.Between(x1, y1, x2, y2);
-    const angle = Phaser.Math.Angle.Between(x1, y1, x2, y2);
-    let remaining = length;
-    let cx = x1;
-    let cy = y1;
-    while (remaining > 0) {
-      const seg = Math.min(this.dashLength, remaining);
-      const nx = cx + Math.cos(angle) * seg;
-      const ny = cy + Math.sin(angle) * seg;
-      this.moveTo(cx, cy);
-      this.lineTo(nx, ny);
-      remaining -= this.dashLength;
-      cx = nx + Math.cos(angle) * this.gapLength;
-      cy = ny + Math.sin(angle) * this.gapLength;
-      remaining -= this.gapLength;
+  /**
+   * Draw a dashed line between two points.
+   */
+  private drawDashedLine(start: Phaser.Math.Vector2, end: Phaser.Math.Vector2) {
+    const totalLength = Phaser.Math.Distance.Between(
+      start.x,
+      start.y,
+      end.x,
+      end.y,
+    );
+    const angle = Phaser.Math.Angle.Between(start.x, start.y, end.x, end.y);
+
+    let remainingLength = totalLength;
+    let currentPoint = start.clone();
+
+    while (remainingLength > 0) {
+      const segmentLength = Math.min(this.dashLength, remainingLength);
+
+      const nextPoint = new Phaser.Math.Vector2(
+        currentPoint.x + Math.cos(angle) * segmentLength,
+        currentPoint.y + Math.sin(angle) * segmentLength,
+      );
+
+      this.moveTo(currentPoint.x, currentPoint.y);
+      this.lineTo(nextPoint.x, nextPoint.y);
+
+      // Move to the next gap start
+      currentPoint.set(
+        nextPoint.x + Math.cos(angle) * this.gapLength,
+        nextPoint.y + Math.sin(angle) * this.gapLength,
+      );
+
+      remainingLength -= this.dashLength + this.gapLength;
     }
+
     this.strokePath();
   }
 
+  /**
+   * Unregister input listeners and destroy the object.
+   */
   public destroy(...args: any[]) {
-    if (this.scene && this.scene.input) {
-      this.scene.input.off('pointerdown', this.onPointerDown, this);
-      this.scene.input.off('pointermove', this.onPointerMove, this);
-      this.scene.input.off('pointerup', this.onPointerUp, this);
-    }
+    const input = this.scene.input;
+
+    input.off('pointerdown', this.onPointerDown, this);
+    input.off('pointermove', this.onPointerMove, this);
+    input.off('pointerup', this.onPointerUp, this);
+
     super.destroy(...args);
   }
 }

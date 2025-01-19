@@ -1,10 +1,11 @@
-import { ColorObj } from '@constants/BubbleColors.ts';
+import { ColorObj } from '@constants/BubbleColors';
+import { BubbleCluster } from '@objects/BubbleCluster';
 
 export class Bubble extends Phaser.GameObjects.Sprite {
   private bubbleType: 'static' | 'shooting';
   private readonly _color: ColorObj;
-  public neighbors: Bubble[] = [];
   private readonly _diameter: number;
+  public neighbors: Set<Bubble>;
 
   constructor(
     scene: Phaser.Scene,
@@ -16,26 +17,33 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     fillColor: ColorObj,
   ) {
     super(scene, x, y, texture, fillColor.label);
+
     this.bubbleType = bubbleType;
     this._color = fillColor;
     this._diameter = diameter;
+    this.neighbors = new Set();
+
     this.scene.add.existing(this);
     this.setBubbleSize();
     this.initPhysics();
   }
 
+  /** Getter for the bubble's color */
   get color() {
     return this._color;
   }
 
+  /** Change the bubble to static type */
   setStatic() {
     this.bubbleType = 'static';
   }
 
+  /** Pop the bubble and clean up references */
   pop() {
     this.destroy();
   }
 
+  /** Make the bubble fall with physics */
   fall() {
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
       this.body.enable = true;
@@ -43,21 +51,22 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
+  /** Fire the bubble in a specified direction */
   shot(direction: { x: number; y: number }, speed: number = 600) {
     if (this.bubbleType !== 'shooting') return;
-    const dx = direction.x - this.x;
-    const dy = direction.y - this.y;
-    const magnitude = Math.sqrt(dx * dx + dy * dy);
-    if (magnitude > 0) {
-      const nx = dx / magnitude;
-      const ny = dy / magnitude;
-      (this.body as Phaser.Physics.Arcade.Body).setVelocity(
-        nx * speed,
-        ny * speed,
-      );
+
+    const velocity = new Phaser.Math.Vector2(
+      direction.x - this.x,
+      direction.y - this.y,
+    )
+      .normalize()
+      .scale(speed);
+    if (this.body instanceof Phaser.Physics.Arcade.Body) {
+      this.body.setVelocity(velocity.x, velocity.y);
     }
   }
 
+  /** Disable the physics body of the bubble */
   disablePhysics() {
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
       this.body.setVelocity(0, 0);
@@ -65,24 +74,38 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
+  /** Add a neighbor bubble */
   addNeighbor(bubble: Bubble) {
-    if (!this.neighbors.includes(bubble)) {
-      this.neighbors.push(bubble);
-    }
+    this.neighbors.add(bubble);
   }
 
+  /** Remove a neighbor bubble */
   removeNeighbor(bubble: Bubble) {
-    const index = this.neighbors.indexOf(bubble);
-    if (index !== -1) {
-      this.neighbors.splice(index, 1);
-    }
+    this.neighbors.delete(bubble);
   }
 
+  /** Check if this bubble collides with any in the given cluster */
+  checkCollision(cluster: BubbleCluster): Bubble | null {
+    for (const targetBubble of cluster.getBubbles()) {
+      if (this.isOverlapping(targetBubble)) {
+        return targetBubble;
+      }
+    }
+    return null;
+  }
+
+  /** Check overlap with another bubble */
+  private isOverlapping(targetBubble: Bubble): boolean {
+    const dx = this.x - targetBubble.x;
+    const dy = this.y - targetBubble.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance < this._diameter;
+  }
+
+  /** Set the visual size of the bubble */
   private setBubbleSize() {
-    const originalWidth = this.width;
-    const originalHeight = this.height;
-    if (originalWidth > 0 && originalHeight > 0) {
-      const scaleFactor = this._diameter / originalWidth;
+    if (this.width > 0) {
+      const scaleFactor = this._diameter / this.width;
       this.setScale(scaleFactor);
     } else {
       this.once(Phaser.Loader.Events.COMPLETE, () => {
@@ -92,11 +115,19 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
+  /** Initialize physics for the bubble */
   private initPhysics() {
     this.scene.physics.add.existing(this);
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
       this.body.setCollideWorldBounds(true);
       this.body.setVelocity(0, 0);
+      this.body.setBounce(1, 1);
     }
+  }
+
+  /** Cleanup when the bubble is destroyed */
+  public destroy(...args: any[]) {
+    this.neighbors.clear();
+    super.destroy(...args);
   }
 }
