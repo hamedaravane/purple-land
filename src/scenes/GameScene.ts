@@ -67,17 +67,20 @@ export default class GameScene extends Phaser.Scene {
     if (this.shootingBubble) {
       this.shootingBubble.shot(direction);
 
-      // Once the bubble is shot, check for collisions with the cluster
+      // Check for collisions after the bubble is shot
       const collidedBubble = this.shootingBubble.checkCollision(
         this.bubbleCluster,
       );
-
       if (collidedBubble) {
-        // Handle the collision, e.g., adding the bubble to the grid
-        this.bubbleCluster.handleCollision(this.shootingBubble);
+        // Handle collision with existing bubbles in the cluster
+        this.bubbleCluster.handleBubbleCollision(
+          this,
+          this.shootingBubble,
+          'bubbles',
+        );
         this.spawnShootingBubble(); // Spawn a new shooting bubble after collision
       } else {
-        // Handle cases when the bubble doesn't collide with others
+        // Handle no collision (bubble continues moving)
       }
     }
   }

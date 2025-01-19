@@ -1,149 +1,131 @@
-import { Bubble } from '@objects/Bubble';
-import { getBubbleColor } from '@utils/ColorUtils';
-import { ColorObj } from '@constants/BubbleColors';
+import { Bubble } from '@objects/Bubble.ts';
+import { getBubbleColor } from '@utils/ColorUtils.ts';
+import { ColorObj } from '@constants/BubbleColors.ts';
 
 export class BubbleCluster {
-  private grid: (Bubble | null)[][];
+  private bubblesGroup: Phaser.GameObjects.Group;
+  private readonly grid: (Bubble | null)[][];
   private readonly bubbleWidth: number;
-  private readonly bubbleHeight: number;
-  private readonly bubblesGroup: Phaser.GameObjects.Group;
 
   constructor(
-    private scene: Phaser.Scene,
-    private cols: number,
-    private rows: number,
-    private spriteKey: string,
+    scene: Phaser.Scene,
+    cols: number,
+    rows: number,
+    spriteKey: string,
     bubbleWidth: number,
   ) {
     this.bubbleWidth = bubbleWidth;
-    this.bubbleHeight = bubbleWidth * 0.866;
     this.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
-    this.bubblesGroup = this.scene.add.group();
-
-    this.createInitialGrid();
+    this.createGrid(scene, cols, rows, spriteKey);
   }
 
-  /** Generate the initial grid of static bubbles */
-  private createInitialGrid() {
-    const radius = this.bubbleWidth / 2;
+  /** Create the grid and initialize bubbles */
+  createGrid(
+    scene: Phaser.Scene,
+    cols: number,
+    rows: number,
+    spriteKey: string,
+  ) {
+    this.bubblesGroup = new Phaser.GameObjects.Group(scene);
+    const bubbleRadius = this.bubbleWidth / 2;
+    const rowHeight = this.bubbleWidth * 0.866;
 
-    for (let row = 0; row < this.rows; row++) {
-      const isOddRow = row % 2 === 1;
-      const offsetX = isOddRow ? radius : 0;
+    for (let row = 0; row < rows; row++) {
+      const isOddRow = row % 2 === 0;
+      const offsetX = isOddRow ? bubbleRadius : 0;
 
-      for (let col = 0; col < this.cols - (isOddRow ? 1 : 0); col++) {
-        const x = radius + col * this.bubbleWidth + offsetX;
-        const y = radius + row * this.bubbleHeight;
+      for (let col = 0; col < cols - (isOddRow ? 1 : 0); col++) {
+        const x = bubbleRadius + col * this.bubbleWidth + offsetX;
+        const y = bubbleRadius + row * rowHeight;
 
         const bubble = new Bubble(
-          this.scene,
+          scene,
           x,
           y,
           this.bubbleWidth,
           'static',
-          this.spriteKey,
+          spriteKey,
           getBubbleColor(),
         );
-
-        this.addBubbleToGrid(bubble, row, col);
+        this.bubblesGroup.add(bubble);
+        this.grid[row][col] = bubble;
       }
     }
   }
 
-  /** Add a bubble to the cluster */
-  public addBubble(x: number, y: number, color: ColorObj): Bubble | null {
+  /** Check for collision with a shooting bubble */
+  handleBubbleCollision(
+    scene: Phaser.Scene,
+    bubble: Bubble,
+    spriteKey: string,
+  ) {
+    const { row, col } = this.findClosestGridPosition(bubble.x, bubble.y);
+    if (!this.isPositionOccupied(row, col)) {
+      this.addBubble(scene, bubble.x, bubble.y, spriteKey, bubble.color);
+      bubble.pop(); // Remove the shooting bubble after collision
+    }
+  }
+
+  /** Add a bubble to the grid */
+  addBubble(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    spriteKey: string,
+    bubbleColor: ColorObj,
+  ) {
     const { row, col } = this.findClosestGridPosition(x, y);
 
-    if (this.isPositionOccupied(row, col)) {
-      return null;
-    }
+    if (!this.isPositionOccupied(row, col)) {
+      const bubbleX = this.calculateBubbleX(col, row);
+      const bubbleY = this.calculateBubbleY(row);
 
-    const bubbleX = this.calculateBubbleX(col, row);
-    const bubbleY = this.calculateBubbleY(row);
+      const bubble = new Bubble(
+        scene,
+        bubbleX,
+        bubbleY,
+        this.bubbleWidth,
+        'static',
+        spriteKey,
+        bubbleColor,
+      );
 
-    const bubble = new Bubble(
-      this.scene,
-      bubbleX,
-      bubbleY,
-      this.bubbleWidth,
-      'static',
-      this.spriteKey,
-      color,
-    );
-
-    this.addBubbleToGrid(bubble, row, col);
-    return bubble;
-  }
-
-  /** Handle collision of a bubble with the cluster */
-  public handleCollision(shootingBubble: Bubble) {
-    const { x, y, color } = shootingBubble;
-    const newBubble = this.addBubble(x, y, color);
-
-    if (newBubble) {
-      shootingBubble.destroy();
+      this.bubblesGroup.add(bubble);
+      this.grid[row][col] = bubble;
     }
   }
 
-  /** Get all bubbles in the cluster */
-  public getBubbles(): Bubble[] {
-    return this.bubblesGroup.getChildren() as Bubble[];
-  }
-
-  /** Add a bubble to the grid and group */
-  private addBubbleToGrid(bubble: Bubble, row: number, col: number) {
-    this.grid[row][col] = bubble;
-    this.bubblesGroup.add(bubble);
-  }
-
-  /** Find the closest grid position for a given coordinate */
+  /** Find the grid position closest to the bubble's current position */
   private findClosestGridPosition(x: number, y: number) {
-    const radius = this.bubbleWidth / 2;
-    const row = Math.round((y - radius) / this.bubbleHeight);
+    const bubbleRadius = this.bubbleWidth / 2;
+    const row = Math.round((y - bubbleRadius) / (bubbleRadius * Math.sqrt(3)));
     const col = Math.round(
-      (x - radius - (row % 2 === 1 ? radius : 0)) / this.bubbleWidth,
+      (x - bubbleRadius - (row % 2 === 0 ? bubbleRadius : 0)) /
+        this.bubbleWidth,
     );
-
     return { row, col };
   }
 
-  /** Check if a grid position is occupied */
-  private isPositionOccupied(row: number, col: number): boolean {
+  /** Check if a position in the grid is occupied */
+  private isPositionOccupied(row: number, col: number) {
     return this.grid[row]?.[col] !== null;
   }
 
-  /** Calculate the X coordinate for a grid cell */
-  private calculateBubbleX(col: number, row: number): number {
-    const radius = this.bubbleWidth / 2;
-    const offsetX = row % 2 === 1 ? radius : 0;
-    return radius + col * this.bubbleWidth + offsetX;
+  /** Calculate the X position for a bubble in the grid */
+  private calculateBubbleX(col: number, row: number) {
+    const bubbleRadius = this.bubbleWidth / 2;
+    const offsetX = row % 2 === 0 ? bubbleRadius : 0;
+    return bubbleRadius + col * this.bubbleWidth + offsetX;
   }
 
-  /** Calculate the Y coordinate for a grid cell */
-  private calculateBubbleY(row: number): number {
-    const radius = this.bubbleWidth / 2;
-    return radius + row * this.bubbleHeight;
+  /** Calculate the Y position for a bubble in the grid */
+  private calculateBubbleY(row: number) {
+    const bubbleRadius = this.bubbleWidth / 2;
+    return bubbleRadius + row * (this.bubbleWidth * 0.866);
   }
 
-  /** Remove a bubble from the grid */
-  public removeBubble(bubble: Bubble) {
-    for (let row = 0; row < this.rows; row++) {
-      for (let col = 0; col < this.cols; col++) {
-        if (this.grid[row][col] === bubble) {
-          this.grid[row][col] = null;
-          this.bubblesGroup.remove(bubble);
-          bubble.destroy();
-          return;
-        }
-      }
-    }
-  }
-
-  /** Clear all bubbles */
-  public clearCluster() {
-    this.getBubbles().forEach((bubble) => bubble.destroy());
-    this.grid = Array.from({ length: this.rows }, () =>
-      Array(this.cols).fill(null),
-    );
+  /** Get all the bubbles in the cluster */
+  getBubbles(): Bubble[] {
+    return this.bubblesGroup.getChildren() as Bubble[];
   }
 }
