@@ -40,5 +40,6 @@ export default class GameScene extends Phaser.Scene {
       'bubbles',
       getBubbleColor(),
     );
+    new Aimer(this, this.shootingBubble);
   }
 }
