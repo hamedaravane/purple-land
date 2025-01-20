@@ -1,4 +1,4 @@
-import { Bubble } from '@objects/Bubble.ts';
+import { Bubble, NeighborPositions } from '@objects/Bubble.ts';
 import { getBubbleColor } from '@utils/ColorUtils.ts';
 
 export class BubbleCluster {
@@ -30,6 +30,7 @@ export class BubbleCluster {
     this.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
 
     this.createGrid(cols, rows, spriteKey);
+    this.assignNeighbors(rows);
   }
 
   /**
@@ -119,6 +120,127 @@ export class BubbleCluster {
         this.bubbleMap.set(`${x},${y}`, bubble);
 
         this.grid[row][col] = bubble;
+      }
+    }
+  }
+
+  /**
+   * Assign neighbors for each bubble in the grid.
+   *
+   * Depending on your logic, "wall" can be represented as 1,
+   * and "empty" as null, whenever the neighbor indices go out of range.
+   */
+  private assignNeighbors(rows: number): void {
+    for (let row = 0; row < rows; row++) {
+      // Guard against rows that have fewer columns
+      if (!this.grid[row]) continue;
+
+      for (let col = 0; col < this.grid[row].length; col++) {
+        const bubble = this.grid[row][col];
+        if (!bubble) continue;
+
+        const isEvenRow = row % 2 === 0;
+
+        // LEFT
+        if (col - 1 >= 0) {
+          bubble.assignNeighbor(
+            NeighborPositions.LEFT,
+            this.grid[row][col - 1],
+          );
+        } else {
+          // Out of bounds => wall
+          bubble.assignNeighbor(NeighborPositions.LEFT, 1);
+        }
+
+        // RIGHT
+        if (col + 1 < this.grid[row].length) {
+          bubble.assignNeighbor(
+            NeighborPositions.RIGHT,
+            this.grid[row][col + 1],
+          );
+        } else {
+          bubble.assignNeighbor(NeighborPositions.RIGHT, 1);
+        }
+
+        // TOP-LEFT
+        {
+          const topLeftRow = row - 1;
+          // For even rows, same col; for odd rows, col - 1
+          const topLeftCol = col + (isEvenRow ? 0 : -1);
+          if (
+            topLeftRow >= 0 &&
+            topLeftCol >= 0 &&
+            this.grid[topLeftRow] &&
+            topLeftCol < this.grid[topLeftRow].length
+          ) {
+            bubble.assignNeighbor(
+              NeighborPositions.TOP_LEFT,
+              this.grid[topLeftRow][topLeftCol],
+            );
+          } else {
+            bubble.assignNeighbor(NeighborPositions.TOP_LEFT, 1);
+          }
+        }
+
+        // TOP-RIGHT
+        {
+          const topRightRow = row - 1;
+          // For even rows, col + 1; for odd rows, same col
+          const topRightCol = col + (isEvenRow ? 1 : 0);
+          if (
+            topRightRow >= 0 &&
+            this.grid[topRightRow] &&
+            topRightCol >= 0 &&
+            topRightCol < this.grid[topRightRow].length
+          ) {
+            bubble.assignNeighbor(
+              NeighborPositions.TOP_RIGHT,
+              this.grid[topRightRow][topRightCol],
+            );
+          } else {
+            bubble.assignNeighbor(NeighborPositions.TOP_RIGHT, 1);
+          }
+        }
+
+        // BOTTOM-LEFT
+        {
+          const bottomLeftRow = row + 1;
+          // For even rows, same col; for odd rows, col - 1
+          const bottomLeftCol = col + (isEvenRow ? 0 : -1);
+          if (
+            bottomLeftRow < rows &&
+            this.grid[bottomLeftRow] &&
+            bottomLeftCol >= 0 &&
+            bottomLeftCol < this.grid[bottomLeftRow].length
+          ) {
+            bubble.assignNeighbor(
+              NeighborPositions.BOTTOM_LEFT,
+              this.grid[bottomLeftRow][bottomLeftCol],
+            );
+          } else {
+            bubble.assignNeighbor(NeighborPositions.BOTTOM_LEFT, 1);
+          }
+        }
+
+        // BOTTOM-RIGHT
+        {
+          const bottomRightRow = row + 1;
+          // For even rows, col + 1; for odd rows, same col
+          const bottomRightCol = col + (isEvenRow ? 1 : 0);
+          if (
+            bottomRightRow < rows &&
+            this.grid[bottomRightRow] &&
+            bottomRightCol >= 0 &&
+            bottomRightCol < this.grid[bottomRightRow].length
+          ) {
+            bubble.assignNeighbor(
+              NeighborPositions.BOTTOM_RIGHT,
+              this.grid[bottomRightRow][bottomRightCol],
+            );
+          } else {
+            bubble.assignNeighbor(NeighborPositions.BOTTOM_RIGHT, 1);
+          }
+        }
       }
     }
   }

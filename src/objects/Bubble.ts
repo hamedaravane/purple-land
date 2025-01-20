@@ -2,11 +2,20 @@ import { ColorObj } from '@constants/BubbleColors';
 import { BubbleCluster } from '@objects/BubbleCluster';
 import Phaser from 'phaser';
 
+export enum NeighborPositions {
+  BOTTOM_LEFT,
+  BOTTOM_RIGHT,
+  LEFT,
+  RIGHT,
+  TOP_LEFT,
+  TOP_RIGHT,
+}
+
 export class Bubble extends Phaser.GameObjects.Sprite {
   private _bubbleType: 'static' | 'shooting';
   private readonly _color: ColorObj;
-  private readonly _diameter: number;
-  public neighbors: Set<Bubble>;
+  private readonly _width: number;
+  private _neighbors: Map<NeighborPositions, Bubble | null | 1>;
 
   constructor(
     scene: Phaser.Scene,
@@ -21,8 +30,7 @@ export class Bubble extends Phaser.GameObjects.Sprite {
 
     this._bubbleType = bubbleType;
     this._color = fillColor;
-    this._diameter = diameter;
-    this.neighbors = new Set();
+    this._width = diameter;
 
     this.scene.add.existing(this);
     this.setBubbleSize();
@@ -40,6 +48,14 @@ export class Bubble extends Phaser.GameObjects.Sprite {
 
   set bubbleType(value: 'static' | 'shooting') {
     this._bubbleType = value;
+  }
+
+  get neighbors(): Map<NeighborPositions, Bubble | null | 1> {
+    return this._neighbors;
+  }
+
+  assignNeighbor(position: NeighborPositions, value: Bubble | null | 1) {
+    this._neighbors.set(position, value);
   }
 
   /** Pop the bubble and clean up references */
@@ -71,29 +87,10 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
-  /** Disable the physics body of the bubble */
-  disablePhysics() {
-    if (this.body instanceof Phaser.Physics.Arcade.Body) {
-      this.body.setVelocity(0, 0);
-      this.body.enable = false;
-    }
-  }
-
-  /** Add a neighbor bubble */
-  addNeighbor(bubble: Bubble) {
-    this.neighbors.add(bubble);
-  }
-
-  /** Remove a neighbor bubble */
-  removeNeighbor(bubble: Bubble) {
-    this.neighbors.delete(bubble);
-  }
-
   /** Check if this bubble collides with any in the given cluster */
   checkCollision(cluster: BubbleCluster): Bubble | null {
     for (const targetBubble of cluster.getBubbles()) {
       if (this.isOverlapping(targetBubble)) {
-        // debugger; // Pause execution when a collision is detected
         return targetBubble;
       }
     }
@@ -102,12 +99,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
 
   /** Snap the bubble to a specified position */
   snapTo(x: number, y: number): void {
-    console.log('Snapping bubble', {
-      from: { x: this.x, y: this.y },
-      to: { x, y },
-    });
-
-    // Optionally, you could add a tween for smooth snapping
     this.scene.tweens.add({
       targets: this,
       x,
@@ -123,17 +114,17 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     const dy = this.y - targetBubble.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    return distance < this._diameter;
+    return distance < this._width;
   }
 
   /** Set the visual size of the bubble */
   private setBubbleSize() {
     if (this.width > 0) {
-      const scaleFactor = this._diameter / this.width;
+      const scaleFactor = this._width / this.width;
       this.setScale(scaleFactor);
     } else {
       this.once(Phaser.Loader.Events.COMPLETE, () => {
-        const scaleFactor = this._diameter / this.width;
+        const scaleFactor = this._width / this.width;
         this.setScale(scaleFactor);
       });
     }
@@ -151,7 +142,7 @@ export class Bubble extends Phaser.GameObjects.Sprite {
 
   /** Cleanup when the bubble is destroyed */
   public destroy(...args: any[]) {
-    this.neighbors.clear();
+    this._neighbors.clear();
     super.destroy(...args);
   }
 }
