@@ -3,7 +3,7 @@ import { BubbleCluster } from '@objects/BubbleCluster';
 import Phaser from 'phaser';
 
 export class Bubble extends Phaser.GameObjects.Sprite {
-  private _bubbleType: 'static' | 'shooting';
+  public _bubbleType: 'static' | 'shooting';
   private readonly _color: ColorObj;
   private readonly _width: number;
 
@@ -30,27 +30,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   /** Getter for the bubble's color */
   get color() {
     return this._color;
-  }
-
-  get bubbleType(): 'static' | 'shooting' {
-    return this._bubbleType;
-  }
-
-  set bubbleType(value: 'static' | 'shooting') {
-    this._bubbleType = value;
-  }
-
-  /** Pop the bubble and clean up references */
-  pop() {
-    this.destroy();
-  }
-
-  /** Make the bubble fall with physics */
-  fall() {
-    if (this.body instanceof Phaser.Physics.Arcade.Body) {
-      this.body.enable = true;
-      this.body.setVelocityY(200);
-    }
   }
 
   shot(direction: { x: number; y: number }, speed: number = 600) {

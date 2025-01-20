@@ -30,9 +30,6 @@ export class BubbleCluster {
     this.createGrid(cols, rows, spriteKey);
   }
 
-  /**
-   * Handle a collision between a shooting bubble and a target bubble.
-   */
   public handleBubbleCollision(
     shootingBubble: Bubble,
     targetBubble: Bubble,
@@ -52,7 +49,7 @@ export class BubbleCluster {
 
     shootingBubble.snapTo(snappedX, snappedY);
 
-    shootingBubble.bubbleType = 'static';
+    shootingBubble._bubbleType = 'static';
     this.addBubble(shootingBubble);
   }
 
@@ -86,7 +83,6 @@ export class BubbleCluster {
     };
   }
 
-  /** Add a bubble to the cluster and track its position in the map */
   public addBubble(bubble: Bubble): void {
     const normalizedX = this.normalize(bubble.x);
     const normalizedY = this.normalize(bubble.y);
@@ -95,7 +91,6 @@ export class BubbleCluster {
     this.bubbleMap.set(`${normalizedX},${normalizedY}`, bubble);
   }
 
-  /** Remove a bubble from the cluster, and destroy the game object */
   public removeBubble(bubble: Bubble): void {
     const normalizedX = this.normalize(bubble.x);
     const normalizedY = this.normalize(bubble.y);
@@ -105,9 +100,6 @@ export class BubbleCluster {
     bubble.destroy();
   }
 
-  /**
-   * Get all current bubbles as an array.
-   */
   public getBubbles(): Bubble[] {
     return this.bubblesGroup.getChildren() as Bubble[];
   }
@@ -146,7 +138,6 @@ export class BubbleCluster {
     }
   }
 
-  /** Normalize a number to a fixed precision */
   private normalize(value: number, precision: number = 2): number {
     return parseFloat(value.toFixed(precision));
   }
