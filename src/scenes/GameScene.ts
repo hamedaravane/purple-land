@@ -6,8 +6,8 @@ import { BubbleCluster } from '@objects/BubbleCluster.ts';
 export default class GameScene extends Phaser.Scene {
   private shootingBubble: Bubble | null = null;
   private aimer: Aimer | null = null;
-  private cols = 14;
-  private rows = 6;
+  private cols = 6;
+  private rows = 2;
   private bubbleCluster: BubbleCluster;
 
   constructor() {
