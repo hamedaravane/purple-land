@@ -6,8 +6,8 @@ import { BubbleCluster } from '@objects/BubbleCluster.ts';
 export default class GameScene extends Phaser.Scene {
   private shootingBubble: Bubble | null = null;
   private aimer: Aimer | null = null;
-  private cols = 15;
-  private rows = 10;
+  private cols = 10;
+  private rows = 2;
   private bubbleCluster: BubbleCluster;
 
   constructor() {
@@ -52,9 +52,8 @@ export default class GameScene extends Phaser.Scene {
       this.shootingBubble.checkCollision(this.bubbleCluster)
     ) {
       this.bubbleCluster.handleBubbleCollision(
-        this,
         this.shootingBubble,
-        'bubbles',
+        this.shootingBubble.checkCollision(this.bubbleCluster)!,
       );
       this.spawnShootingBubble(this.scale.width / this.cols);
     }
