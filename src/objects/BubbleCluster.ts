@@ -60,36 +60,24 @@ export class BubbleCluster {
     x: number,
     y: number,
   ): { x: number; y: number } {
-    // 1) Approximate which row we're on.
-    //    In createGrid, you do: y = bubbleRadius + row * rowHeight
-    //    => row ≈ (y - bubbleRadius) / rowHeight
     let row = Math.round((y - this.bubbleRadius) / this.rowHeight);
     if (row < 0) row = 0;
-    // (Optionally clamp row to maxRows - 1 if needed)
 
     const isEvenRow = row % 2 === 0;
 
-    // 2) Invert the x-position depending on row parity:
     let col: number;
     if (isEvenRow) {
-      // even row => x = bubbleWidth * (col + 1)
-      // => col = (x / bubbleWidth) - 1
       col = Math.round(x / this.bubbleWidth - 1);
     } else {
-      // odd row => x = bubbleWidth * (col + 0.5)
-      // => col = (x / bubbleWidth) - 0.5
       col = Math.round(x / this.bubbleWidth - 0.5);
     }
 
-    // Prevent negative columns (or clamp to max columns if you wish)
     if (col < 0) col = 0;
 
-    // 3) Re-snap x using the exact same formula from createGrid
     const snappedX = isEvenRow
-      ? this.bubbleWidth * (col + 1) // even row
-      : this.bubbleWidth * (col + 0.5); // odd row
+      ? this.bubbleWidth * (col + 1)
+      : this.bubbleWidth * (col + 0.5);
 
-    // 4) Re-snap y
     const snappedY = this.bubbleRadius + row * this.rowHeight;
 
     return {
