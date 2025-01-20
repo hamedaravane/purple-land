@@ -93,11 +93,10 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   checkCollision(cluster: BubbleCluster): Bubble | null {
     for (const targetBubble of cluster.getBubbles()) {
       if (this.isOverlapping(targetBubble)) {
-        debugger; // Pause execution when a collision is detected
+        // debugger; // Pause execution when a collision is detected
         return targetBubble;
       }
     }
-    console.log('No collision detected');
     return null;
   }
 
@@ -108,17 +107,14 @@ export class Bubble extends Phaser.GameObjects.Sprite {
       to: { x, y },
     });
 
-    this.x = x;
-    this.y = y;
-
     // Optionally, you could add a tween for smooth snapping
-    // this.scene.tweens.add({
-    //   targets: this,
-    //   x,
-    //   y,
-    //   duration: 200,
-    //   ease: 'Power2',
-    // });
+    this.scene.tweens.add({
+      targets: this,
+      x,
+      y,
+      duration: 100,
+      ease: 'Power2',
+    });
   }
 
   /** Check overlap with another bubble */
@@ -126,13 +122,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     const dx = this.x - targetBubble.x;
     const dy = this.y - targetBubble.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-
-    console.log('Checking overlap', {
-      shootingBubble: { x: this.x, y: this.y },
-      targetBubble: { x: targetBubble.x, y: targetBubble.y },
-      distance,
-      diameterThreshold: this._diameter,
-    });
 
     return distance < this._diameter;
   }

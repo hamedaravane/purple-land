@@ -30,7 +30,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private spawnShootingBubble(tileSize: number) {
-    this.shootingBubble?.destroy();
     this.aimer?.destroy();
 
     this.shootingBubble = new Bubble(
@@ -47,19 +46,29 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private handleCollision() {
-    if (
-      this.shootingBubble &&
-      this.shootingBubble.checkCollision(this.bubbleCluster)
-    ) {
+    const targetBubble = this.shootingBubble?.checkCollision(
+      this.bubbleCluster,
+    );
+    if (this.shootingBubble && targetBubble) {
       this.bubbleCluster.handleBubbleCollision(
         this.shootingBubble,
-        this.shootingBubble.checkCollision(this.bubbleCluster)!,
+        targetBubble,
       );
       this.spawnShootingBubble(this.scale.width / this.cols);
     }
   }
 
+  private isBubbleMoving(): boolean {
+    return (
+      (
+        this.shootingBubble?.body as Phaser.Physics.Arcade.Body
+      ).velocity.length() > 0
+    );
+  }
+
   update() {
-    this.handleCollision();
+    if (this.isBubbleMoving()) {
+      this.handleCollision();
+    }
   }
 }
