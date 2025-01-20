@@ -2,20 +2,10 @@ import { ColorObj } from '@constants/BubbleColors';
 import { BubbleCluster } from '@objects/BubbleCluster';
 import Phaser from 'phaser';
 
-export enum NeighborPositions {
-  BOTTOM_LEFT,
-  BOTTOM_RIGHT,
-  LEFT,
-  RIGHT,
-  TOP_LEFT,
-  TOP_RIGHT,
-}
-
 export class Bubble extends Phaser.GameObjects.Sprite {
   private _bubbleType: 'static' | 'shooting';
   private readonly _color: ColorObj;
   private readonly _width: number;
-  private _neighbors: Map<NeighborPositions, Bubble | null | 1>;
 
   constructor(
     scene: Phaser.Scene,
@@ -48,14 +38,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
 
   set bubbleType(value: 'static' | 'shooting') {
     this._bubbleType = value;
-  }
-
-  get neighbors(): Map<NeighborPositions, Bubble | null | 1> {
-    return this._neighbors;
-  }
-
-  assignNeighbor(position: NeighborPositions, value: Bubble | null | 1) {
-    this._neighbors.set(position, value);
   }
 
   /** Pop the bubble and clean up references */
@@ -142,7 +124,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
 
   /** Cleanup when the bubble is destroyed */
   public destroy(...args: any[]) {
-    this._neighbors.clear();
     super.destroy(...args);
   }
 }
