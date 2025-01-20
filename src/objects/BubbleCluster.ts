@@ -128,7 +128,6 @@ export class BubbleCluster {
           spriteKey,
           getBubbleColor(),
         );
-        console.log(`Bubble ${bubbleNumber} position: ${x}, ${y}`);
 
         this.bubblesGroup.add(bubble);
         this.bubbleMap.set(`${x},${y}`, bubble);
