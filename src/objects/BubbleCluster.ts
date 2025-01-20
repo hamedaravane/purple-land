@@ -18,7 +18,6 @@ export class BubbleCluster {
     this.createGrid(scene, cols, rows, spriteKey);
   }
 
-  /** Create the grid and initialize bubbles */
   createGrid(
     scene: Phaser.Scene,
     cols: number,
@@ -55,7 +54,6 @@ export class BubbleCluster {
     }
   }
 
-  /** Check for collision with a shooting bubble */
   handleBubbleCollision(shootingBubble: Bubble, targetBubble: Bubble) {
     if (targetBubble.color.color === shootingBubble.color.color) {
       targetBubble.destroy();
@@ -69,7 +67,6 @@ export class BubbleCluster {
     }
   }
 
-  /** Find the nearest position for the shooting bubble around the target bubble */
   findNearestPositionForTargetBubble(targetBubble: Bubble): {
     x: number;
     y: number;
@@ -90,7 +87,6 @@ export class BubbleCluster {
     return { x: targetBubble.x, y: targetBubble.y };
   }
 
-  /** Get potential neighbor positions around a bubble in a hexagonal grid */
   getPotentialNeighborPositions(
     x: number,
     y: number,
@@ -108,18 +104,15 @@ export class BubbleCluster {
     ];
   }
 
-  /** Check if a grid position is empty */
   isPositionEmpty(x: number, y: number): boolean {
     const bubbles = this.getBubbles();
     return !bubbles.some((bubble) => bubble.x === x && bubble.y === y);
   }
 
-  /** Add a bubble to the grid */
   addBubble(bubble: Bubble) {
     this.bubblesGroup.add(bubble);
   }
 
-  /** Get all the bubbles in the cluster */
   getBubbles(): Bubble[] {
     return this.bubblesGroup.getChildren() as Bubble[];
   }
