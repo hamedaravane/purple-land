@@ -4,11 +4,10 @@ import { Aimer } from '@objects/Aimer.ts';
 import { BubbleCluster } from '@objects/BubbleCluster.ts';
 
 export default class GameScene extends Phaser.Scene {
-  private shootingBubble: Bubble;
-  private aimer: Aimer;
-  private cols: number;
-  private rows: number;
-
+  private shootingBubble: Bubble | null = null;
+  private aimer: Aimer | null = null;
+  private cols = 15;
+  private rows = 10;
   private bubbleCluster: BubbleCluster;
 
   constructor() {
@@ -16,61 +15,52 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.cols = 15;
-    this.rows = 10;
-    const background = new Phaser.GameObjects.Sprite(
-      this,
-      this.scale.width / 2,
-      this.scale.height / 2,
-      'background',
-    );
-    this.add.existing(background);
+    const tileSize = this.scale.width / this.cols;
+    this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
 
     this.bubbleCluster = new BubbleCluster(
       this,
       this.cols,
       this.rows,
       'bubbles',
-      this.scale.width / this.cols,
+      tileSize,
     );
 
-    this.spawnShootingBubble();
+    this.spawnShootingBubble(tileSize);
   }
 
-  private spawnShootingBubble() {
-    if (this.shootingBubble) this.shootingBubble.destroy();
-    if (this.aimer) this.aimer.destroy();
+  private spawnShootingBubble(tileSize: number) {
+    this.shootingBubble?.destroy();
+    this.aimer?.destroy();
 
     this.shootingBubble = new Bubble(
       this,
       this.scale.width / 2,
       this.scale.height - 100,
-      this.scale.width / this.cols,
+      tileSize,
       'shooting',
       'bubbles',
       getBubbleColor(),
     );
 
-    new Aimer(this, this.shootingBubble);
+    this.aimer = new Aimer(this, this.shootingBubble);
   }
 
-  /** Handle the collision of the shooting bubble with the cluster */
-  checkBubbleCollision() {
-    if (this.shootingBubble) {
-      const collision = this.shootingBubble.checkCollision(this.bubbleCluster);
-      if (collision) {
-        this.bubbleCluster.handleBubbleCollision(
-          this,
-          this.shootingBubble,
-          'bubbles',
-        );
-        this.spawnShootingBubble();
-      }
+  private handleCollision() {
+    if (
+      this.shootingBubble &&
+      this.shootingBubble.checkCollision(this.bubbleCluster)
+    ) {
+      this.bubbleCluster.handleBubbleCollision(
+        this,
+        this.shootingBubble,
+        'bubbles',
+      );
+      this.spawnShootingBubble(this.scale.width / this.cols);
     }
   }
 
-  /** Update method, runs continuously to check for collisions */
   update() {
-    this.checkBubbleCollision();
+    this.handleCollision();
   }
 }
