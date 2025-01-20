@@ -50,10 +50,7 @@ export default class GameScene extends Phaser.Scene {
       this.bubbleCluster,
     );
     if (this.shootingBubble && targetBubble) {
-      this.bubbleCluster.handleBubbleCollision(
-        this.shootingBubble,
-        targetBubble,
-      );
+      this.bubbleCluster.handleBubbleCollision(this.shootingBubble);
       this.spawnShootingBubble(this.scale.width / this.cols);
     }
   }
