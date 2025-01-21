@@ -7,6 +7,7 @@ const SQRT3_OVER_2 = 0.86602540378;
 export class BubbleManager {
   scene: Phaser.Scene;
   bubblesGroup: Phaser.GameObjects.Group;
+  shootingBubble: Bubble;
   rows: number;
   cols: number;
   cellWidth: number;
@@ -47,7 +48,7 @@ export class BubbleManager {
   }
 
   spawnShootingBubble() {
-    const shootingBubble = new Bubble(
+    this.shootingBubble = new Bubble(
       this.scene,
       this.scene.scale.width / 2,
       this.scene.scale.height - 100,
@@ -56,9 +57,9 @@ export class BubbleManager {
       'bubbles',
       { label: 'cyan', color: 0x00f697 },
     );
-    shootingBubble.name = 'shooting';
-    new Aimer(this.scene, shootingBubble);
-    this.checkOverlapForBubbleGroup(shootingBubble);
+    this.shootingBubble.name = 'shooting';
+    new Aimer(this.scene, this.shootingBubble);
+    this.checkOverlapForBubbleGroup();
   }
 
   addExistingBubble(bubble: Bubble) {
@@ -70,15 +71,15 @@ export class BubbleManager {
     this.bubblesGroup.remove(bubble, true, true);
   }
 
-  checkOverlapForBubbleGroup(shootingBubble: Bubble) {
+  checkOverlapForBubbleGroup() {
     this.bubblesGroupChildren.forEach((targetBubble) => {
-      this.addOverlap(shootingBubble, targetBubble);
+      this.addOverlap(targetBubble);
     });
   }
 
-  private addOverlap(shootingBubble: Bubble, targetBubble: Bubble) {
-    this.scene.physics.add.overlap(
-      shootingBubble,
+  private addOverlap(targetBubble: Bubble) {
+    return this.scene.physics.add.overlap(
+      this.shootingBubble,
       targetBubble,
       this.onOverlap,
       undefined,
@@ -90,19 +91,8 @@ export class BubbleManager {
     return this.bubblesGroup.getChildren() as Bubble[];
   }
 
-  private onOverlap: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (
-    shootingBubble,
-    targetBubble,
-  ) => {
-    ((shootingBubble as Bubble).body as Phaser.Physics.Arcade.Body).setVelocity(
-      0,
-      0,
-    );
-    console.log(
-      (shootingBubble as Bubble).name,
-      'an overlap detected!',
-      (targetBubble as Bubble).name,
-    );
+  private onOverlap: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = () => {
+    (this.shootingBubble.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
   };
 
   private getPosition(col: number, row: number): { x: number; y: number } {
