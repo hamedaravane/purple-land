@@ -71,6 +71,36 @@ export class BubbleManager {
     this.bubblesGroup.remove(bubble, true, true);
   }
 
+  private getNearestGridPosition(
+    x: number,
+    y: number,
+  ): { x: number; y: number } {
+    let row = Math.round((y - this.bubbleRadius) / this.cellHeight);
+    if (row < 0) row = 0;
+
+    const isEvenRow = row % 2 === 0;
+
+    let col: number;
+    if (isEvenRow) {
+      col = Math.round(x / this.cellWidth - 1);
+    } else {
+      col = Math.round(x / this.cellWidth - 0.5);
+    }
+
+    if (col < 0) col = 0;
+
+    const snappedX = isEvenRow
+      ? this.cellWidth * (col + 1)
+      : this.cellWidth * (col + 0.5);
+
+    const snappedY = this.bubbleRadius + row * this.cellHeight;
+
+    return {
+      x: this.normalize(snappedX),
+      y: this.normalize(snappedY),
+    };
+  }
+
   private checkOverlapForBubbleGroup() {
     this.bubblesGroupChildren.forEach((targetBubble) => {
       this.addOverlap(targetBubble);
@@ -93,6 +123,11 @@ export class BubbleManager {
 
   private onOverlap: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = () => {
     (this.shootingBubble.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
+    const nearestGridPosition = this.getNearestGridPosition(
+      this.shootingBubble.x,
+      this.shootingBubble.y,
+    );
+    this.shootingBubble.snapTo(nearestGridPosition.x, nearestGridPosition.y);
   };
 
   private getPosition(col: number, row: number): { x: number; y: number } {
