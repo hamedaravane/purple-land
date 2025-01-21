@@ -71,7 +71,7 @@ export class BubbleManager {
     this.bubblesGroup.remove(bubble, true, true);
   }
 
-  checkOverlapForBubbleGroup() {
+  private checkOverlapForBubbleGroup() {
     this.bubblesGroupChildren.forEach((targetBubble) => {
       this.addOverlap(targetBubble);
     });
@@ -87,7 +87,7 @@ export class BubbleManager {
     );
   }
 
-  get bubblesGroupChildren() {
+  private get bubblesGroupChildren() {
     return this.bubblesGroup.getChildren() as Bubble[];
   }
 
