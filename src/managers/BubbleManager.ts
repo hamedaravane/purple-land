@@ -122,11 +122,11 @@ export class BubbleManager {
 
   private onOverlap: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = () => {
     (this.shootingBubble.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
-    const nearestGridPosition = this.getNearestGridPosition(
+    const { x: snappedX, y: snappedY } = this.getNearestGridPosition(
       this.shootingBubble.x,
       this.shootingBubble.y,
     );
-    this.shootingBubble.snapTo(nearestGridPosition.x, nearestGridPosition.y);
+    this.shootingBubble.snapTo(snappedX, snappedY);
     this.addExistingBubble(this.shootingBubble);
   };
 
