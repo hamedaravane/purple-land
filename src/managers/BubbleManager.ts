@@ -1,8 +1,7 @@
 import { Bubble } from '@objects/Bubble';
 import { Aimer } from '@objects/Aimer.ts';
 import { getBubbleColor } from '@utils/ColorUtils.ts';
-
-const SQRT3_OVER_2 = 0.86602540378;
+import { SQRT3_OVER_2 } from '@constants';
 
 export class BubbleManager {
   scene: Phaser.Scene;

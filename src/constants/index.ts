@@ -1,0 +1,1 @@
+export const SQRT3_OVER_2 = 0.86602540378;
