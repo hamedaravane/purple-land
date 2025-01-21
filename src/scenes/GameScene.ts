@@ -1,20 +1,24 @@
-import { getBubbleColor } from '@utils/ColorUtils.ts';
-import { Bubble } from '@objects/Bubble.ts';
-import { Aimer } from '@objects/Aimer.ts';
-import { BubbleCluster } from '@objects/BubbleCluster.ts';
+import { BubbleManager } from '@managers/BubbleManager.ts';
 
 export default class GameScene extends Phaser.Scene {
-  private shootingBubble: Bubble | null = null;
-  private aimer: Aimer | null = null;
-  private cols = 14;
-  private rows = 9;
-  private bubbleCluster: BubbleCluster;
+  // private shootingBubble: Bubble | null = null;
+  // private aimer: Aimer | null = null;
+  // private cols = 14;
+  // private rows = 9;
+  // private bubbleCluster: BubbleCluster;
+  bubbleManager: BubbleManager;
 
   constructor() {
     super({ key: 'GameScene' });
   }
 
   create() {
+    this.bubbleManager = new BubbleManager(this, 2, 5);
+    this.bubbleManager.createGrid();
+    this.bubbleManager.spawnShootingBubble();
+  }
+
+  /*create() {
     const tileSize = this.scale.width / this.cols;
     this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
 
@@ -67,5 +71,5 @@ export default class GameScene extends Phaser.Scene {
     if (this.isBubbleMoving()) {
       this.handleCollision();
     }
-  }
+  }*/
 }
