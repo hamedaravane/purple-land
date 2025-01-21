@@ -30,27 +30,149 @@ export class BubbleCluster {
     this.createGrid(cols, rows, spriteKey);
   }
 
-  public handleBubbleCollision(
-    shootingBubble: Bubble,
-    targetBubble: Bubble,
-  ): void {
-    if (targetBubble.color.color === shootingBubble.color.color) {
-      this.removeBubble(targetBubble);
-      this.removeBubble(shootingBubble);
-      return;
-    }
-
+  public handleBubbleCollision(shootingBubble: Bubble) {
     (shootingBubble.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
 
     const { x: snappedX, y: snappedY } = this.getNearestGridPosition(
       shootingBubble.x,
       shootingBubble.y,
     );
-
     shootingBubble.snapTo(snappedX, snappedY);
 
     shootingBubble._bubbleType = 'static';
     this.addBubble(shootingBubble);
+
+    // Now attempt to pop any connected cluster of the same color
+    this.popConnectedBubbles(shootingBubble);
+  }
+
+  /**
+   * Attempt to pop all bubbles connected to the given bubble
+   * if they form a large enough cluster.
+   */
+  public popConnectedBubbles(startBubble: Bubble) {
+    const connected = this.findConnectedSameColor(startBubble);
+    if (connected.length >= 3) {
+      connected.forEach((b: Bubble) => this.removeBubble(b));
+    }
+  }
+
+  /**
+   * Find all bubbles connected to startBubble (including itself)
+   * that have the same color. Uses BFS on the hex grid.
+   */
+  private findConnectedSameColor(startBubble: Bubble): Bubble[] {
+    const targetColor = startBubble.color.color;
+    const visited = new Set<Bubble>();
+    const queue: Bubble[] = [startBubble];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      if (!visited.has(current)) {
+        visited.add(current);
+
+        // Check all neighbors
+        const neighbors = this.getNeighbors(current);
+        for (const neighbor of neighbors) {
+          if (
+            neighbor &&
+            !visited.has(neighbor) &&
+            neighbor.color.color === targetColor
+          ) {
+            queue.push(neighbor);
+          }
+        }
+      }
+    }
+
+    return Array.from(visited);
+  }
+
+  /**
+   * Return all valid neighboring bubbles of a given bubble in the hex grid.
+   */
+  private getNeighbors(bubble: Bubble): Bubble[] {
+    // Find this bubble’s row/col in the grid
+    const { row, col } = this.getGridCoords(bubble);
+
+    // Get offsets depending on even/odd row
+    const offsets = this.getNeighborOffsets(row);
+    const neighbors: Bubble[] = [];
+
+    // For each offset, compute neighbor’s (row, col)
+    for (const [dRow, dCol] of offsets) {
+      const nRow = row + dRow;
+      const nCol = col + dCol;
+
+      // Bounds-check
+      if (
+        nRow >= 0 &&
+        nRow < this.grid.length &&
+        nCol >= 0 &&
+        nCol < this.grid[nRow].length
+      ) {
+        const neighbor = this.grid[nRow][nCol];
+        if (neighbor) {
+          neighbors.push(neighbor);
+        }
+      }
+    }
+    return neighbors;
+  }
+
+  /**
+   * Return row/col offsets for neighbors in a hex grid.
+   * Adjust if row is even or odd.
+   */
+  private getNeighborOffsets(row: number): [number, number][] {
+    // For "even-r" horizontal layout, typical neighbor sets can look like:
+    if (row % 2 === 0) {
+      return [
+        [-1, 0], // top-left
+        [-1, -1], // top-right
+        [0, -1], // left
+        [0, 1], // right
+        [1, 0], // bottom-left
+        [1, -1], // bottom-right
+      ];
+    } else {
+      // Odd row neighbor offsets:
+      return [
+        [-1, 0], // top-left
+        [-1, 1], // top-right
+        [0, -1], // left
+        [0, 1], // right
+        [1, 0], // bottom-left
+        [1, 1], // bottom-right
+      ];
+    }
+  }
+
+  /**
+   * Approximate the grid row/col for a given bubble,
+   * mirroring the logic in `getNearestGridPosition`.
+   */
+  private getGridCoords(bubble: Bubble): { row: number; col: number } {
+    let row = Math.round((bubble.y - this.bubbleRadius) / this.rowHeight);
+    if (row < 0) row = 0;
+    if (row >= this.grid.length) row = this.grid.length - 1;
+
+    const isEvenRow = row % 2 === 0;
+    let col: number;
+
+    if (isEvenRow) {
+      col = Math.round(bubble.x / this.bubbleWidth - 1);
+    } else {
+      col = Math.round(bubble.x / this.bubbleWidth - 0.5);
+    }
+
+    if (col < 0) col = 0;
+    // Make sure col is in range for this row
+    if (col >= this.grid[row].length) {
+      col = this.grid[row].length - 1;
+    }
+
+    return { row, col };
   }
 
   private getNearestGridPosition(
