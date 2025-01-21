@@ -127,6 +127,7 @@ export class BubbleManager {
       this.shootingBubble.y,
     );
     this.shootingBubble.snapTo(nearestGridPosition.x, nearestGridPosition.y);
+    this.addExistingBubble(this.shootingBubble);
   };
 
   private getPosition(col: number, row: number): { x: number; y: number } {
