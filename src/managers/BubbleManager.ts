@@ -1,5 +1,6 @@
 import { Bubble } from '@objects/Bubble';
 import { Aimer } from '@objects/Aimer.ts';
+import { getBubbleColor } from '@utils/ColorUtils.ts';
 
 const SQRT3_OVER_2 = 0.86602540378;
 
@@ -10,6 +11,7 @@ export class BubbleManager {
   cols: number;
   cellWidth: number;
   cellHeight: number;
+  bubbleRadius: number;
 
   constructor(scene: Phaser.Scene, rows: number, cols: number) {
     this.scene = scene;
@@ -17,26 +19,29 @@ export class BubbleManager {
     this.rows = rows;
     this.cols = cols;
     this.cellWidth = this.scene.scale.width / cols;
+    this.bubbleRadius = this.cellWidth / 2;
     this.cellHeight = this.cellWidth * SQRT3_OVER_2;
   }
 
   createGrid() {
-    const cellWidth = this.scene.scale.width / this.cols;
     let bubbleNumber = 0;
     for (let row = 0; row < this.rows; row++) {
-      for (let col = 0; col < this.cols; col++) {
+      const isEvenRow = row % 2 === 0;
+      const maxCols = this.cols - (isEvenRow ? 1 : 0);
+      for (let col = 0; col < maxCols; col++) {
+        const position = this.getPosition(col, row);
         bubbleNumber++;
-        const newBubble = new Bubble(
+        const bubble = new Bubble(
           this.scene,
-          this.horizonPositionByCol(col),
-          this.verticalPositionByRow(row),
-          cellWidth,
+          position.x,
+          position.y,
+          this.cellWidth,
           'static',
           'bubbles',
-          { label: 'cyan', color: 0x00f697 },
+          getBubbleColor(),
         );
-        newBubble.name = `${bubbleNumber}`;
-        this.addExistingBubble(newBubble);
+
+        this.bubblesGroup.add(bubble);
       }
     }
   }
@@ -100,11 +105,15 @@ export class BubbleManager {
     );
   };
 
-  private horizonPositionByCol(col: number) {
-    return this.cellWidth * col + this.cellWidth / 2;
+  private getPosition(col: number, row: number): { x: number; y: number } {
+    const offsetX = row % 2 === 0 ? this.bubbleRadius : 0;
+    return {
+      x: this.normalize(this.bubbleRadius + col * this.cellWidth + offsetX),
+      y: this.normalize(this.bubbleRadius + row * this.cellHeight),
+    };
   }
 
-  private verticalPositionByRow(row: number) {
-    return this.cellWidth * row + this.cellWidth / 2;
+  private normalize(value: number, precision: number = 2): number {
+    return parseFloat(value.toFixed(precision));
   }
 }
