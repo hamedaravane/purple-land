@@ -13,14 +13,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.bubbleManager = new BubbleManager(this, 3, 5);
+    this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
+    this.bubbleManager = new BubbleManager(this, 10, 14);
     this.bubbleManager.createGrid();
     this.bubbleManager.spawnShootingBubble();
   }
 
   /*create() {
     const tileSize = this.scale.width / this.cols;
-    this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
 
     this.bubbleCluster = new BubbleCluster(
       this,
