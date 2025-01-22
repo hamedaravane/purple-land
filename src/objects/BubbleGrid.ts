@@ -4,16 +4,15 @@ import { NEIGHBOR_OFFSETS, SQRT3_OVER_2 } from '@constants';
 import { getBubbleColor } from '@utils/ColorUtils';
 
 export class BubbleGrid extends Phaser.GameObjects.Group {
-  private rows: number;
-  private cols: number;
-  private cellWidth: number;
-  private cellHeight: number;
-  private bubbleRadius: number;
-  private grid: (Bubble | null)[][];
+  private readonly rows: number;
+  private readonly cols: number;
+  private readonly cellWidth: number;
+  private readonly cellHeight: number;
+  private readonly bubbleRadius: number;
+  private readonly grid: (Bubble | null)[][];
 
   constructor(scene: Phaser.Scene, rows: number, cols: number) {
     super(scene);
-
     this.rows = rows;
     this.cols = cols;
     this.cellWidth = scene.scale.width / cols;
@@ -22,12 +21,18 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     this.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
   }
 
-  createGrid(): void {
+  createGrid() {
     for (let row = 0; row < this.rows; row++) {
       const isEvenRow = row % 2 === 0;
+      const offsetX = isEvenRow ? this.bubbleRadius : 0;
       const maxCols = this.cols - (isEvenRow ? 1 : 0);
+
       for (let col = 0; col < maxCols; col++) {
-        const { x, y } = this.getPositionByCoords(col, row);
+        const x = this.normalize(
+          this.bubbleRadius + col * this.cellWidth + offsetX,
+        );
+        const y = this.normalize(this.bubbleRadius + row * this.cellHeight);
+
         const bubble = new Bubble(
           this.scene,
           x,
@@ -37,9 +42,10 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
           'bubbles',
           getBubbleColor(),
         );
-        bubble.gridCoordinates = { col, row };
-        this.grid[row][col] = bubble;
+
+        bubble.gridCoordinates = { row, col };
         this.add(bubble);
+        this.grid[row][col] = bubble;
       }
     }
   }
@@ -50,7 +56,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     this.add(bubble);
   }
 
-  removeBubble(bubble: Bubble): void {
+  private removeBubble(bubble: Bubble): void {
     const { row, col } = bubble.gridCoordinates;
     if (this.grid[row] && this.grid[row][col] === bubble) {
       this.grid[row][col] = null;
@@ -66,7 +72,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     }
   }
 
-  findConnectedSameColor(startBubble: Bubble): Bubble[] {
+  private findConnectedSameColor(startBubble: Bubble): Bubble[] {
     const targetColor = startBubble.color.color;
     const visited = new Set<Bubble>();
     const queue: Bubble[] = [startBubble];
@@ -75,17 +81,19 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
       const current = queue.shift()!;
       if (!visited.has(current)) {
         visited.add(current);
+
         for (const neighbor of this.getNeighbors(current)) {
           if (
             neighbor &&
-            neighbor.color.color === targetColor &&
-            !visited.has(neighbor)
+            !visited.has(neighbor) &&
+            neighbor.color.color === targetColor
           ) {
             queue.push(neighbor);
           }
         }
       }
     }
+
     return Array.from(visited);
   }
 
