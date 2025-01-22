@@ -16,7 +16,7 @@ export default class GameScene extends Phaser.Scene {
     this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
     this.bubbleManager = new BubbleManager(this, 10, 14);
     this.bubbleManager.createGrid();
-    this.bubbleManager.spawnShootingBubble();
+    this.bubbleManager.spawnNewShootingBubble();
   }
 
   /*create() {

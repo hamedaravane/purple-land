@@ -38,7 +38,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     this._gridCoordinates = value;
   }
 
-  /** Getter for the bubble's color */
   get color() {
     return this._color;
   }
@@ -59,7 +58,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
-  /** Check if this bubble collides with any in the given cluster */
   checkCollision(cluster: BubbleCluster): Bubble | null {
     for (const targetBubble of cluster.getBubbles()) {
       if (this.isOverlapping(targetBubble)) {
@@ -69,7 +67,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     return null;
   }
 
-  /** Snap the bubble to a specified position */
   snapTo(x: number, y: number): void {
     this.scene.tweens.add({
       targets: this,
@@ -80,7 +77,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     });
   }
 
-  /** Check overlap with another bubble */
   private isOverlapping(targetBubble: Bubble): boolean {
     const dx = this.x - targetBubble.x;
     const dy = this.y - targetBubble.y;
@@ -89,7 +85,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     return distance < this._width;
   }
 
-  /** Set the visual size of the bubble */
   private setBubbleSize() {
     if (this.width > 0) {
       const scaleFactor = this._width / this.width;
@@ -102,7 +97,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
-  /** Initialize physics for the bubble */
   private initPhysics() {
     this.scene.physics.add.existing(this);
     if (this.body instanceof Phaser.Physics.Arcade.Body) {
@@ -112,7 +106,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
-  /** Cleanup when the bubble is destroyed */
   public destroy(...args: any[]) {
     super.destroy(...args);
   }

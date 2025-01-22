@@ -1,4 +1,4 @@
-export const SQRT3_OVER_2 = 0.86602540378;
+export const SQRT3_OVER_2 = 0.866;
 
 export const NEIGHBOR_OFFSETS = {
   even: [
