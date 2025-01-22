@@ -6,6 +6,8 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   public _bubbleType: 'static' | 'shooting';
   private readonly _color: ColorObj;
   private readonly _width: number;
+  gridCoordinates: { col: number; row: number } | null = null;
+  neighbors: Bubble[] = [];
 
   constructor(
     scene: Phaser.Scene,
