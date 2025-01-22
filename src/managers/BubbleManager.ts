@@ -21,6 +21,9 @@ export class BubbleManager {
   }
 
   spawnNewShootingBubble(): void {
+    this.overlapCollider?.destroy();
+    this.aimer?.destroy();
+
     this.shootingBubble = new Bubble(
       this.scene,
       this.scene.scale.width / 2,
@@ -55,10 +58,6 @@ export class BubbleManager {
         );
         this.bubbleGrid.addBubbleToGrid(shooting);
         this.bubbleGrid.popConnectedBubbles(shooting);
-
-        this.overlapCollider.destroy();
-
-        this.aimer.destroy();
         this.spawnNewShootingBubble();
       },
       undefined,
