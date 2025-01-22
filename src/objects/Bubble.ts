@@ -6,8 +6,7 @@ export class Bubble extends Phaser.GameObjects.Sprite {
   public _bubbleType: 'static' | 'shooting';
   private readonly _color: ColorObj;
   private readonly _width: number;
-  gridCoordinates: { col: number; row: number } | null = null;
-  neighbors: Bubble[] = [];
+  private _gridCoordinates: { col: number; row: number } | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -27,6 +26,16 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     this.scene.add.existing(this);
     this.setBubbleSize();
     this.initPhysics();
+  }
+
+  get gridCoordinates(): { col: number; row: number } {
+    if (this._gridCoordinates === null)
+      throw new Error('Grid coordinates not set');
+    return this._gridCoordinates;
+  }
+
+  set gridCoordinates(value: { col: number; row: number }) {
+    this._gridCoordinates = value;
   }
 
   /** Getter for the bubble's color */

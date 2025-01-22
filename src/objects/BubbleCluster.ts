@@ -1,10 +1,10 @@
 import { Bubble } from '@objects/Bubble.ts';
 import { getBubbleColor } from '@utils/ColorUtils.ts';
+import { NEIGHBOR_OFFSETS } from '@constants';
 
 export class BubbleCluster {
   private readonly scene: Phaser.Scene;
   private bubblesGroup: Phaser.GameObjects.Group;
-  private bubbleMap: Map<string, Bubble>;
   private readonly grid: (Bubble | null)[][];
   private readonly bubbleWidth: number;
   private readonly bubbleRadius: number;
@@ -23,13 +23,14 @@ export class BubbleCluster {
     this.rowHeight = this.bubbleWidth * 0.866;
 
     this.bubblesGroup = new Phaser.GameObjects.Group(this.scene);
-    this.bubbleMap = new Map<string, Bubble>();
-
     this.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
 
     this.createGrid(cols, rows, spriteKey);
   }
 
+  /**
+   * Handle collision of the shooting bubble with the existing cluster.
+   */
   public handleBubbleCollision(shootingBubble: Bubble) {
     (shootingBubble.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
 
@@ -38,20 +39,26 @@ export class BubbleCluster {
       shootingBubble.y,
     );
     shootingBubble.snapTo(snappedX, snappedY);
-
     shootingBubble._bubbleType = 'static';
-    this.addBubble(shootingBubble);
 
+    this.addBubble(shootingBubble);
     this.popConnectedBubbles(shootingBubble);
   }
 
+  /**
+   * If 3+ connected, pop them.
+   */
   public popConnectedBubbles(startBubble: Bubble) {
     const connected = this.findConnectedSameColor(startBubble);
     if (connected.length >= 3) {
-      connected.forEach((b: Bubble) => this.removeBubble(b));
+      connected.forEach((b) => this.removeBubble(b));
     }
   }
 
+  /**
+   * Find all bubbles connected to startBubble that share the same color.
+   * Using a simple BFS or DFS approach.
+   */
   private findConnectedSameColor(startBubble: Bubble): Bubble[] {
     const targetColor = startBubble.color.color;
     const visited = new Set<Bubble>();
@@ -62,8 +69,8 @@ export class BubbleCluster {
       if (!visited.has(current)) {
         visited.add(current);
 
-        const neighbors = this.getNeighbors(current);
-        for (const neighbor of neighbors) {
+        // Push unvisited neighbors of the same color
+        for (const neighbor of this.getNeighbors(current)) {
           if (
             neighbor &&
             !visited.has(neighbor) &&
@@ -78,75 +85,33 @@ export class BubbleCluster {
     return Array.from(visited);
   }
 
+  /**
+   * Get the six neighbors around a bubble, depending on row parity.
+   */
   private getNeighbors(bubble: Bubble): Bubble[] {
-    const { row, col } = this.getGridCoords(bubble);
-
-    const offsets = this.getNeighborOffsets(row);
+    const { row, col } = bubble.gridCoordinates;
+    const rowParity = row % 2 === 0 ? 'even' : 'odd';
+    const offsets = NEIGHBOR_OFFSETS[rowParity];
     const neighbors: Bubble[] = [];
 
     for (const [dRow, dCol] of offsets) {
       const nRow = row + dRow;
       const nCol = col + dCol;
-
-      if (
-        nRow >= 0 &&
-        nRow < this.grid.length &&
-        nCol >= 0 &&
-        nCol < this.grid[nRow].length
-      ) {
+      if (this.isValidCell(nRow, nCol)) {
         const neighbor = this.grid[nRow][nCol];
         if (neighbor) {
           neighbors.push(neighbor);
         }
       }
     }
+
     return neighbors;
   }
 
-  private getNeighborOffsets(row: number): [number, number][] {
-    if (row % 2 === 0) {
-      return [
-        [-1, 0],
-        [-1, -1],
-        [0, -1],
-        [0, 1],
-        [1, 0],
-        [1, -1],
-      ];
-    } else {
-      return [
-        [-1, 0],
-        [-1, 1],
-        [0, -1],
-        [0, 1],
-        [1, 0],
-        [1, 1],
-      ];
-    }
-  }
-
-  private getGridCoords(bubble: Bubble): { row: number; col: number } {
-    let row = Math.round((bubble.y - this.bubbleRadius) / this.rowHeight);
-    if (row < 0) row = 0;
-    if (row >= this.grid.length) row = this.grid.length - 1;
-
-    const isEvenRow = row % 2 === 0;
-    let col: number;
-
-    if (isEvenRow) {
-      col = Math.round(bubble.x / this.bubbleWidth - 1);
-    } else {
-      col = Math.round(bubble.x / this.bubbleWidth - 0.5);
-    }
-
-    if (col < 0) col = 0;
-    if (col >= this.grid[row].length) {
-      col = this.grid[row].length - 1;
-    }
-
-    return { row, col };
-  }
-
+  /**
+   * Snap the bubble to the nearest cell in the grid.
+   * Return the pixel x,y for that cell.
+   */
   private getNearestGridPosition(
     x: number,
     y: number,
@@ -155,14 +120,13 @@ export class BubbleCluster {
     if (row < 0) row = 0;
 
     const isEvenRow = row % 2 === 0;
-
     let col: number;
+
     if (isEvenRow) {
       col = Math.round(x / this.bubbleWidth - 1);
     } else {
       col = Math.round(x / this.bubbleWidth - 0.5);
     }
-
     if (col < 0) col = 0;
 
     const snappedX = isEvenRow
@@ -177,27 +141,31 @@ export class BubbleCluster {
     };
   }
 
+  /**
+   * Add a bubble to the cluster (both group & map).
+   */
   public addBubble(bubble: Bubble): void {
-    const normalizedX = this.normalize(bubble.x);
-    const normalizedY = this.normalize(bubble.y);
-
     this.bubblesGroup.add(bubble);
-    this.bubbleMap.set(`${normalizedX},${normalizedY}`, bubble);
   }
 
+  /**
+   * Remove a bubble from the cluster (both group & map).
+   */
   public removeBubble(bubble: Bubble): void {
-    const normalizedX = this.normalize(bubble.x);
-    const normalizedY = this.normalize(bubble.y);
-
     this.bubblesGroup.remove(bubble, false, false);
-    this.bubbleMap.delete(`${normalizedX},${normalizedY}`);
     bubble.destroy();
   }
 
+  /**
+   * Get all static bubbles as an array.
+   */
   public getBubbles(): Bubble[] {
     return this.bubblesGroup.getChildren() as Bubble[];
   }
 
+  /**
+   * Initialize grid with static bubbles.
+   */
   private createGrid(cols: number, rows: number, spriteKey: string): void {
     let bubbleNumber = 0;
 
@@ -208,6 +176,7 @@ export class BubbleCluster {
 
       for (let col = 0; col < maxCols; col++) {
         bubbleNumber++;
+
         const x = this.normalize(
           this.bubbleRadius + col * this.bubbleWidth + offsetX,
         );
@@ -223,14 +192,30 @@ export class BubbleCluster {
           getBubbleColor(),
         );
 
-        this.bubblesGroup.add(bubble);
-        this.bubbleMap.set(`${x},${y}`, bubble);
+        // Store grid coords inside the bubble for easy reference:
+        bubble.gridCoordinates = { row, col };
 
+        this.bubblesGroup.add(bubble);
         this.grid[row][col] = bubble;
       }
     }
   }
 
+  /**
+   * Check that row,col is inside the grid.
+   */
+  private isValidCell(row: number, col: number): boolean {
+    return (
+      row >= 0 &&
+      row < this.grid.length &&
+      col >= 0 &&
+      col < this.grid[row].length
+    );
+  }
+
+  /**
+   * Normalize the floating-point rounding of x,y positions.
+   */
   private normalize(value: number, precision: number = 2): number {
     return parseFloat(value.toFixed(precision));
   }
