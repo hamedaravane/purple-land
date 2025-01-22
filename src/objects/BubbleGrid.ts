@@ -137,7 +137,10 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     return { col, row };
   }
 
-  getNearestGridPosition(x: number, y: number): { x: number; y: number } {
+  getNearestGridPosition(
+    x: number,
+    y: number,
+  ): { snappedX: number; snappedY: number } {
     let row = Math.round((y - this.bubbleRadius) / this.cellHeight);
     if (row < 0) row = 0;
 
@@ -158,8 +161,8 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     const snappedY = this.bubbleRadius + row * this.cellHeight;
 
     return {
-      x: this.normalize(snappedX),
-      y: this.normalize(snappedY),
+      snappedX: this.normalize(snappedX),
+      snappedY: this.normalize(snappedY),
     };
   }
 

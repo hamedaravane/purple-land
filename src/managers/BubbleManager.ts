@@ -43,13 +43,16 @@ export class BubbleManager {
 
         (shooting.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
 
-        const { x, y } = this.bubbleGrid.getNearestGridPosition(
+        const { snappedX, snappedY } = this.bubbleGrid.getNearestGridPosition(
           shooting.x,
           shooting.y,
         );
-        shooting.snapTo(x, y);
+        shooting.snapTo(snappedX, snappedY);
 
-        shooting.gridCoordinates = this.bubbleGrid.getCoordsByPosition(x, y);
+        shooting.gridCoordinates = this.bubbleGrid.getCoordsByPosition(
+          snappedX,
+          snappedY,
+        );
         this.bubbleGrid.addBubbleToGrid(shooting);
         this.bubbleGrid.popConnectedBubbles(shooting);
 
