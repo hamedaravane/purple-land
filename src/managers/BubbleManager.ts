@@ -23,6 +23,10 @@ export class BubbleManager {
     this.cellHeight = this.cellWidth * SQRT3_OVER_2;
   }
 
+  private get bubblesGroupChildren() {
+    return this.bubblesGroup.getChildren() as Bubble[];
+  }
+
   createGrid() {
     let bubbleNumber = 0;
     for (let row = 0; row < this.rows; row++) {
@@ -114,10 +118,6 @@ export class BubbleManager {
       undefined,
       this,
     );
-  }
-
-  private get bubblesGroupChildren() {
-    return this.bubblesGroup.getChildren() as Bubble[];
   }
 
   private onOverlap: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = () => {
