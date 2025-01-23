@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { Bubble } from './Bubble';
 import { NEIGHBOR_OFFSETS, SQRT3_OVER_2 } from '@constants';
-import { getBubbleColor } from '@utils/ColorUtils';
+import { Coordinate } from '@types';
+import { PINK } from '@constants/BubbleColors.ts';
 
 export class BubbleGrid extends Phaser.GameObjects.Group {
   private readonly rows: number;
@@ -33,15 +34,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
         );
         const y = this.normalize(this.bubbleRadius + row * this.cellHeight);
 
-        const bubble = new Bubble(
-          this.scene,
-          x,
-          y,
-          this.cellWidth,
-          'static',
-          'bubbles',
-          getBubbleColor(),
-        );
+        const bubble = new Bubble(this.scene, x, y, this.cellWidth, PINK);
 
         bubble.gridCoordinates = { row, col };
         this.add(bubble);
@@ -73,7 +66,6 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
   }
 
   private findConnectedSameColor(startBubble: Bubble): Bubble[] {
-    const targetColor = startBubble.color.color;
     const visited = new Set<Bubble>();
     const queue: Bubble[] = [startBubble];
 
@@ -86,7 +78,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
           if (
             neighbor &&
             !visited.has(neighbor) &&
-            neighbor.color.color === targetColor
+            neighbor.color.color === startBubble.color.color
           ) {
             queue.push(neighbor);
           }
@@ -124,7 +116,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     return { x, y };
   }
 
-  getCoordsByPosition(x: number, y: number): { col: number; row: number } {
+  getCoordsByPosition(x: number, y: number): Coordinate {
     let row = Math.floor((y - this.bubbleRadius) / this.cellHeight);
     row = Phaser.Math.Clamp(row, 0, this.rows - 1);
 
@@ -134,7 +126,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     let col = Math.floor((x - this.bubbleRadius - offsetX) / this.cellWidth);
     col = Phaser.Math.Clamp(col, 0, this.cols - 1);
 
-    return { col, row };
+    return { row, col };
   }
 
   getNearestGridPosition(
@@ -167,12 +159,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
   }
 
   private isValidCell(row: number, col: number): boolean {
-    return (
-      row >= 0 &&
-      row < this.grid.length &&
-      col >= 0 &&
-      col < this.grid[row].length
-    );
+    return row >= 0 && row < this.rows && col >= 0 && col < this.cols;
   }
 
   getCellWidth(): number {

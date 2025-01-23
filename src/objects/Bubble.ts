@@ -1,48 +1,35 @@
-import { ColorObj } from '@constants/BubbleColors';
-import { BubbleCluster } from '@objects/BubbleCluster';
+import { ColorObj, PINK } from '@constants/BubbleColors';
 import Phaser from 'phaser';
+import { Coordinate } from '@types';
 
 export class Bubble extends Phaser.GameObjects.Sprite {
-  public _bubbleType: 'static' | 'shooting';
-  private readonly _color: ColorObj;
-  private readonly _width: number;
-  private _gridCoordinates: { col: number; row: number } | null = null;
+  isShooter: boolean;
+  color: ColorObj;
+  diameter: number;
+  gridCoordinates: Coordinate;
 
   constructor(
     scene: Phaser.Scene,
     x: number,
     y: number,
     diameter: number,
-    bubbleType: 'static' | 'shooting' = 'static',
+    fillColor: ColorObj = PINK,
+    isShooter: boolean = false,
     texture: string = 'bubbles',
-    fillColor: ColorObj,
   ) {
     super(scene, x, y, texture, fillColor.label);
 
-    this._bubbleType = bubbleType;
-    this._color = fillColor;
-    this._width = diameter;
+    this.isShooter = isShooter;
+    this.color = fillColor;
+    this.diameter = diameter;
 
-    this.scene.add.existing(this);
     this.setBubbleSize();
     this.initPhysics();
-  }
-
-  get gridCoordinates(): { col: number; row: number } {
-    if (this._gridCoordinates === null)
-      throw new Error('Grid coordinates not set');
-    return this._gridCoordinates;
-  }
-
-  set gridCoordinates(value: { col: number; row: number }) {
-    this._gridCoordinates = value;
-  }
-
-  get color() {
-    return this._color;
+    this.scene.add.existing(this);
   }
 
   shot(direction: { x: number; y: number }, speed: number = 600) {
+    if (!this.isShooter) return;
     const deltaX = direction.x - this.x;
     const deltaY = direction.y - this.y;
     const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -58,15 +45,6 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     }
   }
 
-  checkCollision(cluster: BubbleCluster): Bubble | null {
-    for (const targetBubble of cluster.getBubbles()) {
-      if (this.isOverlapping(targetBubble)) {
-        return targetBubble;
-      }
-    }
-    return null;
-  }
-
   snapTo(x: number, y: number): void {
     this.scene.tweens.add({
       targets: this,
@@ -75,23 +53,16 @@ export class Bubble extends Phaser.GameObjects.Sprite {
       duration: 100,
       ease: 'Power2',
     });
-  }
-
-  private isOverlapping(targetBubble: Bubble): boolean {
-    const dx = this.x - targetBubble.x;
-    const dy = this.y - targetBubble.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    return distance < this._width;
+    this.setPosition(x, y);
   }
 
   private setBubbleSize() {
     if (this.width > 0) {
-      const scaleFactor = this._width / this.width;
+      const scaleFactor = this.diameter / this.width;
       this.setScale(scaleFactor);
     } else {
       this.once(Phaser.Loader.Events.COMPLETE, () => {
-        const scaleFactor = this._width / this.width;
+        const scaleFactor = this.diameter / this.width;
         this.setScale(scaleFactor);
       });
     }
@@ -104,9 +75,5 @@ export class Bubble extends Phaser.GameObjects.Sprite {
       this.body.setVelocity(0, 0);
       this.body.setBounce(1, 1);
     }
-  }
-
-  public destroy(...args: any[]) {
-    super.destroy(...args);
   }
 }

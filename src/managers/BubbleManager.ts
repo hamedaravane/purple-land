@@ -1,7 +1,7 @@
 import { BubbleGrid } from '@objects/BubbleGrid.ts';
 import { Bubble } from '@objects/Bubble.ts';
-import { getBubbleColor } from '@utils/ColorUtils.ts';
 import { Aimer } from '@objects/Aimer.ts';
+import { PINK } from '@constants/BubbleColors.ts';
 
 export class BubbleManager {
   private readonly scene: Phaser.Scene;
@@ -29,9 +29,8 @@ export class BubbleManager {
       this.scene.scale.width / 2,
       this.scene.scale.height - 100,
       this.bubbleGrid.getCellWidth(),
-      'shooting',
-      'bubbles',
-      getBubbleColor(),
+      PINK,
+      true,
     );
 
     this.aimer = new Aimer(this.scene, this.shootingBubble);
@@ -63,5 +62,12 @@ export class BubbleManager {
       undefined,
       this,
     );
+  }
+
+  isOverlap(shootingBubble: Bubble, targetBubble: Bubble) {
+    const dx = shootingBubble.x - targetBubble.x;
+    const dy = shootingBubble.y - targetBubble.y;
+    const distanceSquared = dx * dx + dy * dy;
+    return distanceSquared <= shootingBubble.diameter * targetBubble.diameter;
   }
 }
