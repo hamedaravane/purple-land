@@ -56,7 +56,7 @@ export class Bubble extends Phaser.GameObjects.Sprite {
     this.setPosition(x, y);
   }
 
-  private setBubbleSize() {
+  setBubbleSize() {
     if (this.width > 0) {
       const scaleFactor = this.diameter / this.width;
       this.setScale(scaleFactor);
