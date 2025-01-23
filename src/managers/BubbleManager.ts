@@ -1,14 +1,13 @@
 import { BubbleGrid } from '@objects/BubbleGrid.ts';
 import { Bubble } from '@objects/Bubble.ts';
 import { Aimer } from '@objects/Aimer.ts';
-import { PINK } from '@constants/BubbleColors.ts';
+import { getBubbleColor } from '@utils/ColorUtils.ts';
 
 export class BubbleManager {
   private readonly scene: Phaser.Scene;
   private readonly bubbleGrid: BubbleGrid;
   private aimer: Aimer;
   private shootingBubble: Bubble;
-  private overlapCollider: Phaser.Physics.Arcade.Collider;
 
   constructor(scene: Phaser.Scene, rows: number, cols: number) {
     this.scene = scene;
@@ -16,12 +15,11 @@ export class BubbleManager {
     this.scene.add.existing(this.bubbleGrid);
   }
 
-  createGrid(): void {
+  createGrid() {
     this.bubbleGrid.createGrid();
   }
 
-  spawnNewShootingBubble(): void {
-    this.overlapCollider?.destroy();
+  spawnNewShootingBubble() {
     this.aimer?.destroy();
 
     this.shootingBubble = new Bubble(
@@ -29,39 +27,25 @@ export class BubbleManager {
       this.scene.scale.width / 2,
       this.scene.scale.height - 100,
       this.bubbleGrid.getCellWidth(),
-      PINK,
+      getBubbleColor(),
       true,
     );
 
     this.aimer = new Aimer(this.scene, this.shootingBubble);
+  }
 
-    this.overlapCollider = this.scene.physics.add.overlap(
-      this.shootingBubble,
-      this.bubbleGrid.getChildren() as Phaser.GameObjects.GameObject[],
-      (object1, object2) => {
-        const shooting = object1 as Bubble;
-        const target = object2 as Bubble;
-        if (!shooting || !target) return;
-
-        (shooting.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
-
-        const { snappedX, snappedY } = this.bubbleGrid.getNearestGridPosition(
-          shooting.x,
-          shooting.y,
+  checkCollision() {
+    this.bubbleGrid.getChildren().forEach((targetBubble) => {
+      if (this.isOverlap(this.shootingBubble, targetBubble)) {
+        (this.shootingBubble.body as Phaser.Physics.Arcade.Body).setVelocity(
+          0,
+          0,
         );
-        shooting.snapTo(snappedX, snappedY);
-
-        shooting.gridCoordinates = this.bubbleGrid.getCoordsByPosition(
-          snappedX,
-          snappedY,
-        );
-        this.bubbleGrid.addBubbleToGrid(shooting);
-        this.bubbleGrid.popConnectedBubbles(shooting);
+        this.bubbleGrid.snapBubbleToGrid(this.shootingBubble);
+        this.bubbleGrid.popConnectedBubbles(this.shootingBubble);
         this.spawnNewShootingBubble();
-      },
-      undefined,
-      this,
-    );
+      }
+    });
   }
 
   isOverlap(shootingBubble: Bubble, targetBubble: Bubble) {

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Bubble } from './Bubble';
 import { NEIGHBOR_OFFSETS, SQRT3_OVER_2 } from '@constants';
 import { Coordinate } from '@types';
-import { PINK } from '@constants/BubbleColors.ts';
+import { getBubbleColor } from '@utils/ColorUtils.ts';
 
 export class BubbleGrid extends Phaser.GameObjects.Group {
   private readonly rows: number;
@@ -34,7 +34,13 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
         );
         const y = this.normalize(this.bubbleRadius + row * this.cellHeight);
 
-        const bubble = new Bubble(this.scene, x, y, this.cellWidth, PINK);
+        const bubble = new Bubble(
+          this.scene,
+          x,
+          y,
+          this.cellWidth,
+          getBubbleColor(),
+        );
 
         bubble.gridCoordinates = { row, col };
         this.add(bubble);
@@ -129,7 +135,17 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     return { row, col };
   }
 
-  getNearestGridPosition(
+  snapBubbleToGrid(bubble: Bubble): void {
+    const { snappedX: x, snappedY: y } = this.getNearestGridPosition(
+      bubble.x,
+      bubble.y,
+    );
+    bubble.snapTo(x, y);
+    bubble.gridCoordinates = this.getCoordsByPosition(x, y);
+    this.addBubbleToGrid(bubble);
+  }
+
+  private getNearestGridPosition(
     x: number,
     y: number,
   ): { snappedX: number; snappedY: number } {
@@ -156,6 +172,10 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
       snappedX: this.normalize(snappedX),
       snappedY: this.normalize(snappedY),
     };
+  }
+
+  getChildren() {
+    return super.getChildren() as Bubble[];
   }
 
   private isValidCell(row: number, col: number): boolean {
