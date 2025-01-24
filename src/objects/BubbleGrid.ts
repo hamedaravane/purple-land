@@ -64,8 +64,8 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     bubble.destroy();
   }
 
-  popConnectedBubbles(bubble: Bubble): void {
-    const connected = this.findConnectedSameColor(bubble);
+  popConnectedBubbles(startBubble: Bubble): void {
+    const connected = this.findConnectedSameColor(startBubble);
     if (connected.length >= 3) {
       connected.forEach((b) => this.removeBubble(b));
     }
@@ -140,7 +140,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
       bubble.x,
       bubble.y,
     );
-    bubble.snapTo(x, y);
+    bubble.setPosition(x, y);
     bubble.gridCoordinates = this.getCoordsByPosition(x, y);
     this.addBubbleToGrid(bubble);
   }
