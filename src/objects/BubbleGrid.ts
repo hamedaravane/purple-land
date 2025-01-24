@@ -49,13 +49,13 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     }
   }
 
-  addBubbleToGrid(bubble: Bubble): void {
+  addBubbleToGrid(bubble: Bubble) {
     const { row, col } = bubble.gridCoordinates;
     this.grid[row][col] = bubble;
     this.add(bubble);
   }
 
-  private removeBubble(bubble: Bubble): void {
+  private removeBubble(bubble: Bubble) {
     const { row, col } = bubble.gridCoordinates;
     if (this.grid[row] && this.grid[row][col] === bubble) {
       this.grid[row][col] = null;
@@ -64,7 +64,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     bubble.destroy();
   }
 
-  popConnectedBubbles(startBubble: Bubble): void {
+  popConnectedBubbles(startBubble: Bubble) {
     const connected = this.findConnectedSameColor(startBubble);
     if (connected.length >= 3) {
       connected.forEach((b) => this.removeBubble(b));
@@ -135,7 +135,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     return { row, col };
   }
 
-  snapBubbleToGrid(bubble: Bubble): void {
+  snapBubbleToGrid(bubble: Bubble) {
     const { snappedX: x, snappedY: y } = this.getNearestGridPosition(
       bubble.x,
       bubble.y,
@@ -174,19 +174,19 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     };
   }
 
-  getChildren() {
+  override getChildren() {
     return super.getChildren() as Bubble[];
   }
 
-  private isValidCell(row: number, col: number): boolean {
+  private isValidCell(row: number, col: number) {
     return row >= 0 && row < this.rows && col >= 0 && col < this.cols;
   }
 
-  getCellWidth(): number {
+  getCellWidth() {
     return this.cellWidth;
   }
 
-  private normalize(value: number, precision: number = 2): number {
+  private normalize(value: number, precision: number = 2) {
     return parseFloat(value.toFixed(precision));
   }
 }
