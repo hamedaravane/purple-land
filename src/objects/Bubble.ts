@@ -30,8 +30,8 @@ export class Bubble extends Phaser.GameObjects.Sprite {
 
   /**
    * @description Fires a shot in a given direction with a specified speed.
-   * - Think of this like aiming and shooting an arrow at a specific point. The arrow figures out how far and in what direction
-   *   it needs to travel, then adjusts its velocity so it travels at the desired speed in that direction.
+   * Think of this like aiming and shooting an arrow at a specific point. The arrow figures out how far and in what direction
+   * it needs to travel, then adjusts its velocity so it travels at the desired speed in that direction.
    * To learn more about the math and geometry behind this, check out:
    * https://en.wikipedia.org/wiki/Unit_vector
    * and https://en.wikipedia.org/wiki/Pythagorean_theorem
