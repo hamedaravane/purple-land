@@ -1,44 +1,157 @@
 # Purple Land
 
-A simple yet addictive bubble-popping game built using **Phaser 3** and **TypeScript**. This game demonstrates:
+Purple Land is a dynamic 2D game built with Phaser 3 and TypeScript. The game features a grid-based bubble-shooting mechanic, immersive visuals, and a smooth player experience. This repository is designed for both development and production environments, ensuring a seamless workflow.
 
-- Basic bubble shooter mechanics
-- Matching 3 or more bubbles to pop
-- Level progression and increased difficulty
-- Responsive mobile-friendly scaling
-- Sound effects and simple animations
+## Table of Contents
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Getting Started](#getting-started)
+   - [Prerequisites](#prerequisites)
+   - [Installation](#installation)
+   - [Running the Game](#running-the-game)
+- [Game Overview](#game-overview)
+   - [Core Mechanics](#core-mechanics)
+   - [Game Components](#game-components)
+- [Development](#development)
+   - [Folder Structure](#folder-structure)
+   - [Scripts](#scripts)
+   - [Testing](#testing)
+- [License](#license)
+- [Contributing](#contributing)
+- [Acknowledgments](#acknowledgments)
+
+---
+
+## Features
+- **Phaser 3 Framework:** Advanced 2D game development capabilities.
+- **TypeScript Support:** Type-safe development for robust and maintainable code.
+- **Bubble Shooting Mechanics:** Interactive gameplay with grid-based mechanics.
+- **Smooth Animations:** Seamless transitions and engaging visuals.
+- **Development Tools:** Includes ESLint, Prettier, and Vitest for code quality and testing.
+
+---
+
+## Technologies Used
+- **[Phaser 3](https://phaser.io/):** Game development framework.
+- **[TypeScript](https://www.typescriptlang.org/):** Strongly-typed programming language.
+- **[Vite](https://vitejs.dev/):** Lightning-fast build tool.
+- **[ESLint](https://eslint.org/):** JavaScript linting.
+- **[Prettier](https://prettier.io/):** Code formatter.
+- **[Vitest](https://vitest.dev/):** Testing framework.
+
+---
 
 ## Getting Started
 
-1. **Install Dependencies**:
+### Prerequisites
+- Node.js v14.0.0 or higher
+- NPM v6.0.0 or higher
 
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/hamedaravane/purple-land.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd purple-land
+   ```
+
+3. Install dependencies:
    ```bash
    npm install
-2. **Development Server**:
+   ```
 
-    ```bash
-    npm run dev
+### Running the Game
+To start the game in development mode:
+```bash
+npm run dev
+```
 
-3. Open http://localhost:8080 in your browser.
+To build the game for production:
+```bash
+npm run build
+```
 
-## Production Build:
+To test the game:
+```bash
+npm run test
+```
 
-1. **Build Project**
-    ```bash
-    npm run build
+---
 
-The compiled files will be in the `dist/` folder.
+## Game Overview
 
-## Game Configuration:
+### Core Mechanics
+Purple Land revolves around shooting bubbles into a grid. The goal is to strategically match bubbles of the same color to clear them and score points.
 
-- Adjust `GameConfig.ts` to change `width`, `height`, `scale` `mode`, etc.
-- Edit `BubbleShooterScene.ts` to tweak gameplay parameters (`bubble rows`, `difficulty`, etc.).
+### Game Components
+1. **Aimer**
+   - Handles aiming and shooting of bubbles.
+2. **Bubble**
+   - Represents individual bubbles with specific colors and behaviors.
+3. **BubbleGrid**
+   - Manages the grid structure and bubble placement.
+4. **BubbleManager**
+   - Responsible for spawning and managing bubbles.
+5. **GameScene**
+   - Main game logic and scene management.
 
-## Directory Structure
-- `assets/`: Contains images, audio, and fonts.
-- `src/`: Main game code (TypeScript).
-- `config/`: Shared Phaser game config (GameConfig).
-- `scenes/`: Game scenes (Main bubble shooter).
-- `objects/`, `utils/`, `types/`: Extend as needed for shared classes, utilities, type definitions, etc.
-- `tsconfig.json`: TypeScript configuration.
-- `eslint.config.js`: ESLint configuration for code quality.
+---
+
+## Development
+
+### Folder Structure
+```
+project-root/
+├── src/
+│   ├── constants/
+│   ├── managers/
+│   ├── objects/
+│   ├── scenes/
+│   ├── types/
+│   ├── utils/
+│   ├── main.ts
+├── public/
+│   ├── assets/
+│   │   ├── audio
+│   │   └── images
+├── vite/
+├── index.html
+└── package.json
+```
+
+### Scripts
+- **Development Mode:** `npm run dev`
+- **Production Build:** `npm run build`
+- **Run Tests:** `npm run test`
+- **Code Linting:** `eslint .`
+- **Code Formatting:** `prettier --write .`
+
+### Testing
+Vitest is used to ensure the reliability of the code. Run the following command for test coverage:
+```bash
+npm run coverage
+```
+
+---
+
+## License
+Purple Land is licensed under the **Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)**. See the [LICENSE file](./LICENSE) for more details.
+
+---
+
+## Contributing
+Contributions are welcome! Feel free to open issues or submit pull requests for bug fixes, new features, or improvements.
+
+---
+
+## Acknowledgments
+- **Phaser Team:** For their outstanding game framework.
+- **Open Source Contributors:** For tools and libraries that made this project possible.
+
+---
+
+Enjoy the game and happy coding!
+
