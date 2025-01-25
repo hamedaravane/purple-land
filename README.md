@@ -139,19 +139,3 @@ npm run coverage
 
 ## License
 Purple Land is licensed under the **Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)**. See the [LICENSE file](./LICENSE) for more details.
-
----
-
-## Contributing
-Contributions are welcome! Feel free to open issues or submit pull requests for bug fixes, new features, or improvements.
-
----
-
-## Acknowledgments
-- **Phaser Team:** For their outstanding game framework.
-- **Open Source Contributors:** For tools and libraries that made this project possible.
-
----
-
-Enjoy the game and happy coding!
-
