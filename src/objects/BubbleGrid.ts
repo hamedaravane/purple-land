@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { Bubble } from './Bubble';
 import { NEIGHBOR_OFFSETS, SQRT3_OVER_2 } from '@constants';
-import { Coordinate } from '@types';
 import { getBubbleColor } from '@utils/ColorUtils.ts';
 
 export class BubbleGrid extends Phaser.GameObjects.Group {
@@ -19,7 +18,10 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     this.cellWidth = scene.scale.width / cols;
     this.bubbleRadius = this.cellWidth / 2;
     this.cellHeight = this.cellWidth * SQRT3_OVER_2;
-    this.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+
+    const availableHeight = scene.scale.height - 100 - this.cellHeight;
+    const maxRows = Math.floor(availableHeight / this.cellHeight);
+    this.grid = Array.from({ length: maxRows }, () => Array(cols).fill(null));
   }
 
   createGrid() {
@@ -115,40 +117,22 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     return neighbors;
   }
 
-  getPositionByCoords(col: number, row: number): { x: number; y: number } {
-    const offsetX = row % 2 === 0 ? this.bubbleRadius : 0;
-    const x = this.bubbleRadius + col * this.cellWidth + offsetX;
-    const y = this.bubbleRadius + row * this.cellHeight;
-    return { x, y };
-  }
-
-  getCoordsByPosition(x: number, y: number): Coordinate {
-    let row = Math.floor((y - this.bubbleRadius) / this.cellHeight);
-    row = Phaser.Math.Clamp(row, 0, this.rows - 1);
-
-    const isEvenRow = row % 2 === 0;
-    const offsetX = isEvenRow ? this.bubbleRadius : 0;
-
-    let col = Math.floor((x - this.bubbleRadius - offsetX) / this.cellWidth);
-    col = Phaser.Math.Clamp(col, 0, this.cols - 1);
-
-    return { row, col };
-  }
-
   snapBubbleToGrid(bubble: Bubble) {
-    const { snappedX: x, snappedY: y } = this.getNearestGridPosition(
-      bubble.x,
-      bubble.y,
-    );
+    const {
+      snappedX: x,
+      snappedY: y,
+      row,
+      col,
+    } = this.getNearestGridPosition(bubble.x, bubble.y);
     bubble.setPosition(x, y);
-    bubble.gridCoordinates = this.getCoordsByPosition(x, y);
+    bubble.gridCoordinates = { row, col };
     this.addBubbleToGrid(bubble);
   }
 
   private getNearestGridPosition(
     x: number,
     y: number,
-  ): { snappedX: number; snappedY: number } {
+  ): { snappedX: number; snappedY: number; row: number; col: number } {
     let row = Math.round((y - this.bubbleRadius) / this.cellHeight);
     if (row < 0) row = 0;
 
@@ -171,6 +155,8 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     return {
       snappedX: this.normalize(snappedX),
       snappedY: this.normalize(snappedY),
+      row,
+      col,
     };
   }
 
