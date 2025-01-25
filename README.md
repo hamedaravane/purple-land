@@ -122,13 +122,6 @@ project-root/
 └── package.json
 ```
 
-### Scripts
-- **Development Mode:** `npm run dev`
-- **Production Build:** `npm run build`
-- **Run Tests:** `npm run test`
-- **Code Linting:** `eslint .`
-- **Code Formatting:** `prettier --write .`
-
 ### Testing
 Vitest is used to ensure the reliability of the code. Run the following command for test coverage:
 ```bash
