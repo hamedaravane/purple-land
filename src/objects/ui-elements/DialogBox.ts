@@ -59,6 +59,7 @@ export default class DialogBox extends Phaser.GameObjects.Container {
     this.background.setStrokeStyle(strokeThickness, strokeColor);
 
     const style = {
+      fontFamily: 'LuckiestGuy',
       fontSize: '16px',
       color: '#ffffff',
       wordWrap: { width: finalWidth - 20 },

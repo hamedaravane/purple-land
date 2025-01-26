@@ -31,6 +31,7 @@ export default class Button extends Phaser.GameObjects.Container {
     buttonImage.setScale(finalScale);
 
     const defaultStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+      fontFamily: 'LuckiestGuy',
       fontSize: '18px',
       color: '#ffffff',
       fontStyle: 'bold',

@@ -28,6 +28,7 @@ export default class Badge extends Phaser.GameObjects.Container {
       .setOrigin(0.5);
 
     const defaultStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+      fontFamily: 'LuckiestGuy',
       fontSize: '16px',
       color: '#ffffff',
       fontStyle: 'bold',
