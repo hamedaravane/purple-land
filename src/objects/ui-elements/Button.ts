@@ -1,8 +1,8 @@
 interface ButtonConfig {
   text?: string;
   textStyle?: Phaser.Types.GameObjects.Text.TextStyle;
-  scale?: number;
-  hoverScale?: number;
+  minWidth?: number;
+  minHeight?: number;
   callback?: () => void;
 }
 
@@ -19,24 +19,25 @@ export default class Button extends Phaser.GameObjects.Container {
     const {
       text = '',
       textStyle,
-      scale = 0.8,
-      hoverScale = 0.85,
+      minWidth = 48,
+      minHeight = 48,
       callback,
     } = config || {};
 
     const buttonImage = scene.add.image(0, 0, texture).setInteractive();
-    buttonImage.setScale(scale);
+    const scaleX = minWidth / buttonImage.width;
+    const scaleY = minHeight / buttonImage.height;
+    const finalScale = Math.max(scaleX, scaleY);
+    buttonImage.setScale(finalScale);
 
     const defaultStyle: Phaser.Types.GameObjects.Text.TextStyle = {
-      fontSize: '24px',
+      fontSize: '18px',
       color: '#ffffff',
       fontStyle: 'bold',
     };
     const mergedStyle = { ...defaultStyle, ...textStyle };
     const buttonText = scene.add.text(0, 0, text, mergedStyle).setOrigin(0.5);
 
-    buttonImage.on('pointerover', () => buttonImage.setScale(hoverScale));
-    buttonImage.on('pointerout', () => buttonImage.setScale(scale));
     buttonImage.on('pointerdown', () => callback && callback());
 
     this.add([buttonImage, buttonText]);

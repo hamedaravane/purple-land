@@ -3,6 +3,7 @@ interface BadgeConfig {
   count?: number;
   backgroundColor?: number;
   textStyle?: Phaser.Types.GameObjects.Text.TextStyle;
+  minSize?: number;
 }
 
 export default class Badge extends Phaser.GameObjects.Container {
@@ -17,10 +18,13 @@ export default class Badge extends Phaser.GameObjects.Container {
       count = 0,
       backgroundColor = 0xff0000,
       textStyle,
+      minSize = 48,
     } = config || {};
 
+    const finalSize = Math.max(size, minSize);
+
     this.badgeBackground = scene.add
-      .ellipse(0, 0, size, size, backgroundColor)
+      .ellipse(0, 0, finalSize, finalSize, backgroundColor)
       .setOrigin(0.5);
 
     const defaultStyle: Phaser.Types.GameObjects.Text.TextStyle = {

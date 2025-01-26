@@ -6,6 +6,8 @@ interface ToggleSwitchConfig {
   offColor?: number;
   circleScale?: number;
   onToggle?: (isOn: boolean) => void;
+  minWidth?: number;
+  minHeight?: number;
 }
 
 export default class ToggleSwitch extends Phaser.GameObjects.Container {
@@ -32,7 +34,12 @@ export default class ToggleSwitch extends Phaser.GameObjects.Container {
       offColor = 0xff0000,
       circleScale = 0.8,
       onToggle,
+      minWidth = 48,
+      minHeight = 48,
     } = config || {};
+
+    const finalWidth = Math.max(width, minWidth);
+    const finalHeight = Math.max(height, minHeight);
 
     this.isOn = initialState;
     this.onColor = onColor;
@@ -40,13 +47,13 @@ export default class ToggleSwitch extends Phaser.GameObjects.Container {
     this.onToggle = onToggle;
 
     this.background = scene.add
-      .rectangle(0, 0, width, height, this.isOn ? onColor : offColor)
+      .rectangle(0, 0, finalWidth, finalHeight, this.isOn ? onColor : offColor)
       .setOrigin(0.5);
 
-    const diameter = height * circleScale;
+    const diameter = finalHeight * circleScale;
     this.toggleCircle = scene.add
       .ellipse(
-        this.isOn ? width / 4 : -width / 4,
+        this.isOn ? finalWidth / 4 : -finalWidth / 4,
         0,
         diameter,
         diameter,
@@ -54,9 +61,9 @@ export default class ToggleSwitch extends Phaser.GameObjects.Container {
       )
       .setOrigin(0.5);
 
-    this.background.setInteractive().on('pointerdown', () => {
-      this.setToggle(!this.isOn);
-    });
+    this.background
+      .setInteractive()
+      .on('pointerdown', () => this.setToggle(!this.isOn));
 
     this.add([this.background, this.toggleCircle]);
     scene.add.existing(this);

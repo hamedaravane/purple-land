@@ -20,7 +20,7 @@ export default class ProgressBar extends Phaser.GameObjects.Container {
 
     const {
       width = 200,
-      height = 20,
+      height = 48,
       backgroundColor = 0x808080,
       fillColor = 0x00ff00,
       initialProgress = 0,

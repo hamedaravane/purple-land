@@ -10,6 +10,8 @@ interface DialogBoxConfig {
   strokeThickness?: number;
   textStyle?: Phaser.Types.GameObjects.Text.TextStyle;
   closeIconTexture?: string;
+  minWidth?: number;
+  minHeight?: number;
 }
 
 export default class DialogBox extends Phaser.GameObjects.Container {
@@ -37,17 +39,29 @@ export default class DialogBox extends Phaser.GameObjects.Container {
       strokeThickness = 2,
       textStyle,
       closeIconTexture = 'close-icon',
+      minWidth = 48,
+      minHeight = 48,
     } = config || {};
 
+    const finalWidth = Math.max(width, minWidth);
+    const finalHeight = Math.max(height, minHeight);
+
     this.background = scene.add
-      .rectangle(0, 0, width, height, backgroundColor, backgroundAlpha)
+      .rectangle(
+        0,
+        0,
+        finalWidth,
+        finalHeight,
+        backgroundColor,
+        backgroundAlpha,
+      )
       .setOrigin(0.5);
     this.background.setStrokeStyle(strokeThickness, strokeColor);
 
     const style = {
       fontSize: '16px',
       color: '#ffffff',
-      wordWrap: { width: width - 20 },
+      wordWrap: { width: finalWidth - 20 },
       align: 'center',
       ...textStyle,
     };
@@ -57,7 +71,7 @@ export default class DialogBox extends Phaser.GameObjects.Container {
 
     if (hasCloseButton) {
       this.closeButton = scene.add
-        .image(width / 2 - 20, -height / 2 + 20, closeIconTexture)
+        .image(finalWidth / 2 - 20, -finalHeight / 2 + 20, closeIconTexture)
         .setInteractive()
         .setScale(0.5);
       this.closeButton.on('pointerdown', () => {
