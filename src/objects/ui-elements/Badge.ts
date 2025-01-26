@@ -1,0 +1,51 @@
+interface BadgeConfig {
+  size?: number;
+  count?: number;
+  backgroundColor?: number;
+  textStyle?: Phaser.Types.GameObjects.Text.TextStyle;
+}
+
+export default class Badge extends Phaser.GameObjects.Container {
+  private badgeBackground: Phaser.GameObjects.Ellipse;
+  private badgeText: Phaser.GameObjects.Text;
+
+  constructor(scene: Phaser.Scene, x: number, y: number, config?: BadgeConfig) {
+    super(scene, x, y);
+
+    const {
+      size = 30,
+      count = 0,
+      backgroundColor = 0xff0000,
+      textStyle,
+    } = config || {};
+
+    this.badgeBackground = scene.add
+      .ellipse(0, 0, size, size, backgroundColor)
+      .setOrigin(0.5);
+
+    const defaultStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+      fontSize: '16px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    };
+    const mergedStyle = { ...defaultStyle, ...textStyle };
+    this.badgeText = scene.add
+      .text(0, 0, count.toString(), mergedStyle)
+      .setOrigin(0.5);
+
+    this.add([this.badgeBackground, this.badgeText]);
+    scene.add.existing(this);
+  }
+
+  setCount(count: number) {
+    this.badgeText.setText(count.toString());
+  }
+
+  hideBadge() {
+    this.setVisible(false);
+  }
+
+  showBadge() {
+    this.setVisible(true);
+  }
+}
