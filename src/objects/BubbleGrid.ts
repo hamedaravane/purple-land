@@ -51,7 +51,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     }
   }
 
-  addBubbleToGrid(bubble: Bubble) {
+  addBubble(bubble: Bubble) {
     const { row, col } = bubble.gridCoordinates;
     this.grid[row][col] = bubble;
     this.add(bubble);
@@ -62,8 +62,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     if (this.grid[row] && this.grid[row][col] === bubble) {
       this.grid[row][col] = null;
     }
-    this.remove(bubble, false);
-    bubble.destroy();
+    this.remove(bubble, true, true);
   }
 
   popConnectedBubbles(startBubble: Bubble) {
@@ -126,7 +125,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     } = this.getNearestGridPosition(bubble.x, bubble.y);
     bubble.setPosition(x, y);
     bubble.gridCoordinates = { row, col };
-    this.addBubbleToGrid(bubble);
+    this.addBubble(bubble);
   }
 
   private getNearestGridPosition(
