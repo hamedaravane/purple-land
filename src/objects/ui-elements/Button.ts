@@ -1,47 +1,70 @@
+type ColorStyle = 'blue' | 'pink' | 'yellow' | 'purple' | 'green';
+type State = 'unpressed' | 'pressed';
+type Shape = 'rect' | 'circle' | 'square';
+type CornerRadius = 'sharp' | 'rounded';
+
 interface ButtonConfig {
-  text?: string;
-  textStyle?: Phaser.Types.GameObjects.Text.TextStyle;
-  minWidth?: number;
-  minHeight?: number;
-  callback?: () => void;
+  colorStyle: ColorStyle;
+  state: State;
+  shape: Shape;
+  cornerRadius?: CornerRadius;
+}
+
+function generateButton(config: ButtonConfig) {
+  const { colorStyle, state, shape } = config;
+  const cornerRadius = config.cornerRadius ? `-${config.cornerRadius}` : '';
+  return `${colorStyle}-${state}-${shape}${cornerRadius}`;
 }
 
 export default class Button extends Phaser.GameObjects.Container {
-  constructor(
-    scene: Phaser.Scene,
-    x: number,
-    y: number,
-    texture: string,
-    config?: ButtonConfig,
-  ) {
+  config: ButtonConfig;
+  sprite: Phaser.GameObjects.Sprite;
+  text: Phaser.GameObjects.Text;
+  constructor(scene: Phaser.Scene, x: number, y: number, config: ButtonConfig) {
     super(scene, x, y);
+    this.config = config;
 
-    const {
-      text = '',
-      textStyle,
-      minWidth = 48,
-      minHeight = 48,
-      callback,
-    } = config || {};
-
-    const buttonImage = scene.add.image(0, 0, texture).setInteractive();
-    const scaleX = minWidth / buttonImage.width;
-    const scaleY = minHeight / buttonImage.height;
-    const finalScale = Math.max(scaleX, scaleY);
-    buttonImage.setScale(finalScale);
-
-    const defaultStyle: Phaser.Types.GameObjects.Text.TextStyle = {
+    this.sprite = new Phaser.GameObjects.Sprite(
+      scene,
+      0,
+      0,
+      'ui',
+      generateButton(this.config),
+    );
+    const defaultTextStyles: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: 'LuckiestGuy',
-      fontSize: '18px',
+      fontSize: 16,
       color: '#ffffff',
-      fontStyle: 'bold',
+      align: 'center',
+      shadow: { offsetY: 2, color: '#00000030', blur: 0, fill: true },
     };
-    const mergedStyle = { ...defaultStyle, ...textStyle };
-    const buttonText = scene.add.text(0, 0, text, mergedStyle).setOrigin(0.5);
-
-    buttonImage.on('pointerdown', () => callback && callback());
-
-    this.add([buttonImage, buttonText]);
+    this.text = new Phaser.GameObjects.Text(
+      scene,
+      0,
+      -5,
+      'PLAY',
+      defaultTextStyles,
+    ).setOrigin(0.5, 0.5);
+    this.add([this.sprite, this.text]);
     scene.add.existing(this);
+
+    scene.input.on('pointerdown', () => {
+      this.pressButton();
+    });
+    scene.input.on('pointerup', () => {
+      this.unpressedButton();
+    });
+  }
+
+  private pressButton() {
+    this.sprite.setFrame(generateButton({ ...this.config, state: 'pressed' }));
+    this.text.y = -2;
+  }
+
+  private unpressedButton() {
+    this.sprite.setFrame(
+      generateButton({ ...this.config, state: 'unpressed' }),
+    );
+    this.text.y = -5;
   }
 }

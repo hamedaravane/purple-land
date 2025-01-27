@@ -10,69 +10,33 @@ export default class MainScene extends Phaser.Scene {
     const screenWidth = this.scale.width;
     const screenHeight = this.scale.height;
 
-    const navBarHeight = 80;
-    const navBarY = screenHeight - navBarHeight;
+    // const navBarHeight = 80;
+    // const navBarY = screenHeight - navBarHeight;
+    // this.add.rectangle(
+    //   screenWidth / 2,
+    //   navBarY + navBarHeight / 2,
+    //   screenWidth,
+    //   navBarHeight,
+    //   0x333333,
+    // );
 
-    this.add.rectangle(
-      screenWidth / 2,
-      navBarY + navBarHeight / 2,
-      screenWidth,
-      navBarHeight,
-      0x333333,
-    );
+    // const buttonWidth = 80;
+    // const buttonSpacing = 20;
+    // const buttonY = navBarY + navBarHeight / 2;
 
-    const buttonWidth = 80;
-    const buttonSpacing = 20;
-    const buttonY = navBarY + navBarHeight / 2;
+    this.add.image(screenWidth / 2, screenHeight / 2, 'bg');
 
-    const homeButton = new Button(
-      this,
-      screenWidth / 2 - buttonWidth * 2 - buttonSpacing,
-      buttonY,
-      'buttons',
-      {
-        text: 'Home',
-        callback: () => this.handleNavigation('Home'),
-      },
-    );
+    new Button(this, screenWidth / 2, screenHeight / 2, {
+      colorStyle: 'green',
+      state: 'unpressed',
+      cornerRadius: 'rounded',
+      shape: 'rect',
+    });
 
-    const inventoryButton = new Button(
-      this,
-      screenWidth / 2 - buttonWidth - buttonSpacing / 2,
-      buttonY,
-      'buttons',
-      {
-        text: 'Inventory',
-        callback: () => this.handleNavigation('Inventory'),
-      },
-    );
-
-    const settingsButton = new Button(
-      this,
-      screenWidth / 2 + buttonWidth + buttonSpacing / 2,
-      buttonY,
-      'buttons',
-      {
-        text: 'Settings',
-        callback: () => this.handleNavigation('Settings'),
-      },
-    );
-
-    const profileButton = new Button(
-      this,
-      screenWidth / 2 + buttonWidth * 2 + buttonSpacing,
-      buttonY,
-      'buttons',
-      {
-        text: 'Profile',
-        callback: () => this.handleNavigation('Profile'),
-      },
-    );
-
-    this.add.existing(homeButton);
-    this.add.existing(inventoryButton);
-    this.add.existing(settingsButton);
-    this.add.existing(profileButton);
+    // this.add.existing(homeButton);
+    // this.add.existing(inventoryButton);
+    // this.add.existing(settingsButton);
+    // this.add.existing(profileButton);
   }
 
   handleNavigation(destination: string) {

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import BootScene from '@scenes/BootScene.ts';
 import GameScene from '@scenes/GameScene.ts';
+import MainScene from '@scenes/MainScene.ts';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -8,7 +9,7 @@ const config: Phaser.Types.Core.GameConfig = {
   height: 844,
   pixelArt: false,
   title: 'Purple Land',
-  scene: [BootScene, GameScene],
+  scene: [BootScene, MainScene, GameScene],
   parent: 'game-container',
   scale: {
     mode: Phaser.Scale.RESIZE,
