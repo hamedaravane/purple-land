@@ -72,23 +72,36 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     }
   }
 
+  /**
+   * @description Finds all connected bubbles with the same color as the given start bubble.
+   *
+   * using **Breadth-First Search (BFS):**
+   * an algorithm for traversing or searching tree or graph data structures.
+   * It starts at a specific node (the start bubble in this case) and explores all of its neighbors
+   * at the current depth before moving on to the next depth level. This ensures that nodes closer
+   * to the start node are visited first.
+   *
+   * @param {Bubble} startBubble - The starting bubble for the search.
+   * @returns {Bubble[]} An array of all connected bubbles with the same color.
+   * @author Hamed Arghavan
+   */
   private findConnectedSameColor(startBubble: Bubble): Bubble[] {
     const visited = new Set<Bubble>();
-    const queue: Bubble[] = [startBubble];
+    const queue: Bubble[] = [];
+    queue.push(startBubble);
+    visited.add(startBubble);
 
     while (queue.length > 0) {
       const current = queue.shift()!;
-      if (!visited.has(current)) {
-        visited.add(current);
+      visited.add(current);
 
-        for (const neighbor of this.getNeighbors(current)) {
-          if (
-            neighbor &&
-            !visited.has(neighbor) &&
-            neighbor.color.color === startBubble.color.color
-          ) {
-            queue.push(neighbor);
-          }
+      const neighbors = this.getNeighbors(current);
+      for (const neighbor of neighbors) {
+        if (
+          !visited.has(neighbor) &&
+          neighbor.color.label === startBubble.color.label
+        ) {
+          queue.push(neighbor);
         }
       }
     }
