@@ -40,7 +40,7 @@ export default class Button extends Phaser.GameObjects.Container {
     // this.setSpriteSize();
     const defaultTextStyles: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: 'LuckiestGuy',
-      fontSize: 16,
+      fontSize: 20,
       color: '#ffffff',
       align: 'center',
       shadow: { offsetY: 2, color: '#00000030', blur: 0, fill: true },
