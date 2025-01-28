@@ -26,7 +26,7 @@ export default class MainScene extends Phaser.Scene {
 
     this.add.image(screenWidth / 2, screenHeight / 2, 'bg');
 
-    new Button(this, screenWidth / 2, screenHeight / 2, {
+    new Button(this, 'Hello', screenWidth / 2, screenHeight / 2, {
       colorStyle: 'green',
       state: 'unpressed',
       cornerRadius: 'rounded',
