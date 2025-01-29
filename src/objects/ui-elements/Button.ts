@@ -1,7 +1,7 @@
-type ColorStyle = 'blue' | 'pink' | 'yellow' | 'purple' | 'green';
-type State = 'unpressed' | 'pressed';
-type Shape = 'rect' | 'circle' | 'square';
-type CornerRadius = 'sharp' | 'rounded';
+export type ColorStyle = 'blue' | 'pink' | 'yellow' | 'purple' | 'green';
+export type State = 'unpressed' | 'pressed';
+export type Shape = 'rect' | 'circle' | 'square';
+export type CornerRadius = 'sharp' | 'rounded';
 
 interface ButtonConfig {
   colorStyle: ColorStyle;
