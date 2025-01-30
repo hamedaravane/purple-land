@@ -17,18 +17,24 @@ function generateButton(config: ButtonConfig) {
 }
 
 export default class Button extends Phaser.GameObjects.Container {
-  config: ButtonConfig;
-  sprite: Phaser.GameObjects.Sprite;
-  text: Phaser.GameObjects.Text;
+  private readonly config: ButtonConfig;
+  private readonly sprite: Phaser.GameObjects.Sprite;
+  private readonly text: Phaser.GameObjects.Text;
+  private readonly callback?: () => void;
+
   constructor(
     scene: Phaser.Scene,
     text: string,
     x: number,
     y: number,
     config: ButtonConfig,
+    callback?: () => void,
   ) {
     super(scene, x, y);
+
     this.config = config;
+    this.callback = callback;
+
     this.sprite = new Phaser.GameObjects.Sprite(
       scene,
       0,
@@ -37,14 +43,14 @@ export default class Button extends Phaser.GameObjects.Container {
       generateButton(this.config),
     );
 
-    // this.setSpriteSize();
     const defaultTextStyles: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: 'LuckiestGuy',
-      fontSize: 20,
+      fontSize: '20px',
       color: '#ffffff',
       align: 'center',
       shadow: { offsetY: 2, color: '#00000030', blur: 0, fill: true },
     };
+
     this.text = new Phaser.GameObjects.Text(
       scene,
       0,
@@ -52,33 +58,45 @@ export default class Button extends Phaser.GameObjects.Container {
       text,
       defaultTextStyles,
     ).setOrigin(0.5, 0.5);
+
     this.add([this.sprite, this.text]);
     scene.add.existing(this);
 
-    scene.input.on('pointerdown', () => {
-      this.pressButton();
-    });
-    scene.input.on('pointerup', () => {
-      this.unpressedButton();
-    });
+    this.setInteractive(
+      new Phaser.Geom.Rectangle(
+        -this.sprite.width / 2,
+        -this.sprite.height / 2,
+        this.sprite.width,
+        this.sprite.height,
+      ),
+      Phaser.Geom.Rectangle.Contains,
+    );
+
+    this.on('pointerdown', this.pressButton, this);
+    this.on('pointerup', this.unpressedButton, this);
+    this.on('pointerout', this.resetButton, this);
   }
 
   private pressButton() {
     this.sprite.setFrame(generateButton({ ...this.config, state: 'pressed' }));
-    this.text.y = -1;
+    this.text.setY(-1);
   }
 
   private unpressedButton() {
     this.sprite.setFrame(
       generateButton({ ...this.config, state: 'unpressed' }),
     );
-    this.text.y = -5;
+    this.text.setY(-5);
+
+    if (this.callback) {
+      this.callback();
+    }
   }
 
-  // private setSpriteSize() {
-  //   const { width, height } = this.config;
-  //   const horizontalScale = width / this.sprite.width;
-  //   const verticalScale = height / this.sprite.height;
-  //   this.sprite.setScale(horizontalScale, verticalScale);
-  // }
+  private resetButton() {
+    this.sprite.setFrame(
+      generateButton({ ...this.config, state: 'unpressed' }),
+    );
+    this.text.setY(-5);
+  }
 }
