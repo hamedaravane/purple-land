@@ -75,17 +75,9 @@ export class Aimer extends Phaser.GameObjects.Graphics {
     this.clear();
     this.lineStyle(1, this.aimColor);
 
-    const angle = Phaser.Math.Angle.Between(
-      this.origin.x,
-      this.origin.y,
-      pointer.x,
-      pointer.y,
-    );
+    const angle = Phaser.Math.Angle.Between(this.origin.x, this.origin.y, pointer.x, pointer.y);
 
-    const lineLength = Math.sqrt(
-      Math.pow(this.scene.scale.width, 2) +
-        Math.pow(this.scene.scale.height, 2),
-    );
+    const lineLength = Math.sqrt(Math.pow(this.scene.scale.width, 2) + Math.pow(this.scene.scale.height, 2));
 
     const extendedTarget = new Phaser.Math.Vector2(
       pointer.x + Math.cos(angle) * lineLength,
@@ -93,26 +85,15 @@ export class Aimer extends Phaser.GameObjects.Graphics {
     );
 
     // Draw the dashed lines
-    this.drawDashedLine(
-      this.origin,
-      new Phaser.Math.Vector2(pointer.x, pointer.y),
-    );
-    this.drawDashedLine(
-      new Phaser.Math.Vector2(pointer.x, pointer.y),
-      extendedTarget,
-    );
+    this.drawDashedLine(this.origin, new Phaser.Math.Vector2(pointer.x, pointer.y));
+    this.drawDashedLine(new Phaser.Math.Vector2(pointer.x, pointer.y), extendedTarget);
   }
 
   /**
    * Draw a dashed line between two points.
    */
   private drawDashedLine(start: Phaser.Math.Vector2, end: Phaser.Math.Vector2) {
-    const totalLength = Phaser.Math.Distance.Between(
-      start.x,
-      start.y,
-      end.x,
-      end.y,
-    );
+    const totalLength = Phaser.Math.Distance.Between(start.x, start.y, end.x, end.y);
     const angle = Phaser.Math.Angle.Between(start.x, start.y, end.x, end.y);
 
     let remainingLength = totalLength;

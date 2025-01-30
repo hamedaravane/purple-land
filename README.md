@@ -3,19 +3,20 @@
 Purple Land is a dynamic 2D game built with Phaser 3 and TypeScript. The game features a grid-based bubble-shooting mechanic, immersive visuals, and a smooth player experience. This repository is designed for both development and production environments, ensuring a seamless workflow.
 
 ## Table of Contents
+
 - [Features](#features)
 - [Technologies Used](#technologies-used)
 - [Getting Started](#getting-started)
-   - [Prerequisites](#prerequisites)
-   - [Installation](#installation)
-   - [Running the Game](#running-the-game)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Game](#running-the-game)
 - [Game Overview](#game-overview)
-   - [Core Mechanics](#core-mechanics)
-   - [Game Components](#game-components)
+  - [Core Mechanics](#core-mechanics)
+  - [Game Components](#game-components)
 - [Development](#development)
-   - [Folder Structure](#folder-structure)
-   - [Scripts](#scripts)
-   - [Testing](#testing)
+  - [Folder Structure](#folder-structure)
+  - [Scripts](#scripts)
+  - [Testing](#testing)
 - [License](#license)
 - [Contributing](#contributing)
 - [Acknowledgments](#acknowledgments)
@@ -23,6 +24,7 @@ Purple Land is a dynamic 2D game built with Phaser 3 and TypeScript. The game fe
 ---
 
 ## Features
+
 - **Phaser 3 Framework:** Advanced 2D game development capabilities.
 - **TypeScript Support:** Type-safe development for robust and maintainable code.
 - **Bubble Shooting Mechanics:** Interactive gameplay with grid-based mechanics.
@@ -32,6 +34,7 @@ Purple Land is a dynamic 2D game built with Phaser 3 and TypeScript. The game fe
 ---
 
 ## Technologies Used
+
 - **[Phaser 3](https://phaser.io/):** Game development framework.
 - **[TypeScript](https://www.typescriptlang.org/):** Strongly-typed programming language.
 - **[Vite](https://vitejs.dev/):** Lightning-fast build tool.
@@ -44,16 +47,20 @@ Purple Land is a dynamic 2D game built with Phaser 3 and TypeScript. The game fe
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js v14.0.0 or higher
 - NPM v6.0.0 or higher
 
 ### Installation
+
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/hamedaravane/purple-land.git
    ```
 
 2. Navigate to the project directory:
+
    ```bash
    cd purple-land
    ```
@@ -64,17 +71,21 @@ Purple Land is a dynamic 2D game built with Phaser 3 and TypeScript. The game fe
    ```
 
 ### Running the Game
+
 To start the game in development mode:
+
 ```bash
 npm run dev
 ```
 
 To build the game for production:
+
 ```bash
 npm run build
 ```
 
 To test the game:
+
 ```bash
 npm run test
 ```
@@ -84,9 +95,11 @@ npm run test
 ## Game Overview
 
 ### Core Mechanics
+
 Purple Land revolves around shooting bubbles into a grid. The goal is to strategically match bubbles of the same color to clear them and score points.
 
 ### Game Components
+
 1. **Aimer**
    - Handles aiming and shooting of bubbles.
 2. **Bubble**
@@ -103,6 +116,7 @@ Purple Land revolves around shooting bubbles into a grid. The goal is to strateg
 ## Development
 
 ### Folder Structure
+
 ```
 project-root/
 ├── src/
@@ -123,7 +137,9 @@ project-root/
 ```
 
 ### Testing
+
 Vitest is used to ensure the reliability of the code. Run the following command for test coverage:
+
 ```bash
 npm run coverage
 ```
@@ -131,4 +147,5 @@ npm run coverage
 ---
 
 ## License
+
 Purple Land is licensed under the **Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)**. See the [LICENSE file](./LICENSE) for more details.

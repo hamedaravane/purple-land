@@ -51,10 +51,7 @@ export class Bubble extends Phaser.GameObjects.Sprite {
       const normalizeX = deltaX / magnitude;
       const normalizeY = deltaY / magnitude;
 
-      (this.body as Phaser.Physics.Arcade.Body).setVelocity(
-        normalizeX * speed,
-        normalizeY * speed,
-      );
+      (this.body as Phaser.Physics.Arcade.Body).setVelocity(normalizeX * speed, normalizeY * speed);
     }
   }
 

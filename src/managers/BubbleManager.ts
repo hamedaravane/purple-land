@@ -37,10 +37,7 @@ export class BubbleManager {
   checkCollision() {
     this.bubbleGrid.getChildren().forEach((targetBubble) => {
       if (this.isOverlap(this.shootingBubble, targetBubble)) {
-        (this.shootingBubble.body as Phaser.Physics.Arcade.Body).setVelocity(
-          0,
-          0,
-        );
+        (this.shootingBubble.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
         this.bubbleGrid.snapBubbleToGrid(this.shootingBubble);
         this.bubbleGrid.popConnectedBubbles(this.shootingBubble);
         this.spawnNewShootingBubble();

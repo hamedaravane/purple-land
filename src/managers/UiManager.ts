@@ -1,6 +1,5 @@
 import { NAVBAR_BUTTONS_POSITION_SCALE, NAVBAR_SCALE } from '@constants';
-import { ColorStyle } from '@types';
-import Button from '@objects/ui-elements/Button.ts';
+import Button, { KnownColor } from '@objects/ui-elements/Button.ts';
 
 export class UiManager {
   private readonly scene: Phaser.Scene;
@@ -45,24 +44,12 @@ export class UiManager {
     buttons.forEach((btn, index) => {
       const xPos = (index + 1) * buttonSpacing - centerX;
       const yPos = -navbarHeight / NAVBAR_BUTTONS_POSITION_SCALE;
-      const button = new Button(this.scene, btn.label, xPos, yPos, {
-        colorStyle: btn.color as ColorStyle,
-        state: 'unpressed',
-        shape: 'square',
-      });
+      const button = new Button(this.scene, xPos, yPos, btn.color as KnownColor, btn.label, 48, 48);
       this.bottomNavigation.add(button);
     });
 
-    this.topNavigation = new Phaser.GameObjects.Container(
-      this.scene,
-      centerX,
-      0,
-    );
-    this.contentContainer = new Phaser.GameObjects.Container(
-      this.scene,
-      centerX,
-      0,
-    );
+    this.topNavigation = new Phaser.GameObjects.Container(this.scene, centerX, 0);
+    this.contentContainer = new Phaser.GameObjects.Container(this.scene, centerX, 0);
     this.scene.add.existing(this.bottomNavigation);
     this.scene.add.existing(this.topNavigation);
     this.scene.add.existing(this.contentContainer);

@@ -12,11 +12,7 @@ export default class BootScene extends Phaser.Scene {
       'assets/images/bubbles/bubbles_spritesheet.png',
       'assets/images/bubbles/bubbles_spritesheet.json',
     );
-    this.load.atlas(
-      'ui',
-      'assets/images/ui/ui.png',
-      'assets/images/ui/ui.json',
-    );
+    this.load.atlas('ui', 'assets/images/ui/ui.png', 'assets/images/ui/ui.json');
   }
 
   create() {

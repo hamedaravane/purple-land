@@ -19,12 +19,7 @@ export default class DialogBox extends Phaser.GameObjects.Container {
   private text: Phaser.GameObjects.Text;
   private closeButton?: Phaser.GameObjects.Image;
 
-  constructor(
-    scene: Phaser.Scene,
-    x: number,
-    y: number,
-    config?: DialogBoxConfig,
-  ) {
+  constructor(scene: Phaser.Scene, x: number, y: number, config?: DialogBoxConfig) {
     super(scene, x, y);
 
     const {
@@ -47,14 +42,7 @@ export default class DialogBox extends Phaser.GameObjects.Container {
     const finalHeight = Math.max(height, minHeight);
 
     this.background = scene.add
-      .rectangle(
-        0,
-        0,
-        finalWidth,
-        finalHeight,
-        backgroundColor,
-        backgroundAlpha,
-      )
+      .rectangle(0, 0, finalWidth, finalHeight, backgroundColor, backgroundAlpha)
       .setOrigin(0.5);
     this.background.setStrokeStyle(strokeThickness, strokeColor);
 

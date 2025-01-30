@@ -31,18 +31,10 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
       const maxCols = this.cols - (isEvenRow ? 1 : 0);
 
       for (let col = 0; col < maxCols; col++) {
-        const x = this.normalize(
-          this.bubbleRadius + col * this.cellWidth + offsetX,
-        );
+        const x = this.normalize(this.bubbleRadius + col * this.cellWidth + offsetX);
         const y = this.normalize(this.bubbleRadius + row * this.cellHeight);
 
-        const bubble = new Bubble(
-          this.scene,
-          x,
-          y,
-          this.cellWidth,
-          getBubbleColor(),
-        );
+        const bubble = new Bubble(this.scene, x, y, this.cellWidth, getBubbleColor());
 
         bubble.gridCoordinates = { row, col };
         this.add(bubble);
@@ -97,10 +89,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
 
       const neighbors = this.getNeighbors(current);
       for (const neighbor of neighbors) {
-        if (
-          !visited.has(neighbor) &&
-          neighbor.color.label === startBubble.color.label
-        ) {
+        if (!visited.has(neighbor) && neighbor.color.label === startBubble.color.label) {
           queue.push(neighbor);
         }
       }
@@ -130,12 +119,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
   }
 
   snapBubbleToGrid(bubble: Bubble) {
-    const {
-      snappedX: x,
-      snappedY: y,
-      row,
-      col,
-    } = this.getNearestGridPosition(bubble.x, bubble.y);
+    const { snappedX: x, snappedY: y, row, col } = this.getNearestGridPosition(bubble.x, bubble.y);
     bubble.setPosition(x, y);
     bubble.gridCoordinates = { row, col };
     this.addBubble(bubble);
@@ -158,9 +142,7 @@ export class BubbleGrid extends Phaser.GameObjects.Group {
     }
     if (col < 0) col = 0;
 
-    const snappedX = isEvenRow
-      ? this.cellWidth * (col + 1)
-      : this.cellWidth * (col + 0.5);
+    const snappedX = isEvenRow ? this.cellWidth * (col + 1) : this.cellWidth * (col + 0.5);
 
     const snappedY = this.bubbleRadius + row * this.cellHeight;
 

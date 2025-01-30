@@ -1,10 +1,4 @@
-export type ColorLabel =
-  | 'orange'
-  | 'yellow'
-  | 'cyan'
-  | 'light-blue'
-  | 'purple'
-  | 'pink';
+export type ColorLabel = 'orange' | 'yellow' | 'cyan' | 'light-blue' | 'purple' | 'pink';
 
 export type ColorObj = { label: ColorLabel; color: number };
 

@@ -15,7 +15,8 @@
     "dev-log": "node log.js dev & vite --config vite/config.dev.mjs",
     "build-log": "node log.js build & vite build --config vite/config.prod.mjs",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "format": "prettier --write ."
   },
   "keywords": [
     "glitch",
