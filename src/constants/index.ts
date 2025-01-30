@@ -18,3 +18,6 @@ export const NEIGHBOR_OFFSETS = {
     [1, 0], // bottom-right
   ],
 };
+
+export const NAVBAR_SCALE = 0.12;
+export const NAVBAR_BUTTONS_POSITION_SCALE = 10;

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Bubble } from './Bubble';
 import { NEIGHBOR_OFFSETS, SQRT3_OVER_2 } from '@constants';
-import { getBubbleColor } from '@utils/ColorUtils.ts';
+import { getBubbleColor } from '@utils';
 
 export class BubbleGrid extends Phaser.GameObjects.Group {
   private readonly rows: number;

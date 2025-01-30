@@ -1,7 +1,7 @@
 import { BubbleGrid } from '@objects/BubbleGrid.ts';
 import { Bubble } from '@objects/Bubble.ts';
 import { Aimer } from '@objects/Aimer.ts';
-import { getBubbleColor } from '@utils/ColorUtils.ts';
+import { getBubbleColor } from '@utils';
 
 export class BubbleManager {
   private readonly scene: Phaser.Scene;

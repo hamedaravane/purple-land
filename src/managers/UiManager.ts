@@ -1,4 +1,6 @@
-import Button, { ColorStyle } from '@objects/ui-elements/Button.ts';
+import { NAVBAR_BUTTONS_POSITION_SCALE, NAVBAR_SCALE } from '@constants';
+import { ColorStyle } from '@types';
+import Button from '@objects/ui-elements/Button.ts';
 
 export class UiManager {
   private readonly scene: Phaser.Scene;
@@ -12,7 +14,7 @@ export class UiManager {
     this.scene = scene;
     this.screenWidth = this.scene.scale.width;
     this.screenHeight = this.scene.scale.height;
-    const navbarHeight = this.screenHeight * 0.12;
+    const navbarHeight = this.screenHeight * NAVBAR_SCALE;
     const centerX = this.screenWidth / 2;
     const centerY = this.screenHeight / 2;
     this.scene.add.image(centerX, centerY, 'bg');
@@ -42,7 +44,7 @@ export class UiManager {
     const buttonSpacing = this.screenWidth / (buttonCount + 1);
     buttons.forEach((btn, index) => {
       const xPos = (index + 1) * buttonSpacing - centerX;
-      const yPos = -navbarHeight / 10;
+      const yPos = -navbarHeight / NAVBAR_BUTTONS_POSITION_SCALE;
       const button = new Button(this.scene, btn.label, xPos, yPos, {
         colorStyle: btn.color as ColorStyle,
         state: 'unpressed',

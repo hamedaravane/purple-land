@@ -1,20 +1,5 @@
-export type ColorStyle = 'blue' | 'pink' | 'yellow' | 'purple' | 'green';
-export type State = 'unpressed' | 'pressed';
-export type Shape = 'rect' | 'circle' | 'square';
-export type CornerRadius = 'sharp' | 'rounded';
-
-interface ButtonConfig {
-  colorStyle: ColorStyle;
-  state: State;
-  shape: Shape;
-  cornerRadius?: CornerRadius;
-}
-
-function generateButton(config: ButtonConfig) {
-  const { colorStyle, state, shape } = config;
-  const cornerRadius = config.cornerRadius ? `-${config.cornerRadius}` : '';
-  return `${colorStyle}-${state}-${shape}${cornerRadius}`;
-}
+import { ButtonConfig } from '@types';
+import { generateButton } from '@utils';
 
 export default class Button extends Phaser.GameObjects.Container {
   private readonly config: ButtonConfig;
