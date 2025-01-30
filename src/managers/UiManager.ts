@@ -13,7 +13,6 @@ export class UiManager {
     this.screenWidth = this.scene.scale.width;
     this.screenHeight = this.scene.scale.height;
     const navbarHeight = this.screenHeight * 0.12;
-    console.log(navbarHeight);
     const centerX = this.screenWidth / 2;
     const centerY = this.screenHeight / 2;
     this.scene.add.image(centerX, centerY, 'bg');
@@ -43,7 +42,8 @@ export class UiManager {
     const buttonSpacing = this.screenWidth / (buttonCount + 1);
     buttons.forEach((btn, index) => {
       const xPos = (index + 1) * buttonSpacing - centerX;
-      const button = new Button(this.scene, btn.label, xPos, -10, {
+      const yPos = -navbarHeight / 10;
+      const button = new Button(this.scene, btn.label, xPos, yPos, {
         colorStyle: btn.color as ColorStyle,
         state: 'unpressed',
         shape: 'square',
