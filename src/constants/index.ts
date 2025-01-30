@@ -20,4 +20,10 @@ export const NEIGHBOR_OFFSETS = {
 };
 
 export const NAVBAR_SCALE = 0.12;
-export const NAVBAR_BUTTONS_POSITION_SCALE = 10;
+export const NAVBAR_BUTTONS_POSITION_SCALE = 3;
+
+export const DEFAULT_BUTTON_HEIGHT = 48;
+export const DEFAULT_BUTTON_WIDTH = 52;
+export const DEFAULT_BUTTON_CORNER_RADIUS = 12;
+export const TOP_BUTTON_SCALE = 0.85;
+export const TOP_BUTTON_POSITION_SCALE = 1 - TOP_BUTTON_SCALE;

@@ -1,5 +1,6 @@
 import { NAVBAR_BUTTONS_POSITION_SCALE, NAVBAR_SCALE } from '@constants';
-import Button, { KnownColor } from '@objects/ui-elements/Button.ts';
+import Button from '@objects/ui-elements/Button.ts';
+import { KnownColor } from '@types';
 
 export class UiManager {
   private readonly scene: Phaser.Scene;

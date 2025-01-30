@@ -1,42 +1,20 @@
-export type KnownColor = 'green' | 'yellow' | 'pink' | 'purple' | 'blue';
+import {
+  DEFAULT_BUTTON_CORNER_RADIUS,
+  DEFAULT_BUTTON_HEIGHT,
+  DEFAULT_BUTTON_WIDTH,
+  TOP_BUTTON_POSITION_SCALE,
+  TOP_BUTTON_SCALE,
+} from '@constants';
+import { darkenColor } from '@utils';
+import { COLOR_MAP, KnownColor } from '@types';
 
-/** Map color names to their base (top) hex color */
-const COLOR_MAP: Record<KnownColor, number> = {
-  green: 0x67eb00,
-  yellow: 0xffdb0a,
-  pink: 0xfc8aff,
-  purple: 0xc286ff,
-  blue: 0x4cdafe,
-};
-
-/**
- * Darkens a numeric color by a given ratio (default 20%).
- */
-function darkenColor(baseColor: number, ratio = 0.2): number {
-  let r = (baseColor >> 16) & 0xff;
-  let g = (baseColor >> 8) & 0xff;
-  let b = baseColor & 0xff;
-
-  r = Math.floor(r * (1 - ratio));
-  g = Math.floor(g * (1 - ratio));
-  b = Math.floor(b * (1 - ratio));
-
-  return (r << 16) + (g << 8) + b;
-}
-
-/**
- * A fancy, rounded, “two-layer” button for Phaser 3
- * that takes a single color name and auto-calculates the darker color.
- */
 export default class Button extends Phaser.GameObjects.Container {
-  private topGraphics: Phaser.GameObjects.Graphics;
-  private bottomGraphics: Phaser.GameObjects.Graphics;
-  private labelText?: Phaser.GameObjects.Text;
+  private readonly topGraphics: Phaser.GameObjects.Graphics;
+  private readonly bottomGraphics: Phaser.GameObjects.Graphics;
+  private readonly labelText?: Phaser.GameObjects.Text;
 
-  /** Original topGraphics y-position (for pressed-down animation) */
-  private originalTopY: number;
-  /** Pressed-down y-position */
-  private pressedTopY: number;
+  private readonly originalTopY: number;
+  private readonly pressedTopY: number;
 
   constructor(
     scene: Phaser.Scene,
@@ -44,22 +22,21 @@ export default class Button extends Phaser.GameObjects.Container {
     y: number,
     colorName: KnownColor,
     label?: string,
-    width: number = 120,
-    height: number = 50,
-    cornerRadius: number = 12,
+    width: number = DEFAULT_BUTTON_WIDTH,
+    height: number = DEFAULT_BUTTON_HEIGHT,
+    cornerRadius: number = DEFAULT_BUTTON_CORNER_RADIUS,
   ) {
     super(scene, x, y);
 
-    const topColorHex = COLOR_MAP[colorName];
-    const bottomColorHex = darkenColor(topColorHex, 0.25);
+    const topColor = COLOR_MAP[colorName];
+    const bottomColor = darkenColor(topColor);
 
     this.bottomGraphics = scene.add.graphics();
-    this.drawRoundedRect(this.bottomGraphics, bottomColorHex, width, height, cornerRadius, 0, 0);
-    this.bottomGraphics.y = 3;
+    this.drawRoundedRect(this.bottomGraphics, bottomColor, width, height, cornerRadius, 0, 0);
     this.add(this.bottomGraphics);
 
     this.topGraphics = scene.add.graphics();
-    this.drawRoundedRect(this.topGraphics, topColorHex, width, height * 0.85, cornerRadius, 0, 0);
+    this.drawRoundedRect(this.topGraphics, topColor, width, height * TOP_BUTTON_SCALE, cornerRadius, 0, 0);
     this.add(this.topGraphics);
 
     if (label) {
@@ -69,18 +46,15 @@ export default class Button extends Phaser.GameObjects.Container {
         color: '#FFFFFF',
       });
       this.labelText.setOrigin(0.5, 0.5);
-      this.labelText.y = (height * 0.85) / 2;
+      this.labelText.y = (height * TOP_BUTTON_SCALE) / 2;
       this.add(this.labelText);
     }
 
     this.originalTopY = this.topGraphics.y;
-    this.pressedTopY = this.originalTopY + 5;
+    this.pressedTopY = this.originalTopY + height * TOP_BUTTON_POSITION_SCALE;
 
-    this.setSize(width, height + 3);
-    this.setInteractive(
-      new Phaser.Geom.Rectangle(-width / 2, 0, width, height + 3),
-      Phaser.Geom.Rectangle.Contains,
-    );
+    this.setSize(width, height);
+    this.setInteractive(new Phaser.Geom.Rectangle(0, 0, width, height), Phaser.Geom.Rectangle.Contains);
 
     this.on('pointerdown', this.onPointerDown, this);
     this.on('pointerup', this.onPointerUp, this);
@@ -89,10 +63,6 @@ export default class Button extends Phaser.GameObjects.Container {
     scene.add.existing(this);
   }
 
-  /**
-   * Draws a filled rounded rectangle on a Graphics object
-   * at local coords: center is (0,0).
-   */
   private drawRoundedRect(
     graphics: Phaser.GameObjects.Graphics,
     color: number,
@@ -103,25 +73,31 @@ export default class Button extends Phaser.GameObjects.Container {
     offsetY: number,
   ) {
     graphics.clear();
-    graphics.fillStyle(color, 1);
+    graphics.fillStyle(color);
     graphics.fillRoundedRect(-width / 2 + offsetX, offsetY, width, height, radius);
   }
 
   private onPointerDown(): void {
     this.topGraphics.y = this.pressedTopY;
+    this.bottomGraphics.y = this.pressedTopY;
+    this.bottomGraphics.scaleY = TOP_BUTTON_SCALE;
     if (this.labelText) {
-      this.labelText.y += 5;
+      this.labelText.y += this.height * TOP_BUTTON_POSITION_SCALE;
     }
   }
 
   private onPointerUp(): void {
     this.topGraphics.y = this.originalTopY;
+    this.bottomGraphics.y = this.originalTopY;
+    this.bottomGraphics.scaleY = 1;
     if (this.labelText) {
-      this.labelText.y -= 5;
+      this.labelText.y -= this.height * TOP_BUTTON_POSITION_SCALE;
     }
   }
 
   private onPointerOut() {
     this.topGraphics.y = this.originalTopY;
+    this.bottomGraphics.y = this.originalTopY;
+    this.bottomGraphics.scaleY = 1;
   }
 }
