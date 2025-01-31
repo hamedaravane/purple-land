@@ -45,7 +45,16 @@ export class UiManager {
     buttons.forEach((btn, index) => {
       const xPos = (index + 1) * buttonSpacing - centerX;
       const yPos = -navbarHeight / NAVBAR_BUTTON_SPACING_MULTIPLIER;
-      const button = new Button(this.scene, xPos, yPos, btn.color as KnownColor, btn.label, 48, 48);
+      const button = new Button(
+        this.scene,
+        xPos,
+        yPos,
+        btn.color as KnownColor,
+        undefined,
+        btn.label,
+        48,
+        48,
+      );
       this.bottomNavigation.add(button);
     });
 

@@ -8,9 +8,11 @@ import {
 import { darkenColor } from '@utils';
 import { COLOR_MAP, KnownColor } from '@types';
 
-export default class Button extends Phaser.GameObjects.Container {
-  private readonly topGraphics: Phaser.GameObjects.Graphics;
+export default class IconButton extends Phaser.GameObjects.Container {
   private readonly bottomGraphics: Phaser.GameObjects.Graphics;
+  private readonly topContainer: Phaser.GameObjects.Container;
+  private readonly topGraphics: Phaser.GameObjects.Graphics;
+  private readonly icon?: Phaser.GameObjects.Image;
   private readonly labelText?: Phaser.GameObjects.Text;
   private readonly originalTopY: number;
   private readonly pressedTopY: number;
@@ -20,6 +22,7 @@ export default class Button extends Phaser.GameObjects.Container {
     x: number,
     y: number,
     colorName: KnownColor,
+    iconKey?: string,
     label?: string,
     width: number = DEFAULT_BUTTON_WIDTH,
     height: number = DEFAULT_BUTTON_HEIGHT,
@@ -35,27 +38,42 @@ export default class Button extends Phaser.GameObjects.Container {
     this.bottomGraphics.fillRoundedRect(-width / 2, 0, width, height, cornerRadius);
     this.add(this.bottomGraphics);
 
+    this.topContainer = scene.add.container(0, 0);
+    this.add(this.topContainer);
+
     this.topGraphics = scene.add.graphics();
     this.topGraphics.fillStyle(topColor);
     this.topGraphics.fillRoundedRect(-width / 2, 0, width, height * TOP_BUTTON_SCALE, cornerRadius);
-    this.add(this.topGraphics);
+    this.topContainer.add(this.topGraphics);
+
+    if (iconKey) {
+      this.icon = scene.add.image(0, 0, iconKey).setOrigin(0.5, 0);
+      const iconScale = this.icon.height / 30;
+      this.icon.setScale(iconScale);
+      this.topContainer.add(this.icon);
+    }
 
     if (label) {
-      this.labelText = scene.add.text(0, (height * TOP_BUTTON_SCALE) / 2, label, {
+      this.labelText = scene.add.text(0, 0, label, {
         fontFamily: 'LuckiestGuy',
         fontSize: '18px',
         color: '#FFFFFF',
       });
-      this.labelText.setOrigin(0.5);
-      this.add(this.labelText);
+      this.labelText.setOrigin(0.5, 0);
+      this.topContainer.add(this.labelText);
+      const { iconHeight, textSpacing } = this.icon
+        ? { iconHeight: this.icon.displayHeight, textSpacing: 8 }
+        : { iconHeight: 0, textSpacing: 0 };
+      this.labelText.y = iconHeight + textSpacing;
     }
 
-    this.originalTopY = this.topGraphics.y;
+    this.originalTopY = this.topContainer.y;
     this.pressedTopY = this.originalTopY + height * TOP_BUTTON_POSITION_OFFSET;
 
-    this.setSize(width, height * 1.5);
+    this.setSize(width, height);
+
     this.setInteractive(
-      new Phaser.Geom.Rectangle(-width / 2, 0, width, height * 1.5),
+      new Phaser.Geom.Rectangle(-width / 2, 0, width, height),
       Phaser.Geom.Rectangle.Contains,
     );
 
@@ -67,25 +85,19 @@ export default class Button extends Phaser.GameObjects.Container {
   }
 
   private onPointerDown() {
-    this.topGraphics.y = this.pressedTopY;
+    this.topContainer.y = this.pressedTopY;
     this.bottomGraphics.y = this.pressedTopY;
     this.bottomGraphics.scaleY = TOP_BUTTON_SCALE;
-    if (this.labelText) {
-      this.labelText.y += this.height * TOP_BUTTON_POSITION_OFFSET;
-    }
   }
 
   private onPointerUp() {
-    this.topGraphics.y = this.originalTopY;
+    this.topContainer.y = this.originalTopY;
     this.bottomGraphics.y = this.originalTopY;
     this.bottomGraphics.scaleY = 1;
-    if (this.labelText) {
-      this.labelText.y -= this.height * TOP_BUTTON_POSITION_OFFSET;
-    }
   }
 
   private onPointerOut() {
-    this.topGraphics.y = this.originalTopY;
+    this.topContainer.y = this.originalTopY;
     this.bottomGraphics.y = this.originalTopY;
     this.bottomGraphics.scaleY = 1;
   }
