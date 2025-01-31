@@ -8,7 +8,7 @@ import {
 import { darkenColor } from '@utils';
 import { COLOR_MAP, KnownColor } from '@types';
 
-export default class IconButton extends Phaser.GameObjects.Container {
+export default class Button extends Phaser.GameObjects.Container {
   private readonly bottomGraphics: Phaser.GameObjects.Graphics;
   private readonly topContainer: Phaser.GameObjects.Container;
   private readonly topGraphics: Phaser.GameObjects.Graphics;
