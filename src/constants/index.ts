@@ -1,4 +1,14 @@
+import { KnownColor } from '@types';
+
 export const SQRT3_OVER_2 = 0.866;
+
+export const COLOR_MAP: Record<KnownColor, number> = {
+  green: 0x67eb00,
+  yellow: 0xffdb0a,
+  pink: 0xfc8aff,
+  purple: 0xc286ff,
+  blue: 0x4cdafe,
+};
 
 export const NEIGHBOR_OFFSETS = {
   even: [

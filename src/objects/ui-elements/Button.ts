@@ -4,9 +4,10 @@ import {
   DEFAULT_BUTTON_WIDTH,
   TOP_BUTTON_POSITION_OFFSET,
   TOP_BUTTON_SCALE,
+  COLOR_MAP,
 } from '@constants';
 import { darkenColor } from '@utils';
-import { COLOR_MAP, KnownColor } from '@types';
+import { KnownColor } from '@types';
 
 export default class Button extends Phaser.GameObjects.Container {
   private readonly bottomGraphics: Phaser.GameObjects.Graphics;
