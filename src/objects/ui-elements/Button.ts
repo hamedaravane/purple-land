@@ -48,22 +48,23 @@ export default class Button extends Phaser.GameObjects.Container {
 
     if (iconKey) {
       this.icon = scene.add.image(0, 0, iconKey).setOrigin(0.5, 0);
-      const iconScale = this.icon.height / 30;
+      const iconScale = this.icon.height / 22;
       this.icon.setScale(iconScale);
       this.topContainer.add(this.icon);
     }
 
     if (label) {
-      this.labelText = scene.add.text(0, 0, label, {
-        fontFamily: 'LuckiestGuy',
-        fontSize: '18px',
-        color: '#FFFFFF',
-      });
-      this.labelText.setOrigin(0.5, 0);
+      this.labelText = scene.add
+        .text(0, 0, label, {
+          fontFamily: 'LuckiestGuy',
+          fontSize: '18px',
+          color: '#FFFFFF',
+        })
+        .setOrigin(0.5, 0);
       this.topContainer.add(this.labelText);
       const { iconHeight, textSpacing } = this.icon
-        ? { iconHeight: this.icon.displayHeight, textSpacing: 8 }
-        : { iconHeight: 0, textSpacing: 0 };
+        ? { iconHeight: this.icon.displayHeight, textSpacing: 4 }
+        : { iconHeight: 0, textSpacing: 8 };
       this.labelText.y = iconHeight + textSpacing;
     }
 
@@ -72,10 +73,7 @@ export default class Button extends Phaser.GameObjects.Container {
 
     this.setSize(width, height);
 
-    this.setInteractive(
-      new Phaser.Geom.Rectangle(-width / 2, 0, width, height),
-      Phaser.Geom.Rectangle.Contains,
-    );
+    this.setInteractive(new Phaser.Geom.Rectangle(0, 0, width, height), Phaser.Geom.Rectangle.Contains);
 
     this.on('pointerdown', this.onPointerDown, this);
     this.on('pointerup', this.onPointerUp, this);

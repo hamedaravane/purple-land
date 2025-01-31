@@ -34,10 +34,10 @@ export class UiManager {
     ).setBlendMode(Phaser.BlendModes.MULTIPLY);
     this.bottomNavigation.add(bottomNavRect);
     const buttons = [
-      { label: '1', color: 'pink' },
-      { label: '2', color: 'purple' },
-      { label: '3', color: 'blue' },
-      { label: '4', color: 'yellow' },
+      { label: 'hey', color: 'pink' },
+      { label: 'hi', color: 'purple' },
+      { label: 'hoo', color: 'blue' },
+      { label: 'bye', color: 'yellow' },
     ];
     const buttonCount = buttons.length;
 
@@ -52,8 +52,8 @@ export class UiManager {
         btn.color as KnownColor,
         undefined,
         btn.label,
-        48,
-        48,
+        56,
+        52,
       );
       this.bottomNavigation.add(button);
     });
