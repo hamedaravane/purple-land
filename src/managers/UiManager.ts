@@ -34,10 +34,10 @@ export class UiManager {
     ).setBlendMode(Phaser.BlendModes.MULTIPLY);
     this.bottomNavigation.add(bottomNavRect);
     const buttons = [
-      { label: 'hey', color: 'pink' },
-      { label: 'hi', color: 'purple' },
-      { label: 'hoo', color: 'blue' },
-      { label: 'bye', color: 'yellow' },
+      { label: 'earn', iconKey: 'icon-bubble', color: 'pink' },
+      { label: 'score', iconKey: 'icon-crown', color: 'purple' },
+      { label: 'shop', iconKey: 'icon-shop', color: 'blue' },
+      { label: 'level', iconKey: 'icon-gem', color: 'yellow' },
     ];
     const buttonCount = buttons.length;
 
@@ -50,10 +50,10 @@ export class UiManager {
         xPos,
         yPos,
         btn.color as KnownColor,
-        undefined,
+        btn.iconKey,
         btn.label,
+        60,
         56,
-        52,
       );
       this.bottomNavigation.add(button);
     });

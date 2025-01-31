@@ -7,6 +7,11 @@ export default class BootScene extends Phaser.Scene {
 
   preload() {
     this.load.image('bg', 'assets/images/background/bg.png');
+    this.load.image('icon-shop', 'assets/images/ui/icons/shop.png');
+    this.load.image('icon-coins', 'assets/images/ui/icons/coins.png');
+    this.load.image('icon-gem', 'assets/images/ui/icons/gem.png');
+    this.load.image('icon-crown', 'assets/images/ui/icons/crown.png');
+    this.load.image('icon-bubble', 'assets/images/ui/icons/bubble.png');
     this.load.atlas(
       'bubbles',
       'assets/images/bubbles/bubbles_spritesheet.png',

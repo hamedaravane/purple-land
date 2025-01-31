@@ -49,8 +49,9 @@ export default class Button extends Phaser.GameObjects.Container {
 
     if (iconKey) {
       this.icon = scene.add.image(0, 0, iconKey).setOrigin(0.5, 0);
-      const iconScale = this.icon.height / 22;
+      const iconScale = 22 / this.icon.height;
       this.icon.setScale(iconScale);
+      this.icon.y = 6;
       this.topContainer.add(this.icon);
     }
 
@@ -58,13 +59,14 @@ export default class Button extends Phaser.GameObjects.Container {
       this.labelText = scene.add
         .text(0, 0, label, {
           fontFamily: 'LuckiestGuy',
-          fontSize: '18px',
+          fontSize: 14,
           color: '#FFFFFF',
+          shadow: { color: '#00000030', fill: true, blur: 0, offsetY: 2 },
         })
         .setOrigin(0.5, 0);
       this.topContainer.add(this.labelText);
       const { iconHeight, textSpacing } = this.icon
-        ? { iconHeight: this.icon.displayHeight, textSpacing: 4 }
+        ? { iconHeight: this.icon.displayHeight, textSpacing: 6 }
         : { iconHeight: 0, textSpacing: 8 };
       this.labelText.y = iconHeight + textSpacing;
     }
