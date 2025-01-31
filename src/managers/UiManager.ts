@@ -1,4 +1,4 @@
-import { NAVBAR_BUTTONS_POSITION_SCALE, NAVBAR_SCALE } from '@constants';
+import { NAVBAR_BUTTON_SPACING_MULTIPLIER, NAVBAR_SCALE } from '@constants';
 import Button from '@objects/ui-elements/Button.ts';
 import { KnownColor } from '@types';
 
@@ -44,7 +44,7 @@ export class UiManager {
     const buttonSpacing = this.screenWidth / (buttonCount + 1);
     buttons.forEach((btn, index) => {
       const xPos = (index + 1) * buttonSpacing - centerX;
-      const yPos = -navbarHeight / NAVBAR_BUTTONS_POSITION_SCALE;
+      const yPos = -navbarHeight / NAVBAR_BUTTON_SPACING_MULTIPLIER;
       const button = new Button(this.scene, xPos, yPos, btn.color as KnownColor, btn.label, 48, 48);
       this.bottomNavigation.add(button);
     });

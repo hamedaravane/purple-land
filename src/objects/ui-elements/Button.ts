@@ -2,7 +2,7 @@ import {
   DEFAULT_BUTTON_CORNER_RADIUS,
   DEFAULT_BUTTON_HEIGHT,
   DEFAULT_BUTTON_WIDTH,
-  TOP_BUTTON_POSITION_SCALE,
+  TOP_BUTTON_POSITION_OFFSET,
   TOP_BUTTON_SCALE,
 } from '@constants';
 import { darkenColor } from '@utils';
@@ -12,7 +12,6 @@ export default class Button extends Phaser.GameObjects.Container {
   private readonly topGraphics: Phaser.GameObjects.Graphics;
   private readonly bottomGraphics: Phaser.GameObjects.Graphics;
   private readonly labelText?: Phaser.GameObjects.Text;
-
   private readonly originalTopY: number;
   private readonly pressedTopY: number;
 
@@ -32,29 +31,33 @@ export default class Button extends Phaser.GameObjects.Container {
     const bottomColor = darkenColor(topColor);
 
     this.bottomGraphics = scene.add.graphics();
-    this.drawRoundedRect(this.bottomGraphics, bottomColor, width, height, cornerRadius, 0, 0);
+    this.bottomGraphics.fillStyle(bottomColor);
+    this.bottomGraphics.fillRoundedRect(-width / 2, 0, width, height, cornerRadius);
     this.add(this.bottomGraphics);
 
     this.topGraphics = scene.add.graphics();
-    this.drawRoundedRect(this.topGraphics, topColor, width, height * TOP_BUTTON_SCALE, cornerRadius, 0, 0);
+    this.topGraphics.fillStyle(topColor);
+    this.topGraphics.fillRoundedRect(-width / 2, 0, width, height * TOP_BUTTON_SCALE, cornerRadius);
     this.add(this.topGraphics);
 
     if (label) {
-      this.labelText = scene.add.text(0, 0, label, {
+      this.labelText = scene.add.text(0, (height * TOP_BUTTON_SCALE) / 2, label, {
         fontFamily: 'LuckiestGuy',
         fontSize: '18px',
         color: '#FFFFFF',
       });
-      this.labelText.setOrigin(0.5, 0.5);
-      this.labelText.y = (height * TOP_BUTTON_SCALE) / 2;
+      this.labelText.setOrigin(0.5);
       this.add(this.labelText);
     }
 
     this.originalTopY = this.topGraphics.y;
-    this.pressedTopY = this.originalTopY + height * TOP_BUTTON_POSITION_SCALE;
+    this.pressedTopY = this.originalTopY + height * TOP_BUTTON_POSITION_OFFSET;
 
-    this.setSize(width, height);
-    this.setInteractive(new Phaser.Geom.Rectangle(0, 0, width, height), Phaser.Geom.Rectangle.Contains);
+    this.setSize(width, height * 1.5);
+    this.setInteractive(
+      new Phaser.Geom.Rectangle(-width / 2, 0, width, height * 1.5),
+      Phaser.Geom.Rectangle.Contains,
+    );
 
     this.on('pointerdown', this.onPointerDown, this);
     this.on('pointerup', this.onPointerUp, this);
@@ -63,35 +66,21 @@ export default class Button extends Phaser.GameObjects.Container {
     scene.add.existing(this);
   }
 
-  private drawRoundedRect(
-    graphics: Phaser.GameObjects.Graphics,
-    color: number,
-    width: number,
-    height: number,
-    radius: number,
-    offsetX: number,
-    offsetY: number,
-  ) {
-    graphics.clear();
-    graphics.fillStyle(color);
-    graphics.fillRoundedRect(-width / 2 + offsetX, offsetY, width, height, radius);
-  }
-
-  private onPointerDown(): void {
+  private onPointerDown() {
     this.topGraphics.y = this.pressedTopY;
     this.bottomGraphics.y = this.pressedTopY;
     this.bottomGraphics.scaleY = TOP_BUTTON_SCALE;
     if (this.labelText) {
-      this.labelText.y += this.height * TOP_BUTTON_POSITION_SCALE;
+      this.labelText.y += this.height * TOP_BUTTON_POSITION_OFFSET;
     }
   }
 
-  private onPointerUp(): void {
+  private onPointerUp() {
     this.topGraphics.y = this.originalTopY;
     this.bottomGraphics.y = this.originalTopY;
     this.bottomGraphics.scaleY = 1;
     if (this.labelText) {
-      this.labelText.y -= this.height * TOP_BUTTON_POSITION_SCALE;
+      this.labelText.y -= this.height * TOP_BUTTON_POSITION_OFFSET;
     }
   }
 
